@@ -134,7 +134,7 @@ export const crudspecs: Crudspecs = function(
 
     const middleware: any[] = []
 
-    const mapper = function([ key, stock ]: [ string, typeof stockMiddleware ]) {
+    const mapper = function([ key, stock ]: [ string, Function ]) {
       return setup?.[key] || stock
     }
 

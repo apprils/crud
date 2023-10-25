@@ -47,7 +47,7 @@ export default function <RecordT, StateT, ContextT>(): {
         .update(crud.dataset)
         .returning([
           crud.primaryKey,
-          ...returning.filter((c) => !crud.returningExclude.includes(c))
+          ...returning.filter((e: any) => !crud.returningExclude.includes(e))
         ])
 
       if (!item) {

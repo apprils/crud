@@ -47,7 +47,7 @@ export default function <QueryBuilderT, RecordT, StateT, ContextT>(): {
         .delete()
         .returning([
           crud.primaryKey,
-          ...crud.returning.filter((c) => !crud.returningExclude.includes(c))
+          ...crud.returning.filter((e: any) => !crud.returningExclude.includes(e))
         ])
 
       if (!item) {
