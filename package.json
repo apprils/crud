@@ -1,0 +1,75 @@
+{
+  "name": "@appril/crud",
+  "version": "0.2.0",
+  "description": "Appril CRUD Api and Generators",
+  "author": "Slee Woo",
+  "license": "MIT",
+  "engines": {
+    "node": "20.8",
+    "npm": "10"
+  },
+  "files": [
+    "pkg/*"
+  ],
+  "// ✨ seems exports.types not fully supported by all editors yet?": "",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./pkg/api/index.d.ts"
+      ],
+      "vite-plugin": [
+        "./pkg/vite-plugin/index.d.ts"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "require": "./pkg/api/index.js",
+      "types": "./pkg/api/index.d.ts"
+    },
+    "./vite-plugin": {
+      "require": "./pkg/vite-plugin/index.js",
+      "types": "./pkg/vite-plugin/index.d.ts"
+    }
+  },
+  "main": "./pkg/api/index.js",
+  "scripts": {
+    "// ✨ build api": "",
+    "build:api": "esbundler lib/api/index.ts --sourcemap=inline --outdir=pkg/api",
+    "postbuild:api": "tsc -p lib/api/tsconfig.json",
+    "// ✨ build vite-plugin": "",
+    "build:vite-plugin": "esbundler lib/vite-plugin/index.ts --sourcemap=inline --outdir=pkg/vite-plugin",
+    "postbuild:vite-plugin": "tsc -p lib/vite-plugin/tsconfig.json; rsync -a lib/vite-plugin/templates/ pkg/vite-plugin/templates",
+    "// ✨ build": "",
+    "prebuild": "mkdir -p pkg; find pkg -type f -exec rm -fv {} \\;",
+    "build": "for e in api vite-plugin; do npm run build:$e; done",
+    "// ✨ publish": "",
+    "prepub": "npm run build",
+    "pub": "npm pub"
+  },
+  "dependencies": {
+    "@appril/core": "^0.2.0",
+    "@appril/pgts": "^0.2.0",
+    "fs-extra": "^11.1.1",
+    "kleur": "^4.1.5",
+    "mustache": "^4.2.0",
+    "yaml": "^2.3.3"
+  },
+  "devDependencies": {
+    "@appril/dev": "^0.2.0",
+    "@appril/scripts": "^0.2.0",
+    "@types/fs-extra": "^11.0.3",
+    "@types/mustache": "^4.2.4",
+    "@types/node": "^20.8.8",
+    "esbuild": "^0.19.5",
+    "pinia": "^2.1.7",
+    "typescript": "^5.2.2",
+    "vite": "^4.5.0",
+    "zod": "^3.22.4"
+  },
+  "peerDependencies": {
+    "@appril/ui": "^0.2.0",
+    "zod": "^3.22.4",
+    "zod-validation-error": "^2.0.0"
+  }
+}
