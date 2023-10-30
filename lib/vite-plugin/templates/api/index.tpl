@@ -2,17 +2,14 @@
 
 import type { CrudSetup } from "@appril/crud";
 import { crudspecs } from "@appril/crud";
+import { zodErrorHandler } from "{{crudDir}}/zod";
 
 {{#tables}}
 
-import type { {{queryBuilder}}, {{recordName}} } from "{{typesDir}}/{{schema}}/@types";
+import type { {{queryBuilder}} } from "{{typesDir}}/{{schema}}/@types";
+import type { ItemS as {{recordName}} } from "{{crudDir}}/{{name}}/types";
 import { {{declaredName}} } from "{{tablesDir}}/{{schema}}/@index";
-import { {{varName}}ZodI, {{varName}}ZodU } from "{{zodPath}}";
-{{/tables}}
-
-import { zodErrorHandler } from "{{zodPath}}";
-
-{{#tables}}
+import { {{varName}}ZodI, {{varName}}ZodU } from "{{crudDir}}/zod";
 
 export const {{varName}} = <
   StateT = unknown,

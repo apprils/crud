@@ -17,25 +17,19 @@ import {
   {{varName}}ZodI as zodSchemaI,
   {{varName}}ZodU as zodSchemaU,
   zodErrorHandler,
-} from "{{zodPath}}";
+} from "../zod";
 
-import type {
-  {{recordName}} as ItemT,
-  {{insertName}} as ItemI,
-  {{updateName}} as ItemU,
-} from "{{typesDir}}/{{schema}}/@types";
-
-export type { ItemT, ItemI, ItemU }
+import type { ItemT, ItemS, ItemI, ItemU } from "./types";
 
 export const modelName = "{{modelName}}"
 
 export const useStore = defineStore<
   "{{declaredName}}",
-  StoreState<ItemT>,
-  StoreGetters<ItemT>,
-  StoreActions<ItemT>
+  StoreState<ItemS>,
+  StoreGetters<ItemS>,
+  StoreActions<ItemS>
 >("{{declaredName}}", {
-  state: () => storeState<ItemT>({ primaryKey: "{{primaryKey}}" }),
+  state: () => storeState<ItemS>({ primaryKey: "{{primaryKey}}" }),
   getters: storeGetters(),
   actions: storeActions(),
 })
@@ -76,12 +70,12 @@ export function useHandlers() {
   ) {
     store.loading = true
     return api
-      .get<ListResponse<ItemT>>("list", query || route.query)
+      .get<ListResponse<ItemS>>("list", query || route.query)
       .finally(() => store.loading = false)
   }
 
   function itemsLoaded(
-    response: ListResponse<ItemT> | void,
+    response: ListResponse<ItemS> | void,
   ) {
     if (response) {
       store.setItems(response.items, response.pager)
@@ -93,12 +87,12 @@ export function useHandlers() {
   ) {
     store.loading = true
     return api
-      .get<ItemT>(id)
+      .get<ItemS>(id)
       .finally(() => store.loading = false)
   }
 
   function itemLoaded(
-    item: ItemT,
+    item: ItemS,
   ) {
     store.setItem(item)
     window.scrollTo(0, 0)
@@ -195,7 +189,7 @@ export function useHandlers() {
   }
 
   function itemRoute(
-    item?: ItemT,
+    item?: ItemT | ItemS,
   ) {
     return {
       query: {
@@ -206,14 +200,14 @@ export function useHandlers() {
   }
 
   function itemKey(
-    item: ItemT | undefined,
+    item: ItemT | ItemS | undefined,
     prefix: string = "",
   ): string {
     return [ prefix || "", item?.{{primaryKey}} || "" ].map(String).join(":")
   }
 
   function isActiveItem(
-    item: ItemT,
+    item: ItemT | ItemS,
   ) {
     return store.item
       ? item?.{{primaryKey}} == store.item.{{primaryKey}}
