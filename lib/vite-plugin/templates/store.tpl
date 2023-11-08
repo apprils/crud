@@ -6,11 +6,11 @@ import type {
   GenericObject, Pager, ItemId,
 } from "./types";
 
-export function storeState<ItemT>(
+export function storeState<ItemT, EnvT>(
   {
     primaryKey,
   }: StoreOptions<ItemT>
-): StoreState<ItemT> {
+): StoreState<ItemT, EnvT> {
 
   return {
     primaryKey,

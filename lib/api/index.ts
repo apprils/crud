@@ -19,17 +19,17 @@ import _create from "./create";
 import _update from "./update";
 import _delete from "./delete";
 
-type EnvSetup<StateT, ContextT> =
-  | EnvMiddleware<StateT, ContextT>
-  | EnvMiddleware<StateT, ContextT>[]
-  | Partial<ReturnType<typeof _env<StateT, ContextT>>>
+type EnvSetup<EnvT, StateT, ContextT> =
+  | EnvMiddleware<EnvT, StateT, ContextT>
+  | EnvMiddleware<EnvT, StateT, ContextT>[]
+  | Partial<ReturnType<typeof _env<EnvT, StateT, ContextT>>>
 
 type ListSetup<QueryBuilderT, RecordT, StateT, ContextT> =
   | ListMiddleware<QueryBuilderT, RecordT, StateT, ContextT>
   | ListMiddleware<QueryBuilderT, RecordT, StateT, ContextT>[]
   | Partial<ReturnType<typeof _list<QueryBuilderT, RecordT, StateT, ContextT>> & {
-      itemsPerPage: number,
-      sidePages: number,
+      itemsPerPage: number;
+      sidePages: number;
     }>
 
 type RetrieveSetup<QueryBuilderT, RecordT, StateT, ContextT> =
@@ -63,12 +63,13 @@ type DeleteSetup<QueryBuilderT, RecordT, StateT, ContextT> =
 export type CrudSetup<
   QueryBuilderT = unknown,
   RecordT = unknown,
+  EnvT = unknown,
   StateT = unknown,
   ContextT = unknown,
 > = {
   primaryKey: string;
   returningExclude: string[];
-  env:      EnvSetup<StateT, ContextT>;
+  env:      EnvSetup<EnvT, StateT, ContextT>;
   list:     ListSetup<QueryBuilderT, RecordT, StateT, ContextT>;
   retrieve: RetrieveSetup<QueryBuilderT, RecordT, StateT, ContextT>;
   create:   CreateSetup<RecordT, StateT, ContextT>;
@@ -79,11 +80,12 @@ export type CrudSetup<
 type Crudspecs = <
   QueryBuilderT = unknown,
   RecordT = unknown,
+  EnvT = unknown,
   StateT = unknown,
   ContextT = unknown,
 >(
   dbi: ((env: Env) => any) | any,
-  setup: Partial<CrudSetup<QueryBuilderT, RecordT, StateT, ContextT>>
+  setup: Partial<CrudSetup<QueryBuilderT, RecordT, EnvT, StateT, ContextT>>
 ) => RouteSpec[]
 
 export { config }

@@ -7,6 +7,9 @@ import type {
 
 export type { ItemT, ItemI, ItemU }
 
-// Item Serialized, item with extra properties used on listing, retrieve, store
+// Item Serialized
+// item with extra properties used on listing, retrieve, store
 export type ItemS = ItemT
+
+export type EnvT = never
 

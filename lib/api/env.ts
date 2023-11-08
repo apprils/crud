@@ -2,16 +2,23 @@
 import type { EnvMiddleware as Middleware  } from "./@types";
 
 type Methods =
-  | "env"
+  | "define"
+  | "response"
 
-export default function <StateT, ContextT>(): {
-  [key in Methods]: Middleware<StateT, ContextT>;
+export default function <EnvT, StateT, ContextT>(): {
+  [key in Methods]: Middleware<EnvT, StateT, ContextT>;
 } {
 
   return {
 
-    env(env, next) {
-      env.body = {}
+    define(env, next) {
+      env.crudEnv = {}
+      return next()
+    },
+
+    response(env, next) {
+      env.body = env.crudEnv
+      return next()
     },
 
   }

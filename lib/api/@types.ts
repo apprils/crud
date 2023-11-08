@@ -39,11 +39,9 @@ export type DatasetMiddleware<StateT, ContextT> = Middleware<
   Context<DatasetFromPayloadContext, ContextT>
 >
 
-type EnvContext = {}
-
-export type EnvMiddleware<StateT, ContextT> = Middleware<
+export type EnvMiddleware<EnvT, StateT, ContextT> = Middleware<
   StateT,
-  Context<EnvContext, ContextT>
+  Context<{}, ContextT> & { crudEnv: EnvT }
 >
 
 type ListContext<QueryBuilderT, RecordT> = {

@@ -20,9 +20,9 @@ export type StoreOptions<ItemT> = {
   primaryKey: keyof ItemT;
 }
 
-export type StoreState<ItemT> = {
+export type StoreState<ItemT, EnvT> = {
   primaryKey: keyof ItemT,
-  env: GenericObject,
+  env: EnvT,
   items: ItemT[],
   item: ItemT | undefined,
   itemEvent: StoreItemEvent;
@@ -36,12 +36,12 @@ export type StoreItemEvent = {
   id: ItemId | undefined;
 }
 
-export type StoreGetters<ItemT> = {}
+export type StoreGetters<ItemT, EnvT> = {}
 
-export type StoreActions<ItemT> = {
+export type StoreActions<ItemT, EnvT> = {
 
   setEnv: (
-    env: GenericObject,
+    env: EnvT,
   ) => void;
 
   setItems: (

@@ -19,17 +19,17 @@ import {
   zodErrorHandler,
 } from "../zod";
 
-import type { ItemT, ItemS, ItemI, ItemU } from "./types";
+import type { ItemT, ItemS, ItemI, ItemU, EnvT } from "./types";
 
 export const modelName = "{{modelName}}"
 
 export const useStore = defineStore<
   "{{declaredName}}",
-  StoreState<ItemS>,
-  StoreGetters<ItemS>,
-  StoreActions<ItemS>
+  StoreState<ItemS, EnvT>,
+  StoreGetters<ItemS, EnvT>,
+  StoreActions<ItemS, EnvT>
 >("{{declaredName}}", {
-  state: () => storeState<ItemS>({ primaryKey: "{{primaryKey}}" }),
+  state: () => storeState<ItemS, EnvT>({ primaryKey: "{{primaryKey}}" }),
   getters: storeGetters(),
   actions: storeActions(),
 })
@@ -54,12 +54,12 @@ export function useHandlers() {
   ) {
     store.loading = true
     return api
-      .get<GenericObject>("env", query || route.query)
+      .get<EnvT>("env", query || route.query)
       .finally(() => store.loading = false)
   }
 
   function envLoaded(
-    env: GenericObject,
+    env: EnvT,
   ) {
     store.setEnv(env)
     return env
