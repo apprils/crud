@@ -49,18 +49,18 @@
   },
   "dependencies": {
     "@appril/core": "^0.2.2",
-    "@appril/pgts": "^0.2.2",
+    "@appril/pgts": "^0.2.3",
     "fs-extra": "^11.1.1",
     "kleur": "^4.1.5",
     "mustache": "^4.2.0",
-    "yaml": "^2.3.3"
+    "yaml": "^2.3.4"
   },
   "devDependencies": {
     "@appril/dev": "^0.2.2",
     "@appril/scripts": "^0.2.2",
-    "@types/fs-extra": "^11.0.3",
-    "@types/mustache": "^4.2.4",
-    "@types/node": "^20.8.9",
+    "@types/fs-extra": "^11.0.4",
+    "@types/mustache": "^4.2.5",
+    "@types/node": "^20.9.0",
     "esbuild": "^0.19.5",
     "pinia": "^2.1.7",
     "typescript": "^5.2.2",
@@ -70,6 +70,6 @@
   "peerDependencies": {
     "@appril/ui": "^0.2.2",
     "zod": "^3.22.4",
-    "zod-validation-error": "^2.0.0"
+    "zod-validation-error": "^2.1.0"
   }
 }
