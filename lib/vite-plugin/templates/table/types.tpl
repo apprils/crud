@@ -9,7 +9,7 @@ import type {
 import type {
   ItemX,
   EnvT,
-} from "../@extra/{{name}}";
+} from "../@views/{{name}}";
 
 // ItemStored / ItemSerialized
 type ItemS = ItemT & ItemX

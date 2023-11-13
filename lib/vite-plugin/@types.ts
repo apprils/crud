@@ -11,7 +11,7 @@ export type Templates = {
   base?: string;
   store?: string;
   handlers?: string;
-  extra?: string;
+  view?: string;
   types?: string;
   Layout?: string;
   Pager?: string;

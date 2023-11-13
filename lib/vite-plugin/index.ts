@@ -15,7 +15,7 @@ import indexTpl from "./templates/table/index.tpl";
 import baseTpl from "./templates/table/base.tpl";
 import handlersTpl from "./templates/table/handlers.tpl";
 import storeTpl from "./templates/table/store.tpl";
-import extraTpl from "./templates/table/extra.tpl";
+import viewTpl from "./templates/table/view.tpl";
 import typesTpl from "./templates/table/types.tpl";
 import LayoutTpl from "./templates/table/Layout.tpl";
 import PagerTpl from "./templates/table/Pager.tpl";
@@ -47,7 +47,7 @@ const defaultTemplates: Required<Templates> & {
   base: baseTpl,
   store: storeTpl,
   handlers: handlersTpl,
-  extra: extraTpl,
+  view: viewTpl,
   types: typesTpl,
   Layout: LayoutTpl,
   Pager: PagerTpl,
@@ -144,7 +144,7 @@ export function vitePluginApprilCrud(
 
     for (const table of tables) {
 
-      await renderToFile(uixPath("@extra", table.name + ".ts"), templates.extra, {
+      await renderToFile(uixPath("@views", table.name + ".ts"), templates.view, {
         typesDir,
         tablesDir,
         ...table,
@@ -258,7 +258,7 @@ export function vitePluginApprilCrud(
 
     configureServer(server) {
 
-      // adding optedTemplates and extraFiles templates to watchlist
+      // adding optedTemplates to watchlist
 
       const watchedFiles = [
         ...Object.values(crudConfig.templates || {}),
