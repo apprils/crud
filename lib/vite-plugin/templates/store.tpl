@@ -6,6 +6,10 @@ import type {
   GenericObject, Pager, ItemId,
 } from "./types";
 
+import customGetters from "./@store/getters";
+import customActions from "./@store/actions";
+import customActionListeners from "./@store/action-listeners";
+
 export function storeState<ItemT, EnvT>(
   {
     primaryKey,
@@ -33,7 +37,7 @@ export function storeState<ItemT, EnvT>(
 }
 
 export function storeGetters() {
-  return {}
+  return { ...customGetters }
 }
 
 export function storeActions() {
@@ -111,6 +115,8 @@ export function storeActions() {
       this.$patch((state) => state.items = state.items.filter((e: any) => e[state.primaryKey] != id))
     },
 
+    ...customActions,
+
   }
 
 }
@@ -150,6 +156,8 @@ export const storeActionListeners: StoreOnActionListener<
     }
 
   },
+
+  ...customActionListeners,
 
 ]
 

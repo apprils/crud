@@ -26,6 +26,10 @@ import $storeTpl from "./templates/store.tpl";
 import $typesTpl from "./templates/types.tpl";
 import $zodTpl from "./templates/zod.tpl";
 
+import $storeActionListenersTpl from "./templates/@store/action-listeners.tpl";
+import $storeActionsTpl from "./templates/@store/actions.tpl";
+import $storeGettersTpl from "./templates/@store/getters.tpl";
+
 import apiIndexTpl from "./templates/api/index.tpl";
 
 import { BANNER, renderToFile } from "./render";
@@ -35,6 +39,9 @@ const defaultTemplates: Required<Templates> & {
   $store: string;
   $types: string;
   $zod: string;
+  $storeActionListeners: string;
+  $storeActions: string;
+  $storeGetters: string;
 } = {
   index: indexTpl,
   base: baseTpl,
@@ -49,6 +56,9 @@ const defaultTemplates: Required<Templates> & {
   $store: $storeTpl,
   $types: $typesTpl,
   $zod: $zodTpl,
+  $storeActionListeners: $storeActionListenersTpl,
+  $storeActions: $storeActionsTpl,
+  $storeGetters: $storeGettersTpl,
 }
 
 type TemplateName = keyof typeof defaultTemplates
@@ -164,15 +174,15 @@ export function vitePluginApprilCrud(
     }
 
     for (
-      const [ tpl, ext ] of [
-        [ "$Overlay", ".vue" ],
-        [ "$store", ".ts" ],
-        [ "$types", ".ts" ],
-        [ "$zod", ".ts" ],
-      ] satisfies [ tpl: TemplateName, ext: string ][]
+      const [ file, tpl ] of [
+        [ "Overlay.vue", "$Overlay" ],
+        [ "store.ts", "$store" ],
+        [ "types.ts", "$types" ],
+        [ "zod.ts", "$zod" ],
+      ] satisfies [ file: string, tpl: TemplateName ][]
     ) {
 
-      await renderToFile(uixPath(tpl.replace("$", "") + ext), templates[tpl], {
+      await renderToFile(uixPath(file), templates[tpl], {
         BANNER,
         tables,
         typesDir,
@@ -181,17 +191,29 @@ export function vitePluginApprilCrud(
 
     }
 
-    {
+    for (
+      const [ file, tpl ] of [
+        [ "action-listeners.ts", "$storeActionListeners" ],
+        [ "actions.ts", "$storeActions" ],
+        [ "getters.ts", "$storeGetters" ],
+      ] satisfies [ file: string, tpl: TemplateName ][]
+    ) {
 
-      await renderToFile(apiPath("index.ts"), apiIndexTpl, {
-        BANNER,
+      await renderToFile(uixPath("@store", file), templates[tpl], {
         tables,
         typesDir,
         tablesDir,
-        crudDir,
-      })
+      }, { overwrite: false })
 
     }
+
+    await renderToFile(apiPath("index.ts"), apiIndexTpl, {
+      BANNER,
+      tables,
+      typesDir,
+      tablesDir,
+      crudDir,
+    })
 
     {
 
