@@ -9,7 +9,7 @@ import { cyan, red } from "kleur/colors";
 
 import type { Plugin, ResolvedConfig } from "vite";
 
-import type { ConnectionConfig, PgtsConfig, Config, Table } from "./@types";
+import type { ConnectionConfig, PgtsConfig, Config, Table, Templates } from "./@types";
 
 import indexTpl from "./templates/table/index.tpl";
 import baseTpl from "./templates/table/base.tpl";
@@ -30,7 +30,12 @@ import apiIndexTpl from "./templates/api/index.tpl";
 
 import { BANNER, renderToFile } from "./render";
 
-const defaultTemplates = {
+const defaultTemplates: Required<Templates> & {
+  $Overlay: string;
+  $store: string;
+  $types: string;
+  $zod: string;
+} = {
   index: indexTpl,
   base: baseTpl,
   extra: extraTpl,

@@ -8,15 +8,14 @@ export type { ConnectionConfig, PgtsConfig, TableDeclaration }
 
 export type Templates = {
   index?: string;
-  setup?: string;
+  base?: string;
+  extra?: string;
+  types?: string;
   Layout?: string;
   Pager?: string;
   ControlButtons?: string;
+  CreateDialog?: string;
   EditorPlaceholder?: string;
-  Notifications?: string;
-  Overlay?: string;
-  apiEntry?: string;
-  apiIndex?: string;
 }
 
 export type Table = TableDeclaration & {
