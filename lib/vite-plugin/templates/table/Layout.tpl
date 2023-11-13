@@ -6,19 +6,19 @@ import { onBeforeMount } from "vue";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import { Success } from "@appril/ui";
 
-import { store, useHandlers } from "./base";
+import { store } from "./base";
+
+import {
+  itemRoute, itemKey, isActiveItem,
+  loadEnv, envLoaded,
+  loadItems, itemsLoaded,
+  loadItem, itemLoaded,
+} from "./handlers";
 
 import ControlButtons from "./ControlButtons.vue";
 import Pager from "./Pager.vue";
 import EditorPlaceholder from "./EditorPlaceholder.vue";
 import Overlay from "../Overlay.vue";
-
-const {
-  itemRoute, itemKey, isActiveItem,
-  loadEnv, envLoaded,
-  loadItems, itemsLoaded,
-  loadItem, itemLoaded,
-} = useHandlers()
 
 const route = useRoute()
 

@@ -13,6 +13,7 @@ import type { ConnectionConfig, PgtsConfig, Config, Table, Templates } from "./@
 
 import indexTpl from "./templates/table/index.tpl";
 import baseTpl from "./templates/table/base.tpl";
+import handlersTpl from "./templates/table/handlers.tpl";
 import storeTpl from "./templates/table/store.tpl";
 import extraTpl from "./templates/table/extra.tpl";
 import typesTpl from "./templates/table/types.tpl";
@@ -45,6 +46,7 @@ const defaultTemplates: Required<Templates> & {
   index: indexTpl,
   base: baseTpl,
   store: storeTpl,
+  handlers: handlersTpl,
   extra: extraTpl,
   types: typesTpl,
   Layout: LayoutTpl,
@@ -153,6 +155,7 @@ export function vitePluginApprilCrud(
           [ "index.ts", "index" ],
           [ "base.ts", "base" ],
           [ "store.ts", "store" ],
+          [ "handlers.ts", "handlers" ],
           [ "types.ts", "types" ],
           [ "Layout.vue", "Layout" ],
           [ "Pager.vue", "Pager" ],

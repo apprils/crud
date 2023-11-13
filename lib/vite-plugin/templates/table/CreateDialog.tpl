@@ -5,14 +5,13 @@
 import { ref } from "vue";
 import { IconOrSpinner, Error } from "@appril/ui";
 
-import type { ItemT, ItemI } from "./base";
-import { store, useHandlers } from "./base";
+import type { ItemT, ItemI } from "./types";
+import { store } from "./base";
+import { createItem, itemCreated } from "./handlers";
 
 const props = defineProps<{
   modelValue: ItemI;
 }>()
-
-const { createItem, itemCreated } = useHandlers()
 
 const emit = defineEmits<{
   mounted: [];

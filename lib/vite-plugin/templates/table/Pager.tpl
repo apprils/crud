@@ -4,9 +4,8 @@
 
 import { Icon } from "@appril/ui";
 
-import { store, useHandlers } from "./base"
-
-const { gotoPage } = useHandlers()
+import { store } from "./base";
+import { gotoPage } from "./handlers";
 
 </script>
 

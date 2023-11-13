@@ -10,6 +10,7 @@ export type Templates = {
   index?: string;
   base?: string;
   store?: string;
+  handlers?: string;
   extra?: string;
   types?: string;
   Layout?: string;
