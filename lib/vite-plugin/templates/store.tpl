@@ -14,7 +14,7 @@ export function storeState<ItemT, EnvT>(
 
   return {
     primaryKey,
-    env: {},
+    env: {} as EnvT,
     items: [],
     item: undefined,
     itemEvent: { event: undefined, id: undefined },
@@ -117,9 +117,9 @@ export function storeActions() {
 
 export const storeActionListeners: StoreOnActionListener<
   any,
-  StoreState<any>,
-  StoreGetters<any>,
-  StoreActions<any>
+  StoreState<any, any>,
+  StoreGetters<any, any>,
+  StoreActions<any, any>
 >[] = [
 
   function({ store, name, args, after }) {

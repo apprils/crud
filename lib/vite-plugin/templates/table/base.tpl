@@ -19,7 +19,7 @@ import {
   zodErrorHandler,
 } from "../zod";
 
-import type { ItemT, ItemS, ItemI, ItemU, EnvT } from "./types";
+import type { ItemT, ItemI, ItemU, ItemS, EnvT } from "./types";
 
 export const modelName = "{{modelName}}"
 
@@ -189,7 +189,7 @@ export function useHandlers() {
   }
 
   function itemRoute(
-    item?: ItemT | ItemS,
+    item?: ItemS,
   ) {
     return {
       query: {
@@ -200,14 +200,14 @@ export function useHandlers() {
   }
 
   function itemKey(
-    item: ItemT | ItemS | undefined,
+    item: ItemS | undefined,
     prefix: string = "",
   ): string {
     return [ prefix || "", item?.{{primaryKey}} || "" ].map(String).join(":")
   }
 
   function isActiveItem(
-    item: ItemT | ItemS,
+    item: ItemS,
   ) {
     return store.item
       ? item?.{{primaryKey}} == store.item.{{primaryKey}}

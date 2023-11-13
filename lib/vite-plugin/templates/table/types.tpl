@@ -1,3 +1,4 @@
+{{BANNER}}
 
 import type {
   {{recordName}} as ItemT,
@@ -5,11 +6,13 @@ import type {
   {{updateName}} as ItemU,
 } from "{{typesDir}}/{{schema}}/@types";
 
-export type { ItemT, ItemI, ItemU }
+import type {
+  ItemX,
+  EnvT,
+} from "../@extra/{{name}}";
 
-// Item Serialized
-// item with extra properties used on listing, retrieve, store
-export type ItemS = ItemT
+// ItemStored / ItemSerialized
+type ItemS = ItemT & ItemX
 
-export type EnvT = never
+export type { ItemT, ItemI, ItemU, ItemX, ItemS, EnvT };
 

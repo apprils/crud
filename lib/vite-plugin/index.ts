@@ -13,6 +13,7 @@ import type { ConnectionConfig, PgtsConfig, Config, Table } from "./@types";
 
 import indexTpl from "./templates/table/index.tpl";
 import baseTpl from "./templates/table/base.tpl";
+import extraTpl from "./templates/table/extra.tpl";
 import typesTpl from "./templates/table/types.tpl";
 import LayoutTpl from "./templates/table/Layout.tpl";
 import PagerTpl from "./templates/table/Pager.tpl";
@@ -32,6 +33,7 @@ import { BANNER, renderToFile } from "./render";
 const defaultTemplates = {
   index: indexTpl,
   base: baseTpl,
+  extra: extraTpl,
   types: typesTpl,
   Layout: LayoutTpl,
   Pager: PagerTpl,
@@ -126,17 +128,23 @@ export function vitePluginApprilCrud(
 
     for (const table of tables) {
 
+      await renderToFile(uixPath("@extra", table.name + ".ts"), templates.extra, {
+        typesDir,
+        tablesDir,
+        ...table,
+      }, { overwrite: false })
+
       for (
-        const [ tpl, ext, opts ] of [
+        const [ tpl, ext ] of [
           [ "index", ".ts" ],
           [ "base", ".ts" ],
-          [ "types", ".ts", { overwrite: false } ],
+          [ "types", ".ts" ],
           [ "Layout", ".vue" ],
           [ "Pager", ".vue" ],
           [ "ControlButtons", ".vue" ],
           [ "CreateDialog", ".vue" ],
           [ "EditorPlaceholder", ".vue" ],
-        ] satisfies [ tpl: TemplateName, ext: string, opts?: object ][]
+        ] satisfies [ tpl: TemplateName, ext: string ][]
       ) {
 
         await renderToFile(uixPath(table.name, tpl + ext), templates[tpl], {
@@ -144,7 +152,7 @@ export function vitePluginApprilCrud(
           typesDir,
           tablesDir,
           ...table,
-        }, opts)
+        })
 
       }
 
