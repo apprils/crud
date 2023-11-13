@@ -25,6 +25,7 @@ export type Table = TableDeclaration & {
 }
 
 export type Config = {
+  schema?: string;
   outDir: string;
   apiDir?: string;
   importBase?: string;

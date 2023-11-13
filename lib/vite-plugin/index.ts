@@ -69,17 +69,22 @@ export function vitePluginApprilCrud(
     const rootPath = (...path: string[]) => resolve(viteConfig.root, join(...path))
 
     const {
-      schemas,
-      tables: tableDeclarations,
-    } = await pgts(dbxConfig.connection, dbxConfig)
-
-    const {
+      schema,
       outDir,
       apiDir = "api",
       importBase = "@",
       tableFilter,
       meta,
     } = crudConfig
+
+    const {
+      tables: tableDeclarations,
+    } = await pgts(dbxConfig.connection, {
+      ...dbxConfig,
+      ...schema
+        ? { schemas: [ schema ] }
+        : {},
+    })
 
     const apiBase = (
       "apiBase" in crudConfig
@@ -167,7 +172,6 @@ export function vitePluginApprilCrud(
 
       await renderToFile(apiPath("index.ts"), apiIndexTpl, {
         BANNER,
-        schemas,
         tables,
         typesDir,
         tablesDir,
