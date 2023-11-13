@@ -5,7 +5,9 @@
 import { Icon } from "@appril/ui";
 
 import { store } from "./base";
-import { gotoPage } from "./handlers";
+import { useHandlers } from "./handlers";
+
+const { gotoPage } = useHandlers()
 
 </script>
 

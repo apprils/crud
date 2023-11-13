@@ -7,7 +7,9 @@ import { IconOrSpinner, Error } from "@appril/ui";
 
 import type { ItemT, ItemI } from "./types";
 import { store } from "./base";
-import { createItem, itemCreated } from "./handlers";
+import { useHandlers } from "./handlers";
+
+const { createItem, itemCreated } = useHandlers()
 
 const props = defineProps<{
   modelValue: ItemI;

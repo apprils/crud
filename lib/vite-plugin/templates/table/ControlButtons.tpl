@@ -6,8 +6,9 @@ import { ref } from "vue";
 import { Icon, Confirm } from "@appril/ui";
 
 import { store, modelName } from "./base";
-import { deleteItem, itemDeleted, closeItem } from "./handlers";
+import { useHandlers } from "./handlers";
 
+const { deleteItem, itemDeleted, closeItem } = useHandlers()
 const deleteItemId = ref<null | string>(null)
 
 </script>

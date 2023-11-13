@@ -7,13 +7,14 @@ import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import { Success } from "@appril/ui";
 
 import { store } from "./base";
+import { useHandlers } from "./handlers";
 
-import {
+const {
   itemRoute, itemKey, isActiveItem,
   loadEnv, envLoaded,
   loadItems, itemsLoaded,
   loadItem, itemLoaded,
-} from "./handlers";
+} = useHandlers()
 
 import ControlButtons from "./ControlButtons.vue";
 import Pager from "./Pager.vue";
