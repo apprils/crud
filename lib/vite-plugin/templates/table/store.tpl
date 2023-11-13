@@ -1,58 +1,61 @@
+{{BANNER}}
 
-import type { StoreGeneric, StoreOnActionListener } from "pinia";
+import { defineStore } from "pinia";
+
+import type { StoreOnActionListener } from "pinia";
 
 import type {
-  StoreOptions, StoreState, StoreGetters, StoreActions,
+  StoreState, StoreGetters, StoreActions,
   GenericObject, Pager, ItemId,
-} from "./types";
+} from "../types";
 
-import customGetters from "./@store/getters";
-import customActions from "./@store/actions";
-import customActionListeners from "./@store/action-listeners";
+import type { ItemS, EnvT } from "./types";
 
-export function storeState<ItemT, EnvT>(
-  {
-    primaryKey,
-  }: StoreOptions<ItemT>
-): StoreState<ItemT, EnvT> {
+import customGetters from "../@store/getters";
+import customActions from "../@store/actions";
+import customActionListeners from "../@store/action-listeners";
 
-  return {
-    primaryKey,
-    env: {} as EnvT,
-    items: [],
-    item: undefined,
-    itemEvent: { event: undefined, id: undefined },
-    loading: false,
-    pager: {
-      totalItems: 0,
-      totalPages: 0,
-      currentPage: 0,
-      nextPage: 0,
-      prevPage: 0,
-      offset: 0,
-    },
-    createDialog: false,
-  }
+export const useStore = defineStore<
+  "{{declaredName}}",
+  StoreState<ItemS, EnvT>,
+  StoreGetters<ItemS, EnvT>,
+  StoreActions<ItemS, EnvT>
+>("{{declaredName}}", {
 
-}
+  state: () => {
+    return {
+      primaryKey: "{{primaryKey}}",
+      env: {} as EnvT,
+      items: [],
+      item: undefined,
+      itemEvent: { event: undefined, id: undefined },
+      loading: false,
+      pager: {
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: 0,
+        nextPage: 0,
+        prevPage: 0,
+        offset: 0,
+      },
+      createDialog: false,
+    }
+  },
 
-export function storeGetters() {
-  return { ...customGetters }
-}
+  getters: {
+    ...customGetters,
+  },
 
-export function storeActions() {
-  return {
+  actions: {
 
     setEnv(
-      this: StoreGeneric,
       env: GenericObject,
     ) {
       // $patch({ env }) would cause cache issues with complex/nested items
-      this.$patch((state) => state.env = { ...env })
+      this.$patch((state) => { state.env = { ...env } as EnvT })
     },
 
     setItems(
-      this: StoreGeneric,
       items: any[],
       pager: Pager,
     ) {
@@ -64,7 +67,6 @@ export function storeActions() {
     },
 
     setItem(
-      this: StoreGeneric,
       item: any,
     ) {
       // $patch({ item }) would cause cache issues with complex/nested items
@@ -79,7 +81,6 @@ export function storeActions() {
     },
 
     patchItem(
-      this: StoreGeneric,
       updates: any,
     ) {
       // $patch({ item }) would cause cache issues with complex/nested items
@@ -87,7 +88,6 @@ export function storeActions() {
     },
 
     updateItem(
-      this: StoreGeneric,
       id: ItemId,
       updates: any,
     ) {
@@ -102,14 +102,12 @@ export function storeActions() {
     },
 
     unshiftItem(
-      this: StoreGeneric,
       item: any,
     ) {
       this.items.unshift(item)
     },
 
     async removeItem(
-      this: StoreGeneric,
       id: ItemId,
     ) {
       this.$patch((state) => state.items = state.items.filter((e: any) => e[state.primaryKey] != id))
@@ -117,15 +115,15 @@ export function storeActions() {
 
     ...customActions,
 
-  }
+  },
 
-}
+})
 
-export const storeActionListeners: StoreOnActionListener<
-  any,
-  StoreState<any, any>,
-  StoreGetters<any, any>,
-  StoreActions<any, any>
+export const actionListeners: StoreOnActionListener<
+  "{{declaredName}}",
+  StoreState<ItemS, EnvT>,
+  StoreGetters<ItemS, EnvT>,
+  StoreActions<ItemS, EnvT>
 >[] = [
 
   function({ store, name, args, after }) {
@@ -143,16 +141,14 @@ export const storeActionListeners: StoreOnActionListener<
       return
     }
 
-    const [ id ] = args
-
     if (name === "insertItem") {
-      store.itemEvent = { event: "Created", id }
+      store.itemEvent = { event: "Created", id: args[0] }
     }
     else if (name === "updateItem") {
-      store.itemEvent = { event: "Updated", id }
+      store.itemEvent = { event: "Updated", id: args[0] }
     }
     else if (name === "removeItem") {
-      store.itemEvent = { event: "Deleted", id }
+      store.itemEvent = { event: "Deleted", id: args[0] }
     }
 
   },

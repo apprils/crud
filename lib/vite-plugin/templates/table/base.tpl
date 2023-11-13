@@ -2,14 +2,10 @@
 
 import { reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { defineStore } from "pinia";
 
-import { storeState, storeGetters, storeActions, storeActionListeners } from "../store";
+import { useStore, actionListeners } from "./store";
 
-import type {
-  GenericObject, Filters, ListResponse, ItemId,
-  StoreState, StoreGetters, StoreActions,
-} from "../types";
+import type { GenericObject, Filters, ListResponse, ItemId } from "../types";
 
 import fetch from "@/fetch";
 
@@ -23,20 +19,9 @@ import type { ItemT, ItemI, ItemU, ItemS, EnvT } from "./types";
 
 export const modelName = "{{modelName}}"
 
-export const useStore = defineStore<
-  "{{declaredName}}",
-  StoreState<ItemS, EnvT>,
-  StoreGetters<ItemS, EnvT>,
-  StoreActions<ItemS, EnvT>
->("{{declaredName}}", {
-  state: () => storeState<ItemS, EnvT>({ primaryKey: "{{primaryKey}}" }),
-  getters: storeGetters(),
-  actions: storeActions(),
-})
-
 export const store = useStore()
 
-for (const listener of storeActionListeners) {
+for (const listener of actionListeners) {
   store.$onAction(listener)
 }
 

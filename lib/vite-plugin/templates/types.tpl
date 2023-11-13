@@ -16,10 +16,6 @@ export type Pager = {
   offset: number;
 }
 
-export type StoreOptions<ItemT> = {
-  primaryKey: keyof ItemT;
-}
-
 export type StoreState<ItemT, EnvT> = {
   primaryKey: keyof ItemT,
   env: EnvT,

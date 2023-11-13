@@ -9,6 +9,7 @@ export type { ConnectionConfig, PgtsConfig, TableDeclaration }
 export type Templates = {
   index?: string;
   base?: string;
+  store?: string;
   extra?: string;
   types?: string;
   Layout?: string;

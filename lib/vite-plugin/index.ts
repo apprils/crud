@@ -13,6 +13,7 @@ import type { ConnectionConfig, PgtsConfig, Config, Table, Templates } from "./@
 
 import indexTpl from "./templates/table/index.tpl";
 import baseTpl from "./templates/table/base.tpl";
+import storeTpl from "./templates/table/store.tpl";
 import extraTpl from "./templates/table/extra.tpl";
 import typesTpl from "./templates/table/types.tpl";
 import LayoutTpl from "./templates/table/Layout.tpl";
@@ -22,7 +23,6 @@ import CreateDialogTpl from "./templates/table/CreateDialog.tpl";
 import EditorPlaceholderTpl from "./templates/table/EditorPlaceholder.tpl";
 
 import $OverlayTpl from "./templates/Overlay.tpl";
-import $storeTpl from "./templates/store.tpl";
 import $typesTpl from "./templates/types.tpl";
 import $zodTpl from "./templates/zod.tpl";
 
@@ -36,7 +36,6 @@ import { BANNER, renderToFile } from "./render";
 
 const defaultTemplates: Required<Templates> & {
   $Overlay: string;
-  $store: string;
   $types: string;
   $zod: string;
   $storeActionListeners: string;
@@ -45,6 +44,7 @@ const defaultTemplates: Required<Templates> & {
 } = {
   index: indexTpl,
   base: baseTpl,
+  store: storeTpl,
   extra: extraTpl,
   types: typesTpl,
   Layout: LayoutTpl,
@@ -53,7 +53,6 @@ const defaultTemplates: Required<Templates> & {
   CreateDialog: CreateDialogTpl,
   EditorPlaceholder: EditorPlaceholderTpl,
   $Overlay: $OverlayTpl,
-  $store: $storeTpl,
   $types: $typesTpl,
   $zod: $zodTpl,
   $storeActionListeners: $storeActionListenersTpl,
@@ -150,19 +149,20 @@ export function vitePluginApprilCrud(
       }, { overwrite: false })
 
       for (
-        const [ tpl, ext ] of [
-          [ "index", ".ts" ],
-          [ "base", ".ts" ],
-          [ "types", ".ts" ],
-          [ "Layout", ".vue" ],
-          [ "Pager", ".vue" ],
-          [ "ControlButtons", ".vue" ],
-          [ "CreateDialog", ".vue" ],
-          [ "EditorPlaceholder", ".vue" ],
-        ] satisfies [ tpl: TemplateName, ext: string ][]
+        const [ file, tpl ] of [
+          [ "index.ts", "index" ],
+          [ "base.ts", "base" ],
+          [ "store.ts", "store" ],
+          [ "types.ts", "types" ],
+          [ "Layout.vue", "Layout" ],
+          [ "Pager.vue", "Pager" ],
+          [ "ControlButtons.vue", "ControlButtons" ],
+          [ "CreateDialog.vue", "CreateDialog" ],
+          [ "EditorPlaceholder.vue", "EditorPlaceholder" ],
+        ] satisfies [ file: string, tpl: TemplateName ][]
       ) {
 
-        await renderToFile(uixPath(table.name, tpl + ext), templates[tpl], {
+        await renderToFile(uixPath(table.name, file), templates[tpl], {
           BANNER,
           typesDir,
           tablesDir,
@@ -176,7 +176,6 @@ export function vitePluginApprilCrud(
     for (
       const [ file, tpl ] of [
         [ "Overlay.vue", "$Overlay" ],
-        [ "store.ts", "$store" ],
         [ "types.ts", "$types" ],
         [ "zod.ts", "$zod" ],
       ] satisfies [ file: string, tpl: TemplateName ][]
