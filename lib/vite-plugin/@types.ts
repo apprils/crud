@@ -7,11 +7,9 @@ import type {
 export type { ConnectionConfig, PgtsConfig, TableDeclaration }
 
 export type Templates = {
-  index?: string;
   base?: string;
   store?: string;
   handlers?: string;
-  view?: string;
   types?: string;
   Layout?: string;
   Pager?: string;

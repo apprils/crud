@@ -11,55 +11,51 @@ import type { Plugin, ResolvedConfig } from "vite";
 
 import type { ConnectionConfig, PgtsConfig, Config, Table, Templates } from "./@types";
 
-import indexTpl from "./templates/table/index.tpl";
-import baseTpl from "./templates/table/base.tpl";
-import handlersTpl from "./templates/table/handlers.tpl";
-import storeTpl from "./templates/table/store.tpl";
-import viewTpl from "./templates/table/view.tpl";
-import typesTpl from "./templates/table/types.tpl";
-import LayoutTpl from "./templates/table/Layout.tpl";
-import PagerTpl from "./templates/table/Pager.tpl";
-import ControlButtonsTpl from "./templates/table/ControlButtons.tpl";
-import CreateDialogTpl from "./templates/table/CreateDialog.tpl";
-import EditorPlaceholderTpl from "./templates/table/EditorPlaceholder.tpl";
+import componentBaseTpl from "./templates/table/@component/base.tpl";
+import componentStoreTpl from "./templates/table/@component/store.tpl";
+import componentHandlersTpl from "./templates/table/@component/handlers.tpl";
+import componentTypesTpl from "./templates/table/@component/types.tpl";
+import componentLayoutTpl from "./templates/table/@component/Layout.tpl";
+import componentPagerTpl from "./templates/table/@component/Pager.tpl";
+import componentControlButtonsTpl from "./templates/table/@component/ControlButtons.tpl";
+import componentCreateDialogTpl from "./templates/table/@component/CreateDialog.tpl";
+import componentEditorPlaceholderTpl from "./templates/table/@component/EditorPlaceholder.tpl";
+
+import tableTypesTpl from "./templates/table/types.tpl";
+import tableIndexTpl from "./templates/table/index.tpl";
 
 import $OverlayTpl from "./templates/Overlay.tpl";
 import $typesTpl from "./templates/types.tpl";
+import $storeTpl from "./templates/store.tpl";
 import $zodTpl from "./templates/zod.tpl";
-
-import $storeActionListenersTpl from "./templates/@store/action-listeners.tpl";
-import $storeActionsTpl from "./templates/@store/actions.tpl";
-import $storeGettersTpl from "./templates/@store/getters.tpl";
 
 import apiIndexTpl from "./templates/api/index.tpl";
 
 import { BANNER, renderToFile } from "./render";
 
 const defaultTemplates: Required<Templates> & {
+  tableTypes: string;
+  tableIndex: string;
   $Overlay: string;
   $types: string;
+  $store: string;
   $zod: string;
-  $storeActionListeners: string;
-  $storeActions: string;
-  $storeGetters: string;
 } = {
-  index: indexTpl,
-  base: baseTpl,
-  store: storeTpl,
-  handlers: handlersTpl,
-  view: viewTpl,
-  types: typesTpl,
-  Layout: LayoutTpl,
-  Pager: PagerTpl,
-  ControlButtons: ControlButtonsTpl,
-  CreateDialog: CreateDialogTpl,
-  EditorPlaceholder: EditorPlaceholderTpl,
+  base: componentBaseTpl,
+  store: componentStoreTpl,
+  handlers: componentHandlersTpl,
+  types: componentTypesTpl,
+  Layout: componentLayoutTpl,
+  Pager: componentPagerTpl,
+  ControlButtons: componentControlButtonsTpl,
+  CreateDialog: componentCreateDialogTpl,
+  EditorPlaceholder: componentEditorPlaceholderTpl,
+  tableTypes: tableTypesTpl,
+  tableIndex: tableIndexTpl,
   $Overlay: $OverlayTpl,
   $types: $typesTpl,
+  $store: $storeTpl,
   $zod: $zodTpl,
-  $storeActionListeners: $storeActionListenersTpl,
-  $storeActions: $storeActionsTpl,
-  $storeGetters: $storeGettersTpl,
 }
 
 type TemplateName = keyof typeof defaultTemplates
@@ -144,15 +140,29 @@ export function vitePluginApprilCrud(
 
     for (const table of tables) {
 
-      await renderToFile(uixPath("@views", table.name + ".ts"), templates.view, {
+      for (const [ file, tpl ] of [
+        [ "types.ts", "tableTypes" ],
+      ] satisfies [ file: string, tpl: TemplateName ][]) {
+
+        await renderToFile(uixPath(table.name, file), templates[tpl], {
+          crudDir,
+          typesDir,
+          tablesDir,
+          ...table,
+        }, { overwrite: false })
+
+      }
+
+      await renderToFile(uixPath(table.name, "index.ts"), templates.tableIndex, {
+        BANNER,
+          crudDir,
         typesDir,
         tablesDir,
         ...table,
-      }, { overwrite: false })
+      })
 
       for (
         const [ file, tpl ] of [
-          [ "index.ts", "index" ],
           [ "base.ts", "base" ],
           [ "store.ts", "store" ],
           [ "handlers.ts", "handlers" ],
@@ -165,14 +175,30 @@ export function vitePluginApprilCrud(
         ] satisfies [ file: string, tpl: TemplateName ][]
       ) {
 
-        await renderToFile(uixPath(table.name, file), templates[tpl], {
+        await renderToFile(uixPath(table.name, "@component", file), templates[tpl], {
           BANNER,
+          crudDir,
           typesDir,
           tablesDir,
           ...table,
         })
 
       }
+
+    }
+
+    for (
+      const [ file, tpl ] of [
+        [ "store.ts", "$store" ],
+      ] satisfies [ file: string, tpl: TemplateName ][]
+    ) {
+
+      await renderToFile(uixPath(file), templates[tpl], {
+        tables,
+        crudDir,
+        typesDir,
+        tablesDir,
+      }, { overwrite: false })
 
     }
 
@@ -187,34 +213,19 @@ export function vitePluginApprilCrud(
       await renderToFile(uixPath(file), templates[tpl], {
         BANNER,
         tables,
+        crudDir,
         typesDir,
         tablesDir,
       })
 
     }
 
-    for (
-      const [ file, tpl ] of [
-        [ "action-listeners.ts", "$storeActionListeners" ],
-        [ "actions.ts", "$storeActions" ],
-        [ "getters.ts", "$storeGetters" ],
-      ] satisfies [ file: string, tpl: TemplateName ][]
-    ) {
-
-      await renderToFile(uixPath("@store", file), templates[tpl], {
-        tables,
-        typesDir,
-        tablesDir,
-      }, { overwrite: false })
-
-    }
-
     await renderToFile(apiPath("index.ts"), apiIndexTpl, {
       BANNER,
       tables,
+      crudDir,
       typesDir,
       tablesDir,
-      crudDir,
     })
 
     {

@@ -19,7 +19,7 @@ const {
 import ControlButtons from "./ControlButtons.vue";
 import Pager from "./Pager.vue";
 import EditorPlaceholder from "./EditorPlaceholder.vue";
-import Overlay from "../Overlay.vue";
+import Overlay from "{{crudDir}}/Overlay.vue";
 
 const route = useRoute()
 
@@ -152,8 +152,13 @@ onBeforeRouteUpdate((to, from) => {
         </div>
 
         <div class="col-lg-9">
-          <slot v-if="store.pager.totalItems > 0" name="editor"
-            :key="itemKey(store.item, 'editor')" />
+          <template v-if="store.pager.totalItems > 0">
+            <slot v-if="store.item" name="editor" :item="store.item"
+              :key="itemKey(store.item, 'editor')" />
+            <slot v-else name="editorPlaceholder">
+              <EditorPlaceholder />
+            </slot>
+          </template>
           <slot v-else name="editorPlaceholder">
             <EditorPlaceholder />
           </slot>

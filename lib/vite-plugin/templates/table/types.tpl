@@ -1,18 +1,6 @@
-{{BANNER}}
 
-import type {
-  {{recordName}} as ItemT,
-  {{insertName}} as ItemI,
-  {{updateName}} as ItemU,
-} from "{{typesDir}}/{{schema}}/@types";
+// ItemExtra, extra poperties used on list / retrieve
+export type ItemX = {}
 
-import type {
-  ItemX,
-  EnvT,
-} from "../@views/{{name}}";
-
-// ItemStored / ItemSerialized
-type ItemS = ItemT & ItemX
-
-export type { ItemT, ItemI, ItemU, ItemX, ItemS, EnvT };
+export type EnvT = never
 

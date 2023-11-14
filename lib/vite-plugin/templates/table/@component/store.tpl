@@ -7,20 +7,18 @@ import type { StoreOnActionListener } from "pinia";
 import type {
   StoreState, StoreGetters, StoreActions,
   GenericObject, Pager, ItemId,
-} from "../types";
+} from "{{crudDir}}/types";
 
 import type { ItemS, EnvT } from "./types";
 
-import customGetters from "../@store/getters";
-import customActions from "../@store/actions";
-import customActionListeners from "../@store/action-listeners";
+import custom from "{{crudDir}}/store";
 
 export const useStore = defineStore<
-  "{{declaredName}}",
+  "{{name}}",
   StoreState<ItemS, EnvT>,
   StoreGetters<ItemS, EnvT>,
   StoreActions<ItemS, EnvT>
->("{{declaredName}}", {
+>("{{name}}", {
 
   state: () => {
     return {
@@ -43,7 +41,7 @@ export const useStore = defineStore<
   },
 
   getters: {
-    ...customGetters,
+    ...custom.getters,
   },
 
   actions: {
@@ -113,14 +111,14 @@ export const useStore = defineStore<
       this.$patch((state) => state.items = state.items.filter((e: any) => e[state.primaryKey] != id))
     },
 
-    ...customActions,
+    ...custom.actions,
 
   },
 
 })
 
 export const actionListeners: StoreOnActionListener<
-  "{{declaredName}}",
+  "{{name}}",
   StoreState<ItemS, EnvT>,
   StoreGetters<ItemS, EnvT>,
   StoreActions<ItemS, EnvT>
@@ -153,7 +151,7 @@ export const actionListeners: StoreOnActionListener<
 
   },
 
-  ...customActionListeners,
+  ...custom.actionListeners,
 
 ]
 

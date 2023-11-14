@@ -7,7 +7,12 @@ import { zodErrorHandler } from "{{crudDir}}/zod";
 {{#tables}}
 
 import type { {{queryBuilder}} } from "{{typesDir}}/{{schema}}/@types";
-import type { ItemS as {{declaredName}}S, EnvT as {{declaredName}}EnvT } from "{{crudDir}}/{{name}}/types";
+
+import type {
+  ItemS as {{declaredName}}S,
+  EnvT as {{declaredName}}EnvT,
+} from "{{crudDir}}/{{name}}/@component/types";
+
 import { {{declaredName}} } from "{{tablesDir}}/{{schema}}/@index";
 import { {{varName}}ZodI, {{varName}}ZodU } from "{{crudDir}}/zod";
 

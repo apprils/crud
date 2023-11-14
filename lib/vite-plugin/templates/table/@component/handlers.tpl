@@ -3,7 +3,7 @@
 import { reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import type { GenericObject, Filters, ListResponse, ItemId } from "../types";
+import type { GenericObject, Filters, ListResponse, ItemId } from "{{crudDir}}/types";
 
 import type { ItemT, ItemI, ItemU, ItemS, EnvT } from "./types";
 
@@ -13,7 +13,7 @@ import {
   {{varName}}ZodI as zodSchemaI,
   {{varName}}ZodU as zodSchemaU,
   zodErrorHandler,
-} from "../zod";
+} from "{{crudDir}}/zod";
 
 export function useHandlers() {
 
