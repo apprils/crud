@@ -75,100 +75,89 @@ onBeforeRouteUpdate((to, from) => {
 </slot>
 
 <slot name="container">
-  <div class="container-fluid">
 
-    <div>
+  <div class="row">
+    <div class="col-lg-3">
 
-      <div class="row">
-        <div class="col-lg-3">
+      <div class="d-flex flex-column gap-3">
 
-          <div class="d-flex flex-column gap-3">
+        <slot name="filters" />
 
-            <slot name="filters" />
+        <div>
 
-            <div>
+          <slot name="pager">
+            <Pager />
+          </slot>
 
-              <slot name="pager">
-                <Pager />
+        </div>
+
+        <slot name="listHeader" />
+
+        <slot name="list">
+          <ul class="list-group shadow-sm">
+
+            <li v-for="item of store.items" :key="itemKey(item, 'list')"
+              class="list-group-item list-group-item-compact"
+              :class="{ 'list-group-item-primary': isActiveItem(item) }"
+              style="position: relative; min-height: 24px;">
+
+              <slot name="listItem" :item="item">
+
+                <slot name="listItemName" :item="item">
+                  <slot name="listItemNamePrefix" :item="item" />
+                  <slot name="listItemNameLink" :item="item">
+                    <RouterLink :to="itemRoute(item)">
+                      <slot name="listItemNameText" :item="item">
+                        {{=[[ ]]=}}
+                        {{ "name" in item ? item.name : "" }}
+                        [[={{ }}=]]
+                      </slot>
+                    </RouterLink>
+                  </slot>
+                  <slot name="listItemNameSuffix" :item="item" />
+                </slot>
+
+                <slot name="listItemId" :item="item">
+                  <div style="position: absolute; top: 0; right: 3px; font-size: .7rem;">
+                    <slot name="listItemIdLink" :item="item">
+                      <RouterLink :to="itemRoute(item)" class="text-muted">
+                        <slot name="listItemIdText" :item="item">
+                          {{=[[ ]]=}}
+                          #{{
+                          [[={{ }}=]]
+                            item.{{primaryKey}}
+                          {{=[[ ]]=}}
+                          }}
+                          [[={{ }}=]]
+                        </slot>
+                      </RouterLink>
+                    </slot>
+                  </div>
+                </slot>
               </slot>
 
-            </div>
+            </li>
+          </ul>
+        </slot>
 
-            <slot name="listHeader" />
+        <slot name="listFooter" />
 
-            <slot name="list">
-              <ul class="list-group shadow-sm">
-
-                <li v-for="item of store.items" :key="itemKey(item, 'list')"
-                  class="list-group-item list-group-item-compact"
-                  :class="{ 'list-group-item-primary': isActiveItem(item) }"
-                  style="position: relative; min-height: 24px;">
-
-                  <slot name="listItem" :item="item">
-
-                    <slot name="listItemName" :item="item">
-                      <slot name="listItemNamePrefix" :item="item" />
-                      <slot name="listItemNameLink" :item="item">
-                        <RouterLink :to="itemRoute(item)">
-                          <slot name="listItemNameText" :item="item">
-                            {{=[[ ]]=}}
-                            {{ "name" in item ? item.name : "" }}
-                            [[={{ }}=]]
-                          </slot>
-                        </RouterLink>
-                      </slot>
-                      <slot name="listItemNameSuffix" :item="item" />
-                    </slot>
-
-                    <slot name="listItemId" :item="item">
-                      <div style="position: absolute; top: 0; right: 3px; font-size: .7rem;">
-                        <slot name="listItemIdLink" :item="item">
-                          <RouterLink :to="itemRoute(item)" class="text-muted">
-                            <slot name="listItemIdText" :item="item">
-                              {{=[[ ]]=}}
-                              #{{
-                              [[={{ }}=]]
-                                item.{{primaryKey}}
-                              {{=[[ ]]=}}
-                              }}
-                              [[={{ }}=]]
-                            </slot>
-                          </RouterLink>
-                        </slot>
-                      </div>
-                    </slot>
-                  </slot>
-
-                </li>
-              </ul>
-            </slot>
-
-            <slot name="listFooter" />
-
-            <hr class="d-lg-none mt-0">
-
-          </div>
-
-        </div>
-
-        <div class="col-lg-9">
-          <template v-if="store.pager.totalItems > 0">
-            <slot v-if="store.item" name="editor" :item="store.item"
-              :key="itemKey(store.item, 'editor')" />
-            <slot v-else name="editorPlaceholder">
-              <EditorPlaceholder />
-            </slot>
-          </template>
-          <slot v-else name="editorPlaceholder">
-            <EditorPlaceholder />
-          </slot>
-        </div>
+        <hr class="d-lg-none mt-0">
 
       </div>
 
     </div>
 
+    <div class="col-lg-9">
+      <slot v-if="store.item" name="editor" :item="store.item"
+        :key="itemKey(store.item, 'editor')" />
+      <slot v-else name="editorPlaceholder">
+        <EditorPlaceholder />
+      </slot>
+    </div>
+
   </div>
+
 </slot>
 
 <slot v-if="store.loading" name="overlay">
