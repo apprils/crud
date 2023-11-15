@@ -145,6 +145,9 @@ export const actionListeners: StoreOnActionListener<
     else if (name === "updateItem") {
       store.itemEvent = { event: "Updated", id: args[0] }
     }
+    else if (name === "patchItem") {
+      store.itemEvent = { event: "Updated", id: store.item?.[store.primaryKey] as ItemId }
+    }
     else if (name === "removeItem") {
       store.itemEvent = { event: "Deleted", id: args[0] }
     }
