@@ -9,6 +9,10 @@ import { Success } from "@appril/ui";
 import { store } from "./base";
 import { useHandlers } from "./handlers";
 
+const props = defineProps<{
+  fullpageEditor?: boolean;
+}>()
+
 const {
   itemRoute, itemKey, isActiveItem,
   loadEnv, envLoaded,
@@ -76,7 +80,15 @@ onBeforeRouteUpdate((to, from) => {
 
 <slot name="container">
 
-  <div class="row">
+  <div v-if="props.fullpageEditor">
+    <slot v-if="store.item" :item="store.item"
+      :key="itemKey(store.item, 'editor')" />
+    <slot v-else name="editorPlaceholder">
+      <EditorPlaceholder />
+    </slot>
+  </div>
+
+  <div v-else class="row">
     <div class="col-lg-3">
 
       <div class="d-flex flex-column gap-3">
