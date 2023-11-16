@@ -3,6 +3,7 @@ import type { EnvMiddleware as Middleware  } from "./@types";
 
 type Methods =
   | "define"
+  | "env"
   | "response"
 
 export default function <EnvT, StateT, ContextT>(): {
@@ -12,6 +13,11 @@ export default function <EnvT, StateT, ContextT>(): {
   return {
 
     define(env, next) {
+      env.crudEnv = {}
+      return next()
+    },
+
+    env(env, next) {
       env.crudEnv = {}
       return next()
     },
