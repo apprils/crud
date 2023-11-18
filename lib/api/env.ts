@@ -18,12 +18,11 @@ export default function <EnvT, StateT, ContextT>(): {
     },
 
     env(env, next) {
-      env.crudEnv = {}
       return next()
     },
 
     response(env, next) {
-      env.body = env.crudEnv
+      env.body = env.crudEnv || {}
       return next()
     },
 
