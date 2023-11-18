@@ -2,30 +2,34 @@
 <script setup lang="ts">
 {{BANNER}}
 
-import { onBeforeMount } from "vue";
+import { ref, onBeforeMount } from "vue";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
-import { Success } from "@appril/ui";
+import { Success, Error } from "@appril/ui";
 
 import { store } from "./base";
 import { useHandlers } from "./handlers";
-
-const props = defineProps<{
-  fullpageEditor?: boolean;
-}>()
-
-const {
-  itemRoute, itemKey, isActiveItem,
-  loadEnv, envLoaded,
-  loadItems, itemsLoaded,
-  loadItem, itemLoaded,
-} = useHandlers()
 
 import ControlButtons from "./ControlButtons.vue";
 import Pager from "./Pager.vue";
 import EditorPlaceholder from "./EditorPlaceholder.vue";
 import Overlay from "{{crudDir}}/Overlay.vue";
 
+const props = defineProps<{
+  fullpageEditor?: boolean;
+}>()
+
 const route = useRoute()
+
+const httpError = ref()
+
+const {
+  itemRoute, itemKey, isActiveItem,
+  loadEnv, envLoaded,
+  loadItems, itemsLoaded,
+  loadItem, itemLoaded,
+} = useHandlers({
+  httpErrorHandler(e) { httpError.value = e },
+})
 
 onBeforeMount(() => {
   loadEnv().then(envLoaded).then(() => {
@@ -59,6 +63,8 @@ onBeforeRouteUpdate((to, from) => {
   #{{ store.itemEvent.id }} Successfully {{ store.itemEvent.event }}
   [[={{ }}=]]
 </Success>
+
+<Error v-model="httpError" />
 
 <slot name="controlButtons">
   <ControlButtons>

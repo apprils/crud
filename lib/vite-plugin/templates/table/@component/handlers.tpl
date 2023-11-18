@@ -15,10 +15,22 @@ import {
   zodErrorHandler,
 } from "{{crudDir}}/zod";
 
-export function useHandlers() {
+let httpErrorHandler: (e: any) => any
+
+export function useHandlers(opts: {
+  httpErrorHandler?: typeof httpErrorHandler;
+} = {}) {
 
   const router = useRouter()
   const route = useRoute()
+
+  if (opts.httpErrorHandler && !httpErrorHandler) {
+    httpErrorHandler = opts.httpErrorHandler
+  }
+
+  const $httpErrorHandler: typeof httpErrorHandler = (e) => {
+    return opts.httpErrorHandler?.(e) || httpErrorHandler?.(e) || Promise.reject(e)
+  }
 
   function loadEnv(
     query?: GenericObject,
@@ -26,13 +38,16 @@ export function useHandlers() {
     store.loading = true
     return api
       .get<EnvT>("env", query || route.query)
+      .catch($httpErrorHandler)
       .finally(() => store.loading = false)
   }
 
   function envLoaded(
-    env: EnvT,
+    env: EnvT | undefined,
   ) {
-    store.setEnv(env)
+    if (env) {
+      store.setEnv(env)
+    }
     return env
   }
 
@@ -42,6 +57,7 @@ export function useHandlers() {
     store.loading = true
     return api
       .get<ListResponse<ItemS>>("list", query || route.query)
+      .catch($httpErrorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -59,6 +75,7 @@ export function useHandlers() {
     store.loading = true
     return api
       .get<ItemS>(id)
+      .catch($httpErrorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -76,11 +93,12 @@ export function useHandlers() {
       zodSchemaI.parse(data)
     }
     catch (e: any) {
-      return Promise.reject(zodErrorHandler(e))
+      return $httpErrorHandler(zodErrorHandler(e))
     }
     store.loading = true
     return api
       .post<ItemT>(data)
+      .catch($httpErrorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -101,11 +119,12 @@ export function useHandlers() {
       zodSchemaU.parse(data)
     }
     catch (e: any) {
-      return Promise.reject(zodErrorHandler(e))
+      return $httpErrorHandler(zodErrorHandler(e))
     }
     store.loading = true
     return api
       .patch<ItemT>(id, data)
+      .catch($httpErrorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -131,6 +150,7 @@ export function useHandlers() {
     store.loading = true
     return api
       .delete<ItemT>(id)
+      .catch($httpErrorHandler)
       .finally(() => store.loading = false)
   }
 
