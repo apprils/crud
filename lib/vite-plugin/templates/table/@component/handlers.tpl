@@ -29,7 +29,8 @@ export function useHandlers(opts: {
   }
 
   const $httpErrorHandler: typeof httpErrorHandler = (e) => {
-    return opts.httpErrorHandler?.(e) || httpErrorHandler?.(e) || Promise.reject(e)
+    opts.httpErrorHandler?.(e) || httpErrorHandler?.(e)
+    throw e
   }
 
   function loadEnv(
