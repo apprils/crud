@@ -20,7 +20,7 @@ const props = defineProps<{
 
 const route = useRoute()
 
-const httpError = ref()
+const error = ref()
 
 const {
   itemRoute, itemKey, isActiveItem,
@@ -28,7 +28,7 @@ const {
   loadItems, itemsLoaded,
   loadItem, itemLoaded,
 } = useHandlers({
-  httpErrorHandler(e) { httpError.value = e },
+  errorHandler(e) { error.value = e },
 })
 
 onBeforeMount(() => {
@@ -64,7 +64,7 @@ onBeforeRouteUpdate((to, from) => {
   [[={{ }}=]]
 </Success>
 
-<Error v-model="httpError" />
+<Error v-model="error" />
 
 <slot name="controlButtons">
   <ControlButtons>
