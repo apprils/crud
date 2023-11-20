@@ -73,9 +73,3 @@ export type StoreActions<ItemT, EnvT> = {
 
 }
 
-export type Filters = {
-  model: any;
-  apply: () => Promise<void>;
-  reset: () => Promise<void>;
-}
-

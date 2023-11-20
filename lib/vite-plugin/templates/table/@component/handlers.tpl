@@ -1,9 +1,9 @@
 {{BANNER}}
 
-import { reactive } from "vue";
+import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import type { GenericObject, Filters, ListResponse, ItemId } from "{{crudDir}}/types";
+import type { GenericObject, ListResponse, ItemId } from "{{crudDir}}/types";
 
 import type { ItemT, ItemI, ItemU, ItemS, EnvT } from "./types";
 
@@ -215,23 +215,27 @@ export function useHandlers(opts: {
     return router.push({ query: { ...route.query, _page } })
   }
 
-  const filters: Filters = reactive<Filters>({
-    model: {},
-    apply: applyFilters,
-    reset: resetFilters,
-  })
+  const filtersModel = ref({ ...route.query })
+
+  function $applyFilters(model: typeof filtersModel) {
+    return router.push({ query: { ...route.query, ...model.value, _page: undefined } })
+      .then(() => loadItems())
+      .then(itemsLoaded)
+  }
 
   function applyFilters() {
-    return router.push({ query: { ...route.query, ...filters.model } })
+    return $applyFilters(filtersModel)
+  }
+
+  function $resetFilters(model: typeof filtersModel) {
+    model.value = Object.keys(model.value).reduce((m,k) => ({ ...m, [k]: undefined }), {})
+    return router.push({ query: { ...route.query, ...model.value, _page: undefined } })
       .then(() => loadItems())
       .then(itemsLoaded)
   }
 
   function resetFilters() {
-    filters.model = Object.keys(filters.model).reduce((m,k) => ({ ...m, [k]: undefined }), {})
-    return router.push({ query: { ...route.query, ...filters.model, _page: undefined } })
-      .then(() => loadItems())
-      .then(itemsLoaded)
+    return $resetFilters(filtersModel)
   }
 
   return {
@@ -244,7 +248,7 @@ export function useHandlers(opts: {
     isActiveItem, closeItem,
     itemRoute, itemKey,
     gotoItem, gotoPrevPage, gotoPage,
-    filters, applyFilters, resetFilters,
+    filtersModel, $applyFilters, applyFilters, $resetFilters, resetFilters,
   }
 
 }
