@@ -97,7 +97,7 @@ onBeforeRouteUpdate((to, from) => {
   <div v-else class="row">
     <div class="col-lg-3">
 
-      <div class="d-flex flex-column gap-3">
+      <div class="d-grid gap-2">
 
         <slot name="filters" />
 
