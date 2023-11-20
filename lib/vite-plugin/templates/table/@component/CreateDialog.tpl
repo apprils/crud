@@ -3,13 +3,11 @@
 {{BANNER}}
 
 import { ref } from "vue";
-import { IconOrSpinner, Error } from "@appril/ui";
+import { IconOrSpinner } from "@appril/ui";
 
 import type { ItemT, ItemI } from "./types";
 import { store } from "./base";
 import { useHandlers } from "./handlers";
-
-const { createItem, itemCreated } = useHandlers()
 
 const props = defineProps<{
   modelValue: ItemI;
@@ -21,17 +19,13 @@ const emit = defineEmits<{
   close: [];
 }>()
 
-const creating = ref(false)
-const error = ref(null)
+const { createItem, itemCreated } = useHandlers()
 
 function create() {
-  creating.value = true
   return createItem(props.modelValue)
     .then(itemCreated)
     .then((item) => emit("created", item))
     .then(close)
-    .catch((e: any) => error.value = e.message)
-    .finally(() => creating.value = false)
 }
 
 function close() {
@@ -42,8 +36,6 @@ function close() {
 </script>
 
 <template>
-
-<Error v-model="error" />
 
 <Modal @mounted="$emit('mounted')" @close="close">
 
@@ -60,7 +52,7 @@ function close() {
   <template #footer>
     <slot name="footer" :create="create">
       <button type="button" @click="create" class="btn btn-primary">
-        <IconOrSpinner plus :spin="creating" />
+        <IconOrSpinner plus :spin="store.loading" />
         Create
       </button>
     </slot>
