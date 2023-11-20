@@ -11,21 +11,14 @@ import { {{import}} as {{as}} } from "{{from}}";
 
 {{#tables}}
 
-export const {{varName}}ZodI = z.object({
+export const {{varName}}ZodSchema = z.object({
 {{#columns}}
   {{#zodSchema}}
-  {{name}}: ((z) => {{zodSchemaRefine}})({{zodSchema}}),
+  {{name}}: {{zodSchema}},
   {{/zodSchema}}
 {{/columns}}
-})
+}).strict()
 
-export const {{varName}}ZodU = z.object({
-{{#columns}}
-  {{#zodSchema}}
-  {{name}}: ((z) => {{zodSchemaRefine}}{{^isOptional}}.optional(){{/isOptional}})({{zodSchema}}),
-  {{/zodSchema}}
-{{/columns}}
-})
 {{/tables}}
 
 export function zodErrorHandler(error: any) {

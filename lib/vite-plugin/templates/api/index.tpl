@@ -14,7 +14,7 @@ import type {
 } from "{{crudDir}}/{{name}}/@component/types";
 
 import { {{declaredName}} } from "{{tablesDir}}/{{schema}}/@index";
-import { {{varName}}ZodI, {{varName}}ZodU } from "{{crudDir}}/zod";
+import { {{varName}}ZodSchema } from "{{crudDir}}/zod";
 
 export const {{varName}} = <
   StateT = unknown,
@@ -36,12 +36,12 @@ export const {{varName}} = <
     ContextT
   >({{declaredName}}, {
     create: {
-      zodSchema: {{varName}}ZodI,
+      zodSchema: {{varName}}ZodSchema,
       zodErrorHandler,
       ...create
     },
     update: {
-      zodSchema: {{varName}}ZodU,
+      zodSchema: {{varName}}ZodSchema,
       zodErrorHandler,
       ...update
     },
