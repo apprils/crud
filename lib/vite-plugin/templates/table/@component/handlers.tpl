@@ -9,27 +9,23 @@ import type { ItemT, ItemI, ItemU, ItemS, EnvT } from "./types";
 
 import { store, api } from "./base";
 
-import {
-  {{varName}}ZodI as zodSchemaI,
-  {{varName}}ZodU as zodSchemaU,
-  zodErrorHandler,
-} from "{{crudDir}}/zod";
+import { {{varName}}ZodSchema as zodSchema, zodErrorHandler } from "{{crudDir}}/zod";
 
-let httpErrorHandler: (e: any) => any
+let errorHandler: (e: any) => any
 
 export function useHandlers(opts: {
-  httpErrorHandler?: typeof httpErrorHandler;
+  errorHandler?: typeof errorHandler;
 } = {}) {
 
   const router = useRouter()
   const route = useRoute()
 
-  if (opts.httpErrorHandler && !httpErrorHandler) {
-    httpErrorHandler = opts.httpErrorHandler
+  if (opts.errorHandler && !errorHandler) {
+    errorHandler = opts.errorHandler
   }
 
-  const $httpErrorHandler: typeof httpErrorHandler = (e) => {
-    opts.httpErrorHandler?.(e) || httpErrorHandler?.(e)
+  const $errorHandler: typeof errorHandler = (e) => {
+    opts.errorHandler?.(e) || errorHandler?.(e)
     throw e
   }
 
@@ -39,7 +35,7 @@ export function useHandlers(opts: {
     store.loading = true
     return api
       .get<EnvT>("env", query || route.query)
-      .catch($httpErrorHandler)
+      .catch($errorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -54,11 +50,11 @@ export function useHandlers(opts: {
 
   function loadItems(
     query?: GenericObject,
-  ) {
+  ): Promise<ListResponse<ItemS>> {
     store.loading = true
     return api
       .get<ListResponse<ItemS>>("list", query || route.query)
-      .catch($httpErrorHandler)
+      .catch($errorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -72,11 +68,11 @@ export function useHandlers(opts: {
 
   function loadItem(
     id: ItemId,
-  ) {
+  ): Promise<ItemS> {
     store.loading = true
     return api
       .get<ItemS>(id)
-      .catch($httpErrorHandler)
+      .catch($errorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -89,17 +85,17 @@ export function useHandlers(opts: {
 
   function createItem(
     data: ItemI,
-  ) {
+  ): Promise<ItemT> {
     try {
-      zodSchemaI.parse(data)
+      zodSchema.parse(data)
     }
     catch (e: any) {
-      return $httpErrorHandler(zodErrorHandler(e))
+      return $errorHandler(zodErrorHandler(e))
     }
     store.loading = true
     return api
       .post<ItemT>(data)
-      .catch($httpErrorHandler)
+      .catch($errorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -115,23 +111,23 @@ export function useHandlers(opts: {
   function $updateItem(
     id: ItemId,
     data: ItemU,
-  ) {
+  ): Promise<ItemT> {
     try {
-      zodSchemaU.parse(data)
+      zodSchema.parse(data)
     }
     catch (e: any) {
-      return $httpErrorHandler(zodErrorHandler(e))
+      return $errorHandler(zodErrorHandler(e))
     }
     store.loading = true
     return api
       .patch<ItemT>(id, data)
-      .catch($httpErrorHandler)
+      .catch($errorHandler)
       .finally(() => store.loading = false)
   }
 
   function updateItem(
     data: ItemU,
-  ) {
+  ): Promise<ItemT> {
     return store.item
       ? $updateItem(store.item.{{primaryKey}}, data)
       : Promise.reject("store.item is undefined")
@@ -147,15 +143,15 @@ export function useHandlers(opts: {
 
   function $deleteItem(
     id: ItemId,
-  ) {
+  ): Promise<ItemT> {
     store.loading = true
     return api
       .delete<ItemT>(id)
-      .catch($httpErrorHandler)
+      .catch($errorHandler)
       .finally(() => store.loading = false)
   }
 
-  function deleteItem() {
+  function deleteItem(): Promise<ItemT> {
     return store.item
       ? $deleteItem(store.item.{{primaryKey}})
       : Promise.reject("store.item is undefined")
