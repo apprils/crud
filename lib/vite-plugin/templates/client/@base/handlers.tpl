@@ -3,13 +3,11 @@
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import type { GenericObject, ListResponse, ItemId } from "{{crudDir}}/types";
+import type { GenericObject, ListResponse, ItemId } from "@appril/crud/client";
 
 import type { ItemT, ItemI, ItemU, ItemS, EnvT } from "./types";
-
 import { store, api } from "./base";
-
-import { {{varName}}ZodSchema as zodSchema, zodErrorHandler } from "{{crudDir}}/zod";
+import { zodSchema, zodErrorHandler } from "./zod";
 
 let errorHandler: (e: any) => any
 

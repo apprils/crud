@@ -6,10 +6,7 @@ import type {
   {{updateName}} as ItemU,
 } from "{{typesDir}}/{{schema}}/@types";
 
-import type {
-  ItemX,
-  EnvT,
-} from "../types";
+import type { ItemX, EnvT } from "../types";
 
 // ItemStored / ItemSerialized
 type ItemS = ItemT & ItemX

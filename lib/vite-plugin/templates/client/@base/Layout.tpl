@@ -12,7 +12,9 @@ import { useHandlers } from "./handlers";
 import ControlButtons from "./ControlButtons.vue";
 import Pager from "./Pager.vue";
 import EditorPlaceholder from "./EditorPlaceholder.vue";
-import Overlay from "{{crudDir}}/Overlay.vue";
+
+import { Overlay } from "@appril/crud/client";
+import "@appril/crud/client/style.css";
 
 const props = defineProps<{
   fullpageEditor?: boolean;
@@ -178,8 +180,8 @@ onBeforeRouteUpdate((to, from) => {
 
 </slot>
 
-<slot v-if="store.loading" name="overlay">
-  <Overlay />
+<slot name="overlay">
+  <Overlay v-if="store.loading" />
 </slot>
 
 </template>

@@ -9,57 +9,49 @@ import { cyan, red } from "kleur/colors";
 
 import type { Plugin, ResolvedConfig } from "vite";
 
-import type { ConnectionConfig, PgtsConfig, Config, Table, Templates } from "./@types";
+import type {
+  ConnectionConfig, PgtsConfig, Config,
+  Templates, ApiTemplates,
+  Table,
+} from "./@types";
 
-import componentBaseTpl from "./templates/table/@component/base.tpl";
-import componentStoreTpl from "./templates/table/@component/store.tpl";
-import componentHandlersTpl from "./templates/table/@component/handlers.tpl";
-import componentTypesTpl from "./templates/table/@component/types.tpl";
-import componentLayoutTpl from "./templates/table/@component/Layout.tpl";
-import componentPagerTpl from "./templates/table/@component/Pager.tpl";
-import componentControlButtonsTpl from "./templates/table/@component/ControlButtons.tpl";
-import componentCreateDialogTpl from "./templates/table/@component/CreateDialog.tpl";
-import componentEditorPlaceholderTpl from "./templates/table/@component/EditorPlaceholder.tpl";
+import baseTpl from "./templates/client/@base/base.tpl";
+import ControlButtonsTpl from "./templates/client/@base/ControlButtons.tpl";
+import CreateDialogTpl from "./templates/client/@base/CreateDialog.tpl";
+import EditorPlaceholderTpl from "./templates/client/@base/EditorPlaceholder.tpl";
+import handlersTpl from "./templates/client/@base/handlers.tpl";
+import indexTpl from "./templates/client/@base/index.tpl";
+import LayoutTpl from "./templates/client/@base/Layout.tpl";
+import PagerTpl from "./templates/client/@base/Pager.tpl";
+import storeTpl from "./templates/client/@base/store.tpl";
+import typesTpl from "./templates/client/@base/types.tpl";
+import zodTpl from "./templates/client/@base/zod.tpl";
 
-import tableTypesTpl from "./templates/table/types.tpl";
-import tableIndexTpl from "./templates/table/index.tpl";
+import initTypesTpl from "./templates/client/types.tpl";
+import initIndexTpl from "./templates/client/index.tpl";
+import initStoreTpl from "./templates/client/store.tpl";
 
-import $OverlayTpl from "./templates/Overlay.tpl";
-import $typesTpl from "./templates/types.tpl";
-import $storeTpl from "./templates/store.tpl";
-import $zodTpl from "./templates/zod.tpl";
-
-import apiIndexTpl from "./templates/api/index.tpl";
+import apiBaseIndexTpl from "./templates/api/@base/index.tpl";
 
 import { BANNER, renderToFile } from "./render";
 
-const defaultTemplates: Required<Templates> & {
-  tableTypes: string;
-  tableIndex: string;
-  $Overlay: string;
-  $types: string;
-  $store: string;
-  $zod: string;
-} = {
-  base: componentBaseTpl,
-  store: componentStoreTpl,
-  handlers: componentHandlersTpl,
-  types: componentTypesTpl,
-  Layout: componentLayoutTpl,
-  Pager: componentPagerTpl,
-  ControlButtons: componentControlButtonsTpl,
-  CreateDialog: componentCreateDialogTpl,
-  EditorPlaceholder: componentEditorPlaceholderTpl,
-  tableTypes: tableTypesTpl,
-  tableIndex: tableIndexTpl,
-  $Overlay: $OverlayTpl,
-  $types: $typesTpl,
-  $store: $storeTpl,
-  $zod: $zodTpl,
+const defaultClientTemplates: Required<Templates> = {
+  base: baseTpl,
+  ControlButtons: ControlButtonsTpl,
+  CreateDialog: CreateDialogTpl,
+  EditorPlaceholder: EditorPlaceholderTpl,
+  handlers: handlersTpl,
+  index: indexTpl,
+  Layout: LayoutTpl,
+  Pager: PagerTpl,
+  store: storeTpl,
+  types: typesTpl,
+  zod: zodTpl,
 }
 
-type TemplateName = keyof typeof defaultTemplates
-type TemplateMap = Record<TemplateName, string>
+const defaultApiTemlates: Required<ApiTemplates> = {
+  index: apiBaseIndexTpl,
+}
 
 type DbxConfig = PgtsConfig & {
   connection: string | ConnectionConfig;
@@ -87,6 +79,7 @@ export function vitePluginApprilCrud(
       outDir,
       apiDir = "api",
       importBase = "@",
+      alias = {},
       tableFilter,
       meta,
     } = crudConfig
@@ -113,140 +106,141 @@ export function vitePluginApprilCrud(
     const tablesDir = join(dbxConfig.importBase, dbxConfig.base, dbxConfig.tablesDir)
     const crudDir = join(importBase, outDir)
 
-    const templates: TemplateMap = { ...defaultTemplates }
+    const clientTemplates = { ...defaultClientTemplates }
+    const apiTemplates = { ...defaultApiTemlates }
 
-    for (const [ name, file ] of Object.entries({ ...crudConfig.templates })) {
-      templates[name as TemplateName] = await readFile(rootPath(file), "utf8")
+    for (const [ name, file ] of Object.entries({ ...crudConfig.templates }) as [ name: keyof Templates, file: string ][]) {
+      clientTemplates[name] = await readFile(rootPath(file), "utf8")
+    }
+
+    for (const [ name, file ] of Object.entries({ ...crudConfig.apiTemplates }) as [ name: keyof ApiTemplates, file: string ][]) {
+      apiTemplates[name] = await readFile(rootPath(file), "utf8")
     }
 
     const tables: Table[] = tableDeclarations.flatMap((table) => {
 
-      if (tableFilter && !tableFilter(table)) {
-        return []
+      const entries: Table[] = []
+
+      if (!tableFilter || tableFilter(table)) {
+
+        if (!table.primaryKey) {
+          console.log(` - No primaryKey defined for ${ red(table.name) } table, skipping...`)
+          return []
+        }
+
+        entries.push({
+          basename: table.name,
+          apiBase: join(apiBase, table.name),
+          ...table
+        })
+
       }
 
-      if (!table.primaryKey) {
-        console.log(` - No primaryKey defined for ${ red(table.name) } table, skipping...`)
-        return []
+      const aliasNames: string[] = []
+
+      if (typeof alias[table.name] === "string") {
+        aliasNames.push(alias[table.name] as string)
+      }
+      else if (Array.isArray(alias[table.name])) {
+        aliasNames.push(...alias[table.name] as string[])
       }
 
-      return [{
-        ...table,
-        apiName: join(apiBase, table.name),
-        apiBase: join(apiBase, table.name),
-      }]
+      for (const alias of aliasNames) {
+        entries.push({
+          basename: alias,
+          apiBase: join(apiBase, alias),
+          ...table
+        })
+      }
+
+      return entries
 
     })
 
+    await renderToFile(uixPath("store.ts"), initStoreTpl, {
+      crudDir,
+      typesDir,
+      tablesDir,
+      tables,
+    }, { overwrite: false })
+
     for (const table of tables) {
 
-      for (const [ file, tpl ] of [
-        [ "types.ts", "tableTypes" ],
-      ] satisfies [ file: string, tpl: TemplateName ][]) {
+      for (
+        const [ file, tpl ] of [
+          [ "index.ts", initIndexTpl ],
+          [ "types.ts", initTypesTpl ],
+        ]
+      ) {
 
-        await renderToFile(uixPath(table.name, file), templates[tpl], {
+        await renderToFile(uixPath(table.basename, file), tpl, {
           crudDir,
           typesDir,
           tablesDir,
-          ...table,
+          ...table
         }, { overwrite: false })
 
       }
 
-      await renderToFile(uixPath(table.name, "index.ts"), templates.tableIndex, {
-        BANNER,
-          crudDir,
-        typesDir,
-        tablesDir,
-        ...table,
-      })
-
       for (
         const [ file, tpl ] of [
           [ "base.ts", "base" ],
-          [ "store.ts", "store" ],
-          [ "handlers.ts", "handlers" ],
-          [ "types.ts", "types" ],
-          [ "Layout.vue", "Layout" ],
-          [ "Pager.vue", "Pager" ],
           [ "ControlButtons.vue", "ControlButtons" ],
           [ "CreateDialog.vue", "CreateDialog" ],
           [ "EditorPlaceholder.vue", "EditorPlaceholder" ],
-        ] satisfies [ file: string, tpl: TemplateName ][]
+          [ "handlers.ts", "handlers" ],
+          [ "index.ts", "index" ],
+          [ "Layout.vue", "Layout" ],
+          [ "Pager.vue", "Pager" ],
+          [ "store.ts", "store" ],
+          [ "types.ts", "types" ],
+          [ "zod.ts", "zod" ],
+        ] satisfies [ file: string, tpl: keyof Templates ][]
       ) {
 
-        await renderToFile(uixPath(table.name, "@component", file), templates[tpl], {
+        await renderToFile(uixPath(table.basename, "@base", file), clientTemplates[tpl], {
           BANNER,
           crudDir,
           typesDir,
           tablesDir,
-          ...table,
+          ...table
+        })
+
+      }
+
+      for (
+        const [ file, tpl ] of [
+          [ "index.ts", "index" ],
+        ] satisfies [ file: string, tpl: keyof ApiTemplates ][]
+      ) {
+
+        await renderToFile(apiPath(table.basename, "@base", file), apiTemplates[tpl], {
+          BANNER,
+          crudDir,
+          typesDir,
+          tablesDir,
+          ...table
         })
 
       }
 
     }
 
-    for (
-      const [ file, tpl ] of [
-        [ "store.ts", "$store" ],
-      ] satisfies [ file: string, tpl: TemplateName ][]
-    ) {
-
-      await renderToFile(uixPath(file), templates[tpl], {
-        tables,
-        crudDir,
-        typesDir,
-        tablesDir,
-      }, { overwrite: false })
-
-    }
-
-    for (
-      const [ file, tpl ] of [
-        [ "Overlay.vue", "$Overlay" ],
-        [ "types.ts", "$types" ],
-        [ "zod.ts", "$zod" ],
-      ] satisfies [ file: string, tpl: TemplateName ][]
-    ) {
-
-      await renderToFile(uixPath(file), templates[tpl], {
-        BANNER,
-        tables,
-        crudDir,
-        typesDir,
-        tablesDir,
-      })
-
-    }
-
-    await renderToFile(apiPath("index.ts"), apiIndexTpl, {
-      BANNER,
-      tables,
-      crudDir,
-      typesDir,
-      tablesDir,
-    })
-
     {
 
       const routes: Record<string, {
         name: string;
-        declaredName: string;
-        varName: string;
         template: string;
         meta: Record<string, any>;
       }> = {}
 
       for (const table of tables) {
         routes[join(table.apiBase, "/")] = {
-          name: table.apiName,
-          declaredName: table.declaredName,
-          varName: table.varName,
-          template: resolve(__dirname, "templates/api/route.tpl"),
+          name: table.apiBase,
+          template: resolve(__dirname, "templates/api/index.tpl"),
           meta: typeof meta === "function"
             ? meta(table)
-            : { ...meta?.[table.name] || meta?.["*"] },
+            : { ...meta?.[table.basename] || meta?.["*"] },
         }
       }
 
@@ -263,16 +257,17 @@ export function vitePluginApprilCrud(
 
   return {
 
-    name: "vite-plugin-dbx-crud",
+    name: "vite-plugin-appril-crud",
 
     configResolved: generateFiles,
 
     configureServer(server) {
 
-      // adding optedTemplates to watchlist
+      // adding custom templates to watchlist
 
       const watchedFiles = [
         ...Object.values(crudConfig.templates || {}),
+        ...Object.values(crudConfig.apiTemplates || {}),
       ]
 
       if (watchedFiles.length) {

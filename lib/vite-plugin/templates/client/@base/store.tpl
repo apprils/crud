@@ -7,18 +7,18 @@ import type { StoreOnActionListener } from "pinia";
 import type {
   StoreState, StoreGetters, StoreActions,
   GenericObject, Pager, ItemId,
-} from "{{crudDir}}/types";
+} from "@appril/crud/client";
 
 import type { ItemS, EnvT } from "./types";
 
 import custom from "{{crudDir}}/store";
 
 export const useStore = defineStore<
-  "{{name}}",
+  "{{basename}}",
   StoreState<ItemS, EnvT>,
   StoreGetters<ItemS, EnvT>,
   StoreActions<ItemS, EnvT>
->("{{name}}", {
+>("{{basename}}", {
 
   state: () => {
     return {
@@ -118,7 +118,7 @@ export const useStore = defineStore<
 })
 
 export const actionListeners: StoreOnActionListener<
-  "{{name}}",
+  "{{basename}}",
   StoreState<ItemS, EnvT>,
   StoreGetters<ItemS, EnvT>,
   StoreActions<ItemS, EnvT>

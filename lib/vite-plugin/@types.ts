@@ -8,18 +8,24 @@ export type { ConnectionConfig, PgtsConfig, TableDeclaration }
 
 export type Templates = {
   base?: string;
-  store?: string;
-  handlers?: string;
-  types?: string;
-  Layout?: string;
-  Pager?: string;
   ControlButtons?: string;
   CreateDialog?: string;
   EditorPlaceholder?: string;
+  handlers?: string;
+  index?: string;
+  Layout?: string;
+  Pager?: string;
+  store?: string;
+  types?: string;
+  zod?: string;
+}
+
+export type ApiTemplates = {
+  index?: string;
 }
 
 export type Table = TableDeclaration & {
-  apiName: string;
+  basename: string;
   apiBase: string;
 }
 
@@ -30,6 +36,8 @@ export type Config = {
   importBase?: string;
   apiBase?: string;
   templates?: Templates;
+  apiTemplates?: ApiTemplates;
+  alias?: Record<string, string | string[]>;
   tableFilter?: (t: TableDeclaration) => boolean;
   meta?: Record<string, Record<string, any>> | ((t: Table) => Record<string, any>);
 }

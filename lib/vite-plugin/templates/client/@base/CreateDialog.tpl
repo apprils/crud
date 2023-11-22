@@ -2,7 +2,6 @@
 <script setup lang="ts">
 {{BANNER}}
 
-import { ref } from "vue";
 import { IconOrSpinner } from "@appril/ui";
 
 import type { ItemT, ItemI } from "./types";
