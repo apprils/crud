@@ -14,8 +14,11 @@
   "// ✨ seems exports.types not fully supported by all editors yet?": "",
   "typesVersions": {
     "*": {
-      ".": [
+      "api": [
         "./pkg/api/index.d.ts"
+      ],
+      "client": [
+        "./pkg/client/index.d.ts"
       ],
       "vite-plugin": [
         "./pkg/vite-plugin/index.d.ts"
@@ -23,26 +26,34 @@
     }
   },
   "exports": {
-    ".": {
+    "./api": {
       "require": "./pkg/api/index.js",
       "types": "./pkg/api/index.d.ts"
+    },
+    "./client": {
+      "import": "./pkg/client/index.js",
+      "types": "./pkg/client/index.d.ts"
+    },
+    "./client/style.css": {
+      "default": "./pkg/client/style.css"
     },
     "./vite-plugin": {
       "require": "./pkg/vite-plugin/index.js",
       "types": "./pkg/vite-plugin/index.d.ts"
     }
   },
-  "main": "./pkg/api/index.js",
   "scripts": {
     "// ✨ build api": "",
     "build:api": "esbundler lib/api/index.ts --sourcemap=inline --outdir=pkg/api",
     "postbuild:api": "tsc -p lib/api/tsconfig.json",
+    "// ✨ build client": "",
+    "build:client": "cd lib/client; vite build",
     "// ✨ build vite-plugin": "",
     "build:vite-plugin": "esbundler lib/vite-plugin/index.ts --sourcemap=inline --outdir=pkg/vite-plugin",
     "postbuild:vite-plugin": "tsc -p lib/vite-plugin/tsconfig.json; rsync -a lib/vite-plugin/templates/ pkg/vite-plugin/templates",
     "// ✨ build": "",
     "prebuild": "mkdir -p pkg; find pkg -type f -exec rm -fv {} \\;",
-    "build": "for e in api vite-plugin; do npm run build:$e; done",
+    "build": "for e in api client vite-plugin; do npm run build:$e; done",
     "// ✨ publish": "",
     "prepub": "npm run build",
     "pub": "npm pub"
