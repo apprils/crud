@@ -30,7 +30,10 @@ const {
   loadItems, itemsLoaded,
   loadItem, itemLoaded,
 } = useHandlers({
-  errorHandler(e) { error.value = e },
+  errorHandler(e) {
+    error.value = e
+    throw e
+  },
 })
 
 onBeforeMount(() => {

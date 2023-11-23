@@ -9,23 +9,20 @@ import type { ItemT, ItemI, ItemU, ItemS, EnvT } from "./types";
 import { store, api } from "./base";
 import { zodSchema, zodErrorHandler } from "./zod";
 
-let errorHandler: (e: any) => any
+let defaultErrorHandler: (e: any) => any
 
 export function useHandlers(opts: {
-  errorHandler?: typeof errorHandler;
+  errorHandler?: typeof defaultErrorHandler;
 } = {}) {
 
   const router = useRouter()
   const route = useRoute()
 
-  if (opts.errorHandler && !errorHandler) {
-    errorHandler = opts.errorHandler
+  if (opts.errorHandler && !defaultErrorHandler) {
+    defaultErrorHandler = opts.errorHandler
   }
 
-  const $errorHandler: typeof errorHandler = (e) => {
-    opts.errorHandler?.(e) || errorHandler?.(e)
-    throw e
-  }
+  const errorHandler = opts.errorHandler || defaultErrorHandler
 
   function loadEnv(
     query?: GenericObject,
@@ -33,7 +30,7 @@ export function useHandlers(opts: {
     store.loading = true
     return api
       .get<EnvT>("env", query || route.query)
-      .catch($errorHandler)
+      .catch(errorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -52,7 +49,7 @@ export function useHandlers(opts: {
     store.loading = true
     return api
       .get<ListResponse<ItemS>>("list", query || route.query)
-      .catch($errorHandler)
+      .catch(errorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -70,7 +67,7 @@ export function useHandlers(opts: {
     store.loading = true
     return api
       .get<ItemS>(id)
-      .catch($errorHandler)
+      .catch(errorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -88,12 +85,12 @@ export function useHandlers(opts: {
       zodSchema.parse(data)
     }
     catch (e: any) {
-      return $errorHandler(zodErrorHandler(e))
+      return errorHandler(zodErrorHandler(e))
     }
     store.loading = true
     return api
       .post<ItemT>(data)
-      .catch($errorHandler)
+      .catch(errorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -114,12 +111,12 @@ export function useHandlers(opts: {
       zodSchema.parse(data)
     }
     catch (e: any) {
-      return $errorHandler(zodErrorHandler(e))
+      return errorHandler(zodErrorHandler(e))
     }
     store.loading = true
     return api
       .patch<ItemT>(id, data)
-      .catch($errorHandler)
+      .catch(errorHandler)
       .finally(() => store.loading = false)
   }
 
@@ -145,7 +142,7 @@ export function useHandlers(opts: {
     store.loading = true
     return api
       .delete<ItemT>(id)
-      .catch($errorHandler)
+      .catch(errorHandler)
       .finally(() => store.loading = false)
   }
 
