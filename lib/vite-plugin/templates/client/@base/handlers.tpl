@@ -79,17 +79,17 @@ export function useHandlers(opts: {
   }
 
   function createItem(
-    data: ItemI,
+    dataset: ItemI,
   ): Promise<ItemT> {
     try {
-      zodSchema.parse(data)
+      zodSchema(dataset).parse(dataset)
     }
     catch (e: any) {
       return errorHandler(zodErrorHandler(e))
     }
     store.loading = true
     return api
-      .post<ItemT>(data)
+      .post<ItemT>(dataset)
       .catch(errorHandler)
       .finally(() => store.loading = false)
   }
@@ -105,26 +105,26 @@ export function useHandlers(opts: {
 
   function $updateItem(
     id: ItemId,
-    data: ItemU,
+    dataset: Partial<ItemU>,
   ): Promise<ItemT> {
     try {
-      zodSchema.parse(data)
+      zodSchema(dataset).parse(dataset)
     }
     catch (e: any) {
       return errorHandler(zodErrorHandler(e))
     }
     store.loading = true
     return api
-      .patch<ItemT>(id, data)
+      .patch<ItemT>(id, dataset)
       .catch(errorHandler)
       .finally(() => store.loading = false)
   }
 
   function updateItem(
-    data: ItemU,
+    dataset: Partial<ItemU>,
   ): Promise<ItemT> {
     return store.item
-      ? $updateItem(store.item.{{primaryKey}}, data)
+      ? $updateItem(store.item.{{primaryKey}}, dataset)
       : Promise.reject("store.item is undefined")
   }
 

@@ -77,7 +77,7 @@ export function validateDataset<
   zodSchema,
   zodErrorHandler,
 }: {
-  zodSchema?: ZodSchema;
+  zodSchema?: (dataset: Record<string, any>) => ZodSchema;
   zodErrorHandler?: Function;
 }): DatasetMiddleware<StateT, ContextT> {
 
@@ -85,7 +85,7 @@ export function validateDataset<
 
     if (zodSchema) {
       try {
-        zodSchema.parse(env.crud.payload)
+        zodSchema(env.crud.payload).parse(env.crud.payload)
       }
       catch(error: any) {
         env.throw(zodErrorHandler?.(error) || error)

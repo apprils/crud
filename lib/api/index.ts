@@ -42,7 +42,7 @@ type CreateSetup<RecordT, StateT, ContextT> =
   | CreateMiddleware<RecordT, StateT, ContextT>[]
   | Partial<ReturnType<typeof _create<RecordT, StateT, ContextT>> & {
       datasetFromPayload: DatasetFromPayloadOption;
-      zodSchema?: ZodSchema;
+      zodSchema?: (dataset: Record<string, any>) => ZodSchema;
       zodErrorHandler?: Function;
     }>
 
@@ -51,7 +51,7 @@ type UpdateSetup<RecordT, StateT, ContextT> =
   | UpdateMiddleware<RecordT, StateT, ContextT>[]
   | Partial<ReturnType<typeof _update<RecordT, StateT, ContextT>> & {
       datasetFromPayload: DatasetFromPayloadOption;
-      zodSchema?: ZodSchema;
+      zodSchema?: (dataset: Record<string, any>) => ZodSchema;
       zodErrorHandler?: Function;
     }>
 
