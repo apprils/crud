@@ -1,6 +1,6 @@
 {{BANNER}}
 
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import type { GenericObject, ListResponse, ItemId } from "@appril/crud/client";
@@ -10,6 +10,14 @@ import { store, api } from "./base";
 import { zodSchema, zodErrorHandler } from "./zod";
 
 let defaultErrorHandler: (e: any) => any
+
+const regularColumns = [
+{{#regularColumns}}
+  "{{name}}",
+{{/regularColumns}}
+] as const
+
+type RegularColumn = typeof regularColumns[number]
 
 export function useHandlers(opts: {
   errorHandler?: typeof defaultErrorHandler;
@@ -89,7 +97,7 @@ export function useHandlers(opts: {
     }
     store.loading = true
     return api
-      .post<ItemT>(dataset)
+      .post<Partial<ItemT>>(dataset)
       .catch(errorHandler)
       .finally(() => store.loading = false)
   }
@@ -115,7 +123,7 @@ export function useHandlers(opts: {
     }
     store.loading = true
     return api
-      .patch<ItemT>(id, dataset)
+      .patch<Partial<ItemT>>(id, dataset)
       .catch(errorHandler)
       .finally(() => store.loading = false)
   }
@@ -244,7 +252,37 @@ export function useHandlers(opts: {
     itemRoute, itemKey,
     gotoItem, gotoPrevPage, gotoPage,
     filtersModel, $applyFilters, applyFilters, $resetFilters, resetFilters,
+    errorHandler,
   }
+
+}
+
+export function useModel(opts: {
+  columns?: RegularColumn[];
+  reactive?: boolean;
+} = {}) {
+
+  const modelColumns: RegularColumn[] = [ ...opts.columns || regularColumns ]
+
+  const model = ref<Partial<ItemT>>(
+    modelColumns.reduce((a,c) => ({ ...a, [c]: store.item?.[c] }), {})
+  )
+
+  if (opts.reactive !== false) {
+
+    const { updateItem, itemUpdated } = useHandlers()
+
+    for (const col of modelColumns) {
+      watch(
+        () => model.value[col],
+        // without async there are issues with error handling
+        async (val) => await updateItem({ [col]: val }).then(itemUpdated)
+      )
+    }
+
+  }
+
+  return model
 
 }
 
