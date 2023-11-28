@@ -15,23 +15,25 @@ import type {
   Table,
 } from "./@types";
 
-import baseTpl from "./templates/client/@base/base.tpl";
-import ControlButtonsTpl from "./templates/client/@base/ControlButtons.tpl";
-import CreateDialogTpl from "./templates/client/@base/CreateDialog.tpl";
-import EditorPlaceholderTpl from "./templates/client/@base/EditorPlaceholder.tpl";
-import handlersTpl from "./templates/client/@base/handlers.tpl";
-import indexTpl from "./templates/client/@base/index.tpl";
-import LayoutTpl from "./templates/client/@base/Layout.tpl";
-import PagerTpl from "./templates/client/@base/Pager.tpl";
-import storeTpl from "./templates/client/@base/store.tpl";
-import typesTpl from "./templates/client/@base/types.tpl";
-import zodTpl from "./templates/client/@base/zod.tpl";
+import baseTpl from "./templates/client/entry/@base/base.tpl";
+import ControlButtonsTpl from "./templates/client/entry/@base/ControlButtons.tpl";
+import CreateDialogTpl from "./templates/client/entry/@base/CreateDialog.tpl";
+import EditorPlaceholderTpl from "./templates/client/entry/@base/EditorPlaceholder.tpl";
+import handlersTpl from "./templates/client/entry/@base/handlers.tpl";
+import indexTpl from "./templates/client/entry/@base/index.tpl";
+import LayoutTpl from "./templates/client/entry/@base/Layout.tpl";
+import PagerTpl from "./templates/client/entry/@base/Pager.tpl";
+import storeTpl from "./templates/client/entry/@base/store.tpl";
+import typesTpl from "./templates/client/entry/@base/types.tpl";
+import zodTpl from "./templates/client/entry/@base/zod.tpl";
 
-import initTypesTpl from "./templates/client/types.tpl";
-import initIndexTpl from "./templates/client/index.tpl";
-import initStoreTpl from "./templates/client/store.tpl";
+import initTypesTpl from "./templates/client/entry/types.tpl";
+import initIndexTpl from "./templates/client/entry/index.tpl";
 
-import apiBaseIndexTpl from "./templates/api/@base/index.tpl";
+import clientStoreTpl from "./templates/client/store.tpl";
+import clientIndexTpl from "./templates/client/index.tpl";
+
+import apiBaseIndexTpl from "./templates/api/entry/@base/index.tpl";
 
 import { BANNER, renderToFile } from "./render";
 
@@ -157,7 +159,15 @@ export function vitePluginApprilCrud(
 
     })
 
-    await renderToFile(uixPath("store.ts"), initStoreTpl, {
+    await renderToFile(uixPath("index.ts"), clientIndexTpl, {
+      BANNER,
+      crudDir,
+      typesDir,
+      tablesDir,
+      tables,
+    })
+
+    await renderToFile(uixPath("store.ts"), clientStoreTpl, {
       crudDir,
       typesDir,
       tablesDir,
@@ -237,7 +247,7 @@ export function vitePluginApprilCrud(
       for (const table of tables) {
         routes[join(table.apiBase, "/")] = {
           name: table.apiBase,
-          template: resolve(__dirname, "templates/api/index.tpl"),
+          template: resolve(__dirname, "templates/api/entry/index.tpl"),
           meta: typeof meta === "function"
             ? meta(table)
             : { ...meta?.[table.basename] || meta?.["*"] },

@@ -1,4 +1,16 @@
+{{BANNER}}
 
-export * from "./@base/types"; /* mandatory export, do not remove */
-export * from "./@base"; /* mandatory export, do not remove */
+{{#tables}}
+import * as {{basename}} from "./{{basename}}";
+{{/tables}}
+
+{{#tables}}
+export { {{basename}} };
+{{/tables}}
+
+export default {
+{{#tables}}
+  {{basename}},
+{{/tables}}
+}
 
