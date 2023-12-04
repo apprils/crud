@@ -7,6 +7,7 @@ import type {
 export type { ConnectionConfig, PgtsConfig, TableDeclaration }
 
 export type Templates = {
+  api?: string;
   base?: string;
   ControlButtons?: string;
   CreateDialog?: string;
@@ -20,10 +21,6 @@ export type Templates = {
   zod?: string;
 }
 
-export type ApiTemplates = {
-  index?: string;
-}
-
 export type Table = TableDeclaration & {
   basename: string;
   apiBase: string;
@@ -35,7 +32,6 @@ export type Config = {
   apiDir?: string;
   importBase?: string;
   templates?: Templates;
-  apiTemplates?: ApiTemplates;
   alias?: Record<string, string | string[]>;
   tableFilter?: (t: TableDeclaration) => boolean;
   meta?: Record<string, Record<string, any>> | ((t: Table) => Record<string, any>);

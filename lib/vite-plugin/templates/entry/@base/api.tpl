@@ -1,7 +1,6 @@
 {{BANNER}}
 
-import type { CrudSetup } from "@appril/crud/api";
-import { crudspecs } from "@appril/crud/api";
+import { type CrudSetup, crudspecs } from "@appril/crud/api";
 
 import type { {{queryBuilder}} } from "{{typesDir}}/{{schema}}/@types";
 import { {{declaredName}} } from "{{tablesDir}}/{{schema}}/@index";

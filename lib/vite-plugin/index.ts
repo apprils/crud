@@ -11,33 +11,33 @@ import type { Plugin, ResolvedConfig } from "vite";
 
 import type {
   ConnectionConfig, PgtsConfig, Config,
-  Templates, ApiTemplates,
+  Templates,
   Table,
 } from "./@types";
 
-import baseTpl from "./templates/client/entry/@base/base.tpl";
-import ControlButtonsTpl from "./templates/client/entry/@base/ControlButtons.tpl";
-import CreateDialogTpl from "./templates/client/entry/@base/CreateDialog.tpl";
-import EditorPlaceholderTpl from "./templates/client/entry/@base/EditorPlaceholder.tpl";
-import handlersTpl from "./templates/client/entry/@base/handlers.tpl";
-import indexTpl from "./templates/client/entry/@base/index.tpl";
-import LayoutTpl from "./templates/client/entry/@base/Layout.tpl";
-import PagerTpl from "./templates/client/entry/@base/Pager.tpl";
-import storeTpl from "./templates/client/entry/@base/store.tpl";
-import typesTpl from "./templates/client/entry/@base/types.tpl";
-import zodTpl from "./templates/client/entry/@base/zod.tpl";
+import apiTpl from "./templates/entry/@base/api.tpl";
+import baseTpl from "./templates/entry/@base/base.tpl";
+import ControlButtonsTpl from "./templates/entry/@base/ControlButtons.tpl";
+import CreateDialogTpl from "./templates/entry/@base/CreateDialog.tpl";
+import EditorPlaceholderTpl from "./templates/entry/@base/EditorPlaceholder.tpl";
+import handlersTpl from "./templates/entry/@base/handlers.tpl";
+import indexTpl from "./templates/entry/@base/index.tpl";
+import LayoutTpl from "./templates/entry/@base/Layout.tpl";
+import PagerTpl from "./templates/entry/@base/Pager.tpl";
+import storeTpl from "./templates/entry/@base/store.tpl";
+import typesTpl from "./templates/entry/@base/types.tpl";
+import zodTpl from "./templates/entry/@base/zod.tpl";
 
-import initTypesTpl from "./templates/client/entry/types.tpl";
-import initIndexTpl from "./templates/client/entry/index.tpl";
+import initTypesTpl from "./templates/entry/types.tpl";
+import initIndexTpl from "./templates/entry/index.tpl";
 
-import clientStoreTpl from "./templates/client/store.tpl";
-import clientIndexTpl from "./templates/client/index.tpl";
-
-import apiBaseIndexTpl from "./templates/api/entry/@base/index.tpl";
+import clientStoreTpl from "./templates/store.tpl";
+import clientIndexTpl from "./templates/index.tpl";
 
 import { BANNER, renderToFile } from "./render";
 
-const defaultClientTemplates: Required<Templates> = {
+const defaultTemplates: Required<Templates> = {
+  api: apiTpl,
   base: baseTpl,
   ControlButtons: ControlButtonsTpl,
   CreateDialog: CreateDialogTpl,
@@ -49,10 +49,6 @@ const defaultClientTemplates: Required<Templates> = {
   store: storeTpl,
   types: typesTpl,
   zod: zodTpl,
-}
-
-const defaultApiTemlates: Required<ApiTemplates> = {
-  index: apiBaseIndexTpl,
 }
 
 type DbxConfig = PgtsConfig & {
@@ -95,22 +91,14 @@ export function vitePluginApprilCrud(
         : {},
     })
 
-    const uixPath = (...path: string[]) => rootPath(outDir, join(...path))
-    const apiPath = (...path: string[]) => rootPath(apiDir, outDir, join(...path))
-
     const typesDir = join(dbxConfig.importBase, dbxConfig.base, dbxConfig.typesDir)
     const tablesDir = join(dbxConfig.importBase, dbxConfig.base, dbxConfig.tablesDir)
     const crudDir = join(importBase, outDir)
 
-    const clientTemplates = { ...defaultClientTemplates }
-    const apiTemplates = { ...defaultApiTemlates }
+    const templates = { ...defaultTemplates }
 
     for (const [ name, file ] of Object.entries({ ...crudConfig.templates }) as [ name: keyof Templates, file: string ][]) {
-      clientTemplates[name] = await readFile(rootPath(file), "utf8")
-    }
-
-    for (const [ name, file ] of Object.entries({ ...crudConfig.apiTemplates }) as [ name: keyof ApiTemplates, file: string ][]) {
-      apiTemplates[name] = await readFile(rootPath(file), "utf8")
+      templates[name] = await readFile(rootPath(file), "utf8")
     }
 
     const tables: Table[] = tableDeclarations.flatMap((table) => {
@@ -153,7 +141,7 @@ export function vitePluginApprilCrud(
 
     })
 
-    await renderToFile(uixPath("index.ts"), clientIndexTpl, {
+    await renderToFile(rootPath(outDir, "index.ts"), clientIndexTpl, {
       BANNER,
       crudDir,
       typesDir,
@@ -161,7 +149,7 @@ export function vitePluginApprilCrud(
       tables,
     })
 
-    await renderToFile(uixPath("store.ts"), clientStoreTpl, {
+    await renderToFile(rootPath(outDir, "store.ts"), clientStoreTpl, {
       crudDir,
       typesDir,
       tablesDir,
@@ -177,7 +165,7 @@ export function vitePluginApprilCrud(
         ]
       ) {
 
-        await renderToFile(uixPath(table.basename, file), tpl, {
+        await renderToFile(rootPath(outDir, table.basename, file), tpl, {
           crudDir,
           typesDir,
           tablesDir,
@@ -188,6 +176,7 @@ export function vitePluginApprilCrud(
 
       for (
         const [ file, tpl ] of [
+          [ "api.ts", "api" ],
           [ "base.ts", "base" ],
           [ "ControlButtons.vue", "ControlButtons" ],
           [ "CreateDialog.vue", "CreateDialog" ],
@@ -202,23 +191,7 @@ export function vitePluginApprilCrud(
         ] satisfies [ file: string, tpl: keyof Templates ][]
       ) {
 
-        await renderToFile(uixPath(table.basename, "@base", file), clientTemplates[tpl], {
-          BANNER,
-          crudDir,
-          typesDir,
-          tablesDir,
-          ...table
-        })
-
-      }
-
-      for (
-        const [ file, tpl ] of [
-          [ "index.ts", "index" ],
-        ] satisfies [ file: string, tpl: keyof ApiTemplates ][]
-      ) {
-
-        await renderToFile(apiPath(table.basename, "@base", file), apiTemplates[tpl], {
+        await renderToFile(rootPath(outDir, table.basename, "@base", file), templates[tpl], {
           BANNER,
           crudDir,
           typesDir,
@@ -234,18 +207,24 @@ export function vitePluginApprilCrud(
 
       const routes: Record<string, {
         name: string;
+        file: string;
         template: string;
         meta: Record<string, any>;
       }> = {}
 
       for (const table of tables) {
-        routes[join(table.apiBase, "/")] = {
-          name: table.apiBase,
-          template: resolve(__dirname, "templates/api/entry/index.tpl"),
+
+        const base = join(outDir, table.basename)
+
+        routes[base] = {
+          name: base,
+          file: join(base, "api.ts"),
+          template: resolve(__dirname, "templates/api.tpl"),
           meta: typeof meta === "function"
             ? meta(table)
-            : { ...meta?.[table.basename] || meta?.["*"] },
+            : { ...meta?.["*"], ...meta?.[table.basename] },
         }
+
       }
 
       const content = [
@@ -253,7 +232,7 @@ export function vitePluginApprilCrud(
         stringify(routes),
       ].join("\n")
 
-      await fsx.outputFile(apiPath("_routes.yml"), content, "utf8")
+      await fsx.outputFile(rootPath(apiDir, "_000_crud_routes.yml"), content, "utf8")
 
     }
 
@@ -271,7 +250,6 @@ export function vitePluginApprilCrud(
 
       const watchedFiles = [
         ...Object.values(crudConfig.templates || {}),
-        ...Object.values(crudConfig.apiTemplates || {}),
       ]
 
       if (watchedFiles.length) {
