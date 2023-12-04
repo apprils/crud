@@ -95,14 +95,8 @@ export function vitePluginApprilCrud(
         : {},
     })
 
-    const apiBase = (
-      "apiBase" in crudConfig
-        ? crudConfig.apiBase + "/"
-        : outDir + "/"
-    ).replace(/^\/+$/, "")
-
     const uixPath = (...path: string[]) => rootPath(outDir, join(...path))
-    const apiPath = (...path: string[]) => rootPath(apiDir, apiBase, join(...path))
+    const apiPath = (...path: string[]) => rootPath(apiDir, outDir, join(...path))
 
     const typesDir = join(dbxConfig.importBase, dbxConfig.base, dbxConfig.typesDir)
     const tablesDir = join(dbxConfig.importBase, dbxConfig.base, dbxConfig.tablesDir)
@@ -132,7 +126,7 @@ export function vitePluginApprilCrud(
 
         entries.push({
           basename: table.name,
-          apiBase: join(apiBase, table.name),
+          apiBase: join(viteConfig.base, apiDir, outDir, table.name),
           ...table
         })
 
@@ -150,7 +144,7 @@ export function vitePluginApprilCrud(
       for (const alias of aliasNames) {
         entries.push({
           basename: alias,
-          apiBase: join(apiBase, alias),
+          apiBase: join(viteConfig.base, apiDir, outDir, alias),
           ...table
         })
       }

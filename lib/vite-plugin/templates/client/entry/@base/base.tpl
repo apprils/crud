@@ -1,6 +1,6 @@
 {{BANNER}}
 
-import fetch from "@/fetch";
+import { fetch } from "@appril/more/fetch";
 
 import { useStore, actionListeners } from "./store";
 

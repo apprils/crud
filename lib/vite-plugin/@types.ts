@@ -34,7 +34,6 @@ export type Config = {
   outDir: string;
   apiDir?: string;
   importBase?: string;
-  apiBase?: string;
   templates?: Templates;
   apiTemplates?: ApiTemplates;
   alias?: Record<string, string | string[]>;
