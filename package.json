@@ -56,12 +56,14 @@
     "build": "for e in api client vite-plugin; do npm run build:$e; done",
     "// ✨ publish": "",
     "prepub": "npm run build",
-    "pub": "npm pub"
+    "pub": "npm pub",
+    "postpub": "mkdir -p var/pub; npm pack --pack-destination var/pub"
   },
   "dependencies": {
-    "@appril/core": "^0.2.4",
+    "@appril/core": "^0.2.6",
     "@appril/more": "^0.2.4",
-    "@appril/pgts": "^0.2.3",
+    "@appril/pgts": "^0.2.4",
+    "@phenomnomnominal/tsquery": "^6.1.3",
     "fs-extra": "^11.2.0",
     "kleur": "^4.1.5",
     "mustache": "^4.2.0",
