@@ -8,6 +8,7 @@ export type { ConnectionConfig, PgtsConfig, TableDeclaration }
 
 export type Templates = {
   api?: string;
+  apiTypes?: string;
   base?: string;
   ControlButtons?: string;
   CreateDialog?: string;
@@ -24,6 +25,7 @@ export type Templates = {
 export type Table = TableDeclaration & {
   basename: string;
   apiBase: string;
+  apiFile: string;
 }
 
 export type Config = {

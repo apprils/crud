@@ -6,18 +6,22 @@ import type { StoreOnActionListener } from "pinia";
 
 import type {
   StoreState, StoreGetters, StoreActions,
-  GenericObject, Pager, ItemId,
+  Pager, ItemId,
 } from "@appril/crud/client";
 
-import type { ItemS, EnvT } from "./types";
+import type { ItemT, ItemAssetsT, EnvT } from "./types";
 
 import custom from "{{crudDir}}/store";
 
+type StateT = StoreState<ItemT, ItemAssetsT, EnvT>
+type GettersT = StoreGetters<ItemT, ItemAssetsT, EnvT>
+type ActionsT = StoreActions<ItemT, ItemAssetsT, EnvT>
+
 export const useStore = defineStore<
   "{{basename}}",
-  StoreState<ItemS, EnvT>,
-  StoreGetters<ItemS, EnvT>,
-  StoreActions<ItemS, EnvT>
+  StateT,
+  GettersT,
+  ActionsT
 >("{{basename}}", {
 
   state: () => {
@@ -26,6 +30,7 @@ export const useStore = defineStore<
       env: {} as EnvT,
       items: [],
       item: undefined,
+      itemAssets: undefined,
       itemEvent: { event: undefined, id: undefined },
       loading: false,
       pager: {
@@ -47,10 +52,10 @@ export const useStore = defineStore<
   actions: {
 
     setEnv(
-      env: GenericObject,
+      env: EnvT,
     ) {
       // $patch({ env }) would cause cache issues with complex/nested items
-      this.$patch((state) => { state.env = { ...env } as EnvT })
+      this.$patch((state) => { state.env = env as EnvT })
     },
 
     setItems(
@@ -71,6 +76,13 @@ export const useStore = defineStore<
       this.$patch((state) => state.item = { ...state.item, ...item })
     },
 
+    setItemAssets(
+      itemAssets: any,
+    ) {
+      // $patch({ itemAssets }) would cause cache issues with complex/nested items
+      this.$patch((state) => state.itemAssets = itemAssets)
+    },
+
     insertItem(
       id: ItemId,
       item: any,
@@ -83,6 +95,13 @@ export const useStore = defineStore<
     ) {
       // $patch({ item }) would cause cache issues with complex/nested items
       this.$patch((state) => state.item = { ...state.item, ...updates })
+    },
+
+    patchItemAssets(
+      updates: any,
+    ) {
+      // $patch({ itemAssets }) would cause cache issues with complex/nested items
+      this.$patch((state) => state.itemAssets = { ...state.itemAssets, ...updates })
     },
 
     updateItem(
@@ -119,9 +138,9 @@ export const useStore = defineStore<
 
 export const actionListeners: StoreOnActionListener<
   "{{basename}}",
-  StoreState<ItemS, EnvT>,
-  StoreGetters<ItemS, EnvT>,
-  StoreActions<ItemS, EnvT>
+  StateT,
+  GettersT,
+  ActionsT
 >[] = [
 
   function({ store, name, args, after }) {

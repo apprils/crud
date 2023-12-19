@@ -1,77 +1,61 @@
 
-import type { DeleteMiddleware as Middleware } from "./@types";
+import {
+  type Middleware,
+  del,
+} from "@appril/core/router";
 
-type Methods =
-  | "init"
-  | "query"
-  | "returning"
-  | "before"
-  | "delete"
-  | "after"
-  | "serialize"
-  | "response"
+import type {
+  Ctx, Context,
+  DefaultHandler, CustomHandler,
+} from "./@types";
 
-export default function <QueryBuilderT, RecordT, StateT, ContextT>(): {
-  [key in Methods]: Middleware<QueryBuilderT, RecordT, StateT, ContextT>;
-} {
+export default function deleteHandlerFactory<
+  ItemT,
+>(
+  init: Middleware<any, any>,
+) {
 
-  return {
+  type CtxT = Ctx<ItemT>
 
-    init(env, next) {
+  type ReturnT = ItemT | undefined
 
-      env.crud.query = env.crud.dbi.clone()
-      env.crud.returning = []
+  const defaultHandler: DefaultHandler<CtxT, ReturnT> = async function(
+    ctx: CtxT,
+  ): Promise<ReturnT> {
 
-      return next()
-    },
+    const { crud } = ctx
 
-    query(env, next) {
-      return next()
-    },
+    const [ item ] = await crud.dbi
+      .where(crud.primaryKey, ctx.params._id)
+      .delete()
+      .returning(crud.returningLiteral)
 
-    returning(env, next) {
-      return next()
-    },
+    return item
 
-    before(env, next) {
-      return next()
-    },
+  }
 
-    async delete(env, next) {
+  return function handlerFactory(
+    customHandler?: CustomHandler<CtxT, ReturnT>,
+  ) {
 
-      const { crud } = env
-      const { query }: any = crud
+    return del<
+      any,
+      Context<ItemT>
+    >(":_id", [
 
-      const [ item ] = await query
-        .where(crud.primaryKey, env.params._id)
-        .delete()
-        .returning([
-          crud.primaryKey,
-          ...crud.returning.filter((e: any) => !crud.returningExclude.includes(e))
-        ])
+      init,
 
-      if (!item) {
-        return
+      async (ctx, next) => {
+
+        ctx.body = customHandler
+          ? await customHandler(ctx, { defaultHandler })
+          : await defaultHandler(ctx)
+
+        return next()
+
       }
 
-      crud.item = item
-
-      return next()
-
-    },
-
-    after(env, next) {
-      return next()
-    },
-
-    serialize(env, next) {
-      return next()
-    },
-
-    response(env, next) {
-      env.body = env.crud.item
-      return next()
-    },
+    ])
 
   }
 

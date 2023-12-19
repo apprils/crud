@@ -1,79 +1,114 @@
 
-import type { UpdateMiddleware as Middleware  } from "./@types";
+import {
+  type Middleware,
+  patch,
+} from "@appril/core/router";
 
-type Methods =
-  | "init"
-  | "returning"
-  | "dataset"
-  | "before"
-  | "update"
-  | "after"
-  | "serialize"
-  | "response"
+import type {
+  Ctx, Context,
+  DefaultHandler, CustomHandler,
+  Dataset,
+  ZodSchemaWrapper,
+} from "./@types";
 
-export default function <RecordT, StateT, ContextT>(): {
-  [key in Methods]: Middleware<RecordT, StateT, ContextT>;
-} {
+export default function updateHandlerFactory<
+  ItemT,
+>(
+  init: Middleware<any, any>,
+  opt: {
+    zodSchema?: ZodSchemaWrapper;
+    zodErrorHandler?: Function;
+  },
+) {
 
-  return {
+  type CrudContextExtend = {
+    dataset: Dataset;
+    validatedDataset: Dataset;
+    zodSchema?: ZodSchemaWrapper;
+    zodErrorHandler?: Function;
+  }
 
-    async init(env, next) {
-      env.crud.returning = []
-      return next()
-    },
+  type CtxT = Ctx<
+    ItemT,
+    CrudContextExtend
+  >
 
-    returning(env, next) {
-      return next()
-    },
+  type ReturnT = ItemT | undefined
 
-    dataset(env, next) {
-      return next()
-    },
+  type CustomSetup = {
+    dataset?: (ctx: CtxT) => Promise<Dataset>;
+    datasetExtend?: (ctx: CtxT) => Promise<Dataset>;
+    zodSchema?: (ctx: CtxT) => Promise<ZodSchemaWrapper>;
+    zodErrorHandler?: (ctx: CtxT) => Promise<Function>;
+  }
 
-    before(env, next) {
-      return next()
-    },
+  const defaultHandler: DefaultHandler<CtxT, ReturnT> = async function(
+    ctx: CtxT,
+  ): Promise<ReturnT> {
 
-    async update(env, next) {
+    const { crud } = ctx
 
-      const { crud } = env
+    const [ item ] = await crud.dbi.clone()
+      .where(crud.primaryKey, ctx.params._id)
+      .update(crud.validatedDataset)
+      .returning(crud.returningLiteral)
 
-      const returning = crud.returning.length
-        ? crud.returning
-        : Object.keys(crud.dataset)
-
-      const [ item ] = await crud.dbi.clone()
-        .where(crud.primaryKey, env.params._id)
-        .update(crud.dataset)
-        .returning([
-          crud.primaryKey,
-          ...returning.filter((e: any) => !crud.returningExclude.includes(e))
-        ])
-
-      if (!item) {
-        return
-      }
-
-      crud.item = item
-
-      return next()
-
-    },
-
-    after(env, next) {
-      return next()
-    },
-
-    serialize(env, next) {
-      return next()
-    },
-
-    response(env, next) {
-      env.body = env.crud.item
-      return next()
-    },
+    return item
 
   }
+
+  function handlerFactory(
+    customSetup: CustomSetup, 
+  ): unknown
+
+  function handlerFactory(
+    customHandler?: CustomHandler<CtxT, ReturnT>,
+  ): unknown
+
+  function handlerFactory(
+    arg: unknown,
+  ) {
+
+    let customSetup: CustomSetup
+    let customHandler: CustomHandler<CtxT, ReturnT>
+
+    if (typeof arg === "function") {
+      customHandler = arg as typeof customHandler
+    }
+    else {
+      customSetup = arg as typeof customSetup
+    }
+
+    return patch<
+      any,
+      Context<ItemT, CrudContextExtend>
+    >(":_id", [
+
+      init,
+
+      async (ctx, next) => {
+
+        ctx.crud.dataset = {
+          ...await customSetup?.dataset?.(ctx) || ctx.request.body as Dataset,
+          ...await customSetup?.datasetExtend?.(ctx),
+        }
+
+        ctx.crud.zodSchema = await customSetup?.zodSchema?.(ctx) || opt.zodSchema
+        ctx.crud.zodErrorHandler = await customSetup?.zodErrorHandler?.(ctx) || opt.zodErrorHandler
+
+        ctx.body = customHandler
+          ? await customHandler(ctx, { defaultHandler })
+          : await defaultHandler(ctx)
+
+        return next()
+
+      }
+
+    ])
+
+  }
+
+  return handlerFactory
 
 }
 

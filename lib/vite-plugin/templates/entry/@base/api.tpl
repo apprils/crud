@@ -1,43 +1,26 @@
 {{BANNER}}
 
-import { type CrudSetup, crudspecs } from "@appril/crud/api";
+import crudFactory from "@appril/crud/api";
 
-import type { {{queryBuilder}} } from "{{typesDir}}/{{schema}}/@types";
-import { {{declaredName}} } from "{{tablesDir}}/{{schema}}/@index";
+import type { {{recordName}}, {{queryBuilder}} } from "{{typesImportBase}}/{{schema}}/@types";
+import { {{declaredName}} } from "{{tablesImportBase}}/{{schema}}/@index";
 
-import type { ItemS, EnvT } from "{{crudDir}}/{{basename}}/@base/types";
-import { zodSchema, zodErrorHandler } from "{{crudDir}}/{{basename}}/@base/zod";
+import { zodSchema, zodErrorHandler } from "./zod";
 
-export default function {{basename}}<
-  StateT = unknown,
-  ContextT = unknown
->({ create, update, ...setup }: Partial<
-  CrudSetup<
-    {{queryBuilder}},
-    ItemS,
-    EnvT,
-    StateT,
-    ContextT
-  >
-> = {}) {
-  return crudspecs<
-    {{queryBuilder}},
-    ItemS,
-    EnvT,
-    StateT,
-    ContextT
-  >({{declaredName}}, {
-    create: {
-      zodSchema,
-      zodErrorHandler,
-      ...create
-    },
-    update: {
-      zodSchema,
-      zodErrorHandler,
-      ...update
-    },
-    ...setup
-  })
-}
+export default crudFactory<
+  {{recordName}},
+  {{queryBuilder}}
+>(
+  {{declaredName}},
+  {
+    columns: [
+      {{#regularColumns}}
+      "{{name}}",
+      {{/regularColumns}}
+    ],
+    primaryKey: "{{primaryKey}}",
+    zodSchema,
+    zodErrorHandler,
+  }
+)
 

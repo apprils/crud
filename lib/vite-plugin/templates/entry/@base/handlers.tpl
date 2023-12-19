@@ -3,18 +3,24 @@
 import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import type { GenericObject, ListResponse, ItemId } from "@appril/crud/client";
+import type {
+  GenericObject, ItemId,
+  ListResponse, RetrieveResponse,
+} from "@appril/crud/client";
 
-import type { ItemT, ItemI, ItemU, ItemS, EnvT } from "./types";
+import type { ItemT, ItemI, ItemU, ItemAssetsT, EnvT } from "./types";
 import { store, api } from "./base";
 import { zodSchema, zodErrorHandler } from "./zod";
+
+type ListResponseT = ListResponse<ItemT>
+type RetrieveResponseT = RetrieveResponse<ItemT, ItemAssetsT>
 
 let defaultErrorHandler: (e: any) => any
 
 const regularColumns = [
-{{#regularColumns}}
+  {{#regularColumns}}
   "{{name}}",
-{{/regularColumns}}
+  {{/regularColumns}}
 ] as const
 
 type RegularColumn = typeof regularColumns[number]
@@ -35,11 +41,16 @@ export function useHandlers(opts: {
   function loadEnv(
     query?: GenericObject,
   ) {
+    {{#apiTypes.EnvT}}
     store.loading = true
     return api
       .get<EnvT>("env", query || route.query)
       .catch(errorHandler)
       .finally(() => store.loading = false)
+    {{/apiTypes.EnvT}}
+    {{^apiTypes.EnvT}}
+    return Promise.resolve(undefined)
+    {{/apiTypes.EnvT}}
   }
 
   function envLoaded(
@@ -53,16 +64,16 @@ export function useHandlers(opts: {
 
   function loadItems(
     query?: GenericObject,
-  ): Promise<ListResponse<ItemS>> {
+  ): Promise<ListResponseT> {
     store.loading = true
     return api
-      .get<ListResponse<ItemS>>("list", query || route.query)
+      .get<ListResponseT>("list", query || route.query)
       .catch(errorHandler)
       .finally(() => store.loading = false)
   }
 
   function itemsLoaded(
-    response: ListResponse<ItemS> | void,
+    response: ListResponseT | void,
   ) {
     if (response) {
       store.setItems(response.items, response.pager)
@@ -71,18 +82,19 @@ export function useHandlers(opts: {
 
   function loadItem(
     id: ItemId,
-  ): Promise<ItemS> {
+  ): Promise<RetrieveResponseT> {
     store.loading = true
     return api
-      .get<ItemS>(id)
+      .get<RetrieveResponseT>(id)
       .catch(errorHandler)
       .finally(() => store.loading = false)
   }
 
   function itemLoaded(
-    item: ItemS,
+    { item, assets }: RetrieveResponseT,
   ) {
     store.setItem(item)
+    store.setItemAssets(assets)
     window.scrollTo(0, 0)
   }
 
@@ -180,7 +192,7 @@ export function useHandlers(opts: {
   }
 
   function itemRoute(
-    item?: ItemS,
+    item?: ItemT,
   ) {
     return {
       query: {
@@ -191,14 +203,14 @@ export function useHandlers(opts: {
   }
 
   function itemKey(
-    item: ItemS | undefined,
+    item: ItemT | undefined,
     prefix: string = "",
   ): string {
     return [ prefix || "", item?.{{primaryKey}} || "" ].map(String).join(":")
   }
 
   function isActiveItem(
-    item: ItemS,
+    item: ItemT,
   ) {
     return store.item
       ? item?.{{primaryKey}} == store.item.{{primaryKey}}

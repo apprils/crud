@@ -1,179 +1,197 @@
 
-import type { ListMiddleware as Middleware } from "./@types";
+import {
+  type Middleware,
+  get,
+} from "@appril/core/router";
 
-type Methods =
-  | "init"
-  | "query"
-  | "returning"
-  | "filters"
-  | "sort"
-  | "paginate"
-  | "before"
-  | "list"
-  | "after"
-  | "serialize"
-  | "response"
+import type { Pager } from "../client/@types";
 
-export default function <QueryBuilderT, RecordT, StateT, ContextT>(): {
-  [key in Methods]: Middleware<QueryBuilderT, RecordT, StateT, ContextT>;
-} {
+import type {
+  Ctx, Context,
+  CustomHandler, DefaultHandler,
+} from "./@types";
 
-  return {
+export default function listHandlerFactory<
+  ItemT,
+  QueryBuilder,
+>(
+  init: Middleware<any, any>,
+  opt: {
+    itemsPerPage: number;
+    sidePages: number;
+  },
+) {
 
-    init(env, next) {
+  type CrudContextExtend = {
+    queryBuilder: QueryBuilder;
+    itemsPerPage: number;
+    sidePages: number;
+  }
 
-      env.crud.query = env.crud.dbi.clone()
-      env.crud.returning = []
+  type CtxT = Ctx<
+    ItemT,
+    CrudContextExtend
+  >
 
-      return next()
+  type ReturnT = {
+    items: ItemT[];
+    pager: Pager;
+  }
 
-    },
+  type CustomSetup = {
+    queryBuilder?: (ctx: CtxT) => Promise<QueryBuilder>;
+    filter?: (ctx: CtxT, queryBuilder: QueryBuilder) => Promise<void>;
+    orderBy?: (ctx: CtxT) => Promise<(string | Record<string, "asc" | "desc">)[]>;
+    itemsPerPage?: (ctx: CtxT) => Promise<number>;
+    sidePages?: (ctx: CtxT) => Promise<number>;
+  }
 
-    query(env, next) {
-      return next()
-    },
+  const defaultHandler: DefaultHandler<CtxT, ReturnT> = async function(
+    ctx: CtxT,
+  ): Promise<ReturnT> {
 
-    returning(env, next) {
-      return next()
-    },
+    const { crud } = ctx
 
-    filters(env, next) {
-      return next()
-    },
+    // @ts-expect-error
+    const totalItems = await crud.queryBuilder.clone().countRows()
+    const totalPages = Math.ceil(totalItems / crud.itemsPerPage)
 
-    sort(env, next) {
-      const { query }: any = env.crud
-      query.orderBy(env.crud.primaryKey, "desc")
-      return next()
-    },
+    let currentPage = Number(ctx.query._page || 0)
 
-    async paginate(env, next) {
+    if (currentPage < 1) {
+      currentPage = 1
+    }
 
-      const { crud } = env
-      const { query }: any = crud
+    if (currentPage > totalPages) {
+      currentPage = totalPages
+    }
 
-      const dataset = query.clone()
+    let nextPage = currentPage + 1
 
-      const totalItems = await dataset.countRows()
-      const totalPages = Math.ceil(totalItems / crud.itemsPerPage)
+    if (nextPage > totalPages) {
+      nextPage = 0
+    }
 
-      let currentPage = Number(env.query._page || 0)
+    let prevPage = currentPage - 1
 
-      if (currentPage < 1) {
-        currentPage = 1
-      }
+    if (prevPage < 1) {
+      prevPage = 0
+    }
 
-      if (currentPage > totalPages) {
-        currentPage = totalPages
-      }
+    let minPage = currentPage - crud.sidePages
 
-      let nextPage = currentPage + 1
+    if ((currentPage + crud.sidePages) > totalPages) {
+      minPage = totalPages - (crud.sidePages * 2)
+    }
 
-      if (nextPage > totalPages) {
-        nextPage = 0
-      }
+    if (minPage < 1) {
+      minPage = 1
+    }
 
-      let prevPage = currentPage - 1
+    let maxPage = currentPage + crud.sidePages
 
-      if (prevPage < 1) {
-        prevPage = 0
-      }
+    if (currentPage < crud.sidePages) {
+      maxPage = crud.sidePages * 2
+    }
 
-      let minPage = currentPage - crud.sidePages
+    if (maxPage > totalPages) {
+      maxPage = totalPages
+    }
 
-      if ((currentPage + crud.sidePages) > totalPages) {
-        minPage = totalPages - (crud.sidePages * 2)
-      }
+    let offset = (currentPage - 1) * crud.itemsPerPage
 
-      if (minPage < 1) {
-        minPage = 1
-      }
+    if (offset < 0) {
+      offset = 0
+    }
 
-      let maxPage = currentPage + crud.sidePages
+    const pager = {
+      totalItems,
+      totalPages,
+      currentPage,
+      nextPage,
+      prevPage,
+      offset,
+    }
 
-      if (currentPage < crud.sidePages) {
-        maxPage = crud.sidePages * 2
-      }
+    const items = await crud.queryBuilder
+      // @ts-expect-error
+      .select(
+        crud.returningLiteral
+      )
+      .offset(offset)
+      .limit(crud.itemsPerPage)
 
-      if (maxPage > totalPages) {
-        maxPage = totalPages
-      }
-
-      let offset = (currentPage - 1) * crud.itemsPerPage
-
-      if (offset < 0) {
-        offset = 0
-      }
-
-      crud.pager = {
-        totalItems,
-        totalPages,
-        currentPage,
-        nextPage,
-        prevPage,
-        offset,
-      }
-
-      return next()
-
-    },
-
-    before(env, next) {
-      return next()
-    },
-
-    async list(env, next) {
-
-      const { crud } = env
-      const { query }: any = crud
-
-      const returning = crud.returning.length
-        ? [ crud.primaryKey, ...crud.returning ]
-        : "*"
-
-      const items = await query
-        .select(returning)
-        .offset(crud.pager.offset)
-        .limit(crud.itemsPerPage)
-
-      if (crud.returningExclude.length) {
-        crud.items = items.map(function(item: any): RecordT {
-          return Object.entries(item).reduce((memo, [ col, val ]) => ({
-            ...memo,
-            ...crud.returningExclude.includes(col)
-              ? {}
-              : { [col]: val }
-          }), {} as RecordT)
-        })
-      }
-      else {
-        crud.items = items
-      }
-
-      return next()
-
-    },
-
-    after(env, next) {
-      return next()
-    },
-
-    serialize(env, next) {
-      return next()
-    },
-
-    response(env, next) {
-
-      env.body = {
-        items: env.crud.items,
-        pager: env.crud.pager,
-      }
-
-      return next()
-
-    },
+    return {
+      items,
+      pager,
+    }
 
   }
+
+  function handlerFactory(
+    customSetup: CustomSetup, 
+  ): unknown
+
+  function handlerFactory(
+    customHandler?: CustomHandler<CtxT, ReturnT>,
+  ): unknown
+
+  function handlerFactory(
+    arg: unknown,
+  ) {
+
+    let customSetup: CustomSetup
+    let customHandler: CustomHandler<CtxT, ReturnT>
+
+    if (typeof arg === "function") {
+      customHandler = arg as typeof customHandler
+    }
+    else {
+      customSetup = arg as typeof customSetup
+    }
+
+    return get<
+      any,
+      Context<ItemT,CrudContextExtend>
+    >("list", [
+
+      init,
+
+      async (ctx, next) => {
+
+        ctx.crud.queryBuilder = await customSetup?.queryBuilder?.(ctx) || ctx.crud.dbi.clone()
+
+        await customSetup?.filter?.(ctx, ctx.crud.queryBuilder)
+
+        for (const entry of await customSetup?.orderBy?.(ctx) || [ { [ctx.crud.primaryKey]: "desc" } ]) {
+          if (typeof entry === "string") {
+            // @ts-expect-error
+            ctx.crud.queryBuilder.orderBy(entry)
+          }
+          else {
+            for (const [ col, ord ] of Object.entries(entry)) {
+              // @ts-expect-error
+              ctx.crud.queryBuilder.orderBy(col, ord)
+            }
+          }
+        }
+
+        ctx.crud.itemsPerPage = await customSetup?.itemsPerPage?.(ctx) || opt.itemsPerPage
+        ctx.crud.sidePages = await customSetup?.sidePages?.(ctx) || opt.sidePages
+
+        ctx.body = customHandler
+          ? await customHandler(ctx, { defaultHandler })
+          : await defaultHandler(ctx)
+
+        return next()
+
+      }
+
+    ])
+
+  }
+
+  return handlerFactory
 
 }
 

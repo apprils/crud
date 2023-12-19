@@ -7,6 +7,11 @@ export type ListResponse<ItemT> = {
   pager: Pager;
 }
 
+export type RetrieveResponse<ItemT, ItemAssetsT> = {
+  item: ItemT;
+  assets: ItemAssetsT;
+}
+
 export type Pager = {
   totalItems: number;
   totalPages: number;
@@ -16,14 +21,15 @@ export type Pager = {
   offset: number;
 }
 
-export type StoreState<ItemT, EnvT> = {
-  primaryKey: keyof ItemT,
-  env: EnvT,
-  items: ItemT[],
-  item: ItemT | undefined,
+export type StoreState<ItemT, ItemAssetsT, EnvT> = {
+  primaryKey: keyof ItemT;
+  env: EnvT;
+  items: ItemT[];
+  item: ItemT | undefined;
+  itemAssets: ItemAssetsT | undefined;
   itemEvent: StoreItemEvent;
-  loading: boolean,
-  pager: Pager,
+  loading: boolean;
+  pager: Pager;
   createDialog: boolean;
 }
 
@@ -32,9 +38,9 @@ export type StoreItemEvent = {
   id: ItemId | undefined;
 }
 
-export type StoreGetters<ItemT, EnvT> = {}
+export type StoreGetters<ItemT, ItemAssetsT, EnvT> = {}
 
-export type StoreActions<ItemT, EnvT> = {
+export type StoreActions<ItemT, ItemAssetsT, EnvT> = {
 
   setEnv: (
     env: EnvT,
@@ -49,6 +55,10 @@ export type StoreActions<ItemT, EnvT> = {
     item: ItemT,
   ) => void;
 
+  setItemAssets: (
+    itemAssets: ItemAssetsT,
+  ) => void;
+
   insertItem: (
     id: ItemId,
     item: ItemT,
@@ -56,6 +66,10 @@ export type StoreActions<ItemT, EnvT> = {
 
   patchItem: (
     updates: Partial<ItemT>,
+  ) => void;
+
+  patchItemAssets: (
+    updates: Partial<ItemAssetsT>,
   ) => void;
 
   updateItem: (
