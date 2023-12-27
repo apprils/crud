@@ -5,8 +5,6 @@ import type {
   Ctx as DefaultCtx,
 } from "@appril/core/router";
 
-import type { ZodSchema } from "zod";
-
 export type Config<ItemT = any> = {
   primaryKey: keyof ItemT;
   itemsPerPage: number;
@@ -37,8 +35,6 @@ export type CustomHandler<CtxT, ReturnT> = (
   ctx: CtxT,
   opt: { defaultHandler: DefaultHandler<CtxT, ReturnT> },
 ) => Promise<ReturnT>;
-
-export type ZodSchemaWrapper = (dataset: Record<string, any>) => ZodSchema
 
 export type Dataset = Record<string, any>
 

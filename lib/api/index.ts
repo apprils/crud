@@ -1,8 +1,7 @@
 
-import type {
-  CrudContext, Config,
-  Dataset, ZodSchemaWrapper,
-} from "./@types";
+import { type ZodTypeAny, z } from "zod";
+
+import type { CrudContext, Config, Dataset } from "./@types";
 
 import config from "./config";
 
@@ -24,7 +23,7 @@ export default function crudFactory<
   opt: {
     columns: (keyof ItemT)[],
     primaryKey?: keyof ItemT;
-    zodSchema?: ZodSchemaWrapper;
+    zodSchema?: Record<string, ZodTypeAny>;
     zodErrorHandler?: Function;
   }
 ) {
@@ -61,7 +60,7 @@ export default function crudFactory<
   const validatedDataset = function(
     this: CrudContext<
       ItemT,
-      { dataset: Dataset, zodSchema: ZodSchemaWrapper, zodErrorHandler: Function }
+      { dataset: Dataset, zodSchema: Record<string, ZodTypeAny>, zodErrorHandler: Function }
     >
   ) {
 
@@ -73,8 +72,15 @@ export default function crudFactory<
       return this.dataset
     }
 
+    const zodObject = z.object(
+      Object.keys(this.dataset).reduce((acc, col) => ({
+        ...acc,
+        [col]: this.zodSchema[col],
+      }), {})
+    )
+
     try {
-      this.zodSchema(this.dataset).parse(this.dataset)
+      zodObject.parse(this.dataset)
     }
     catch(error: any) {
       throw this.zodErrorHandler?.(error) || error

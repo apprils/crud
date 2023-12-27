@@ -1,13 +1,14 @@
 
+import type { ZodTypeAny } from "zod";
+
 import {
   type Middleware,
   post,
 } from "@appril/core/router";
 
 import type {
-  Ctx, Context,
+  Ctx, Context, Dataset,
   DefaultHandler, CustomHandler,
-  Dataset, ZodSchemaWrapper,
 } from "./@types";
 
 export default function createHandlerFactory<
@@ -15,7 +16,7 @@ export default function createHandlerFactory<
 >(
   init: Middleware<any, any>,
   opt: {
-    zodSchema?: ZodSchemaWrapper;
+    zodSchema?: Record<string, ZodTypeAny>;
     zodErrorHandler?: Function;
   },
 ) {
@@ -23,7 +24,7 @@ export default function createHandlerFactory<
   type CrudContextExtend = {
     dataset: Dataset;
     validatedDataset: Dataset;
-    zodSchema?: ZodSchemaWrapper;
+    zodSchema?: Record<string, ZodTypeAny>;
     zodErrorHandler?: Function;
   }
 
@@ -37,7 +38,7 @@ export default function createHandlerFactory<
   type CustomSetup = {
     dataset?: (ctx: CtxT) => Promise<Dataset>;
     datasetExtend?: (ctx: CtxT) => Promise<Dataset>;
-    zodSchema?: (ctx: CtxT) => Promise<ZodSchemaWrapper>;
+    zodSchema?: (ctx: CtxT) => Promise<Record<string, ZodTypeAny>>;
     zodErrorHandler?: (ctx: CtxT) => Promise<Function>;
   }
 
