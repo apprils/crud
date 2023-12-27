@@ -1,4 +1,8 @@
 
+<script setup lang="ts">
+  // mandatory
+</script>
+
 <template>
 <div class="overlay">
   <div class="overlay__inner">

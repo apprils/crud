@@ -1,23 +1,23 @@
 
 <script setup lang="ts">
-{{BANNER}}
 
 import { ref, onBeforeMount } from "vue";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import { Success, Error } from "@appril/ui";
 
-import { store } from "./base";
-import { useHandlers } from "./handlers";
+import {
+  type ItemT,
+  store,
+  useHandlers,
+} from "@crud:virtual-module-placeholder/base";
 
-import ControlButtons from "./ControlButtons.vue";
-import Pager from "./Pager.vue";
-import EditorPlaceholder from "./EditorPlaceholder.vue";
-
-import { Overlay } from "@appril/crud/client";
-import "@appril/crud/client/style.css";
+import ControlButtons from "@crud:virtual-module-placeholder/ControlButtons.vue";
+import Pager from "@crud:virtual-module-placeholder/Pager.vue";
+import EditorPlaceholder from "@crud:virtual-module-placeholder/EditorPlaceholder.vue";
+import Overlay from "@crud:virtual-module-placeholder/Overlay.vue";
 
 const props = defineProps<{
-  fullpageEditor?: boolean;
+  fullpageEditor?: boolean | "true" | "false";
 }>()
 
 const route = useRoute()
@@ -25,7 +25,7 @@ const route = useRoute()
 const error = ref()
 
 const {
-  itemRoute, itemKey, isActiveItem,
+  itemRoute, isActiveItem,
   loadEnv, envLoaded,
   loadItems, itemsLoaded,
   loadItem, itemLoaded,
@@ -58,15 +58,22 @@ onBeforeRouteUpdate((to, from) => {
 
 })
 
+function itemKey(
+  item: any,
+  prefix: string = "",
+): string {
+  return [
+    prefix || "",
+    item?.[store.primaryKey] || "",
+  ].map(String).join(":")
+}
+
 </script>
 
 <template>
 
 <Success v-model="store.itemEvent.event">
-  {{modelName}}
-  {{=[[ ]]=}}
-  #{{ store.itemEvent.id }} Successfully {{ store.itemEvent.event }}
-  [[={{ }}=]]
+  {{ store.$id }} #{{ store.itemEvent.id }} Successfully {{ store.itemEvent.event }}
 </Success>
 
 <Error v-model="error" />
@@ -91,8 +98,8 @@ onBeforeRouteUpdate((to, from) => {
 
 <slot name="container">
 
-  <div v-if="props.fullpageEditor">
-    <slot v-if="store.item" :item="store.item"
+  <div v-if="props.fullpageEditor === true || props.fullpageEditor === 'true'">
+    <slot v-if="store.item" :item="store.item satisfies ItemT"
       :key="itemKey(store.item, 'editor')" />
     <slot v-else name="editorPlaceholder">
       <EditorPlaceholder />
@@ -124,39 +131,32 @@ onBeforeRouteUpdate((to, from) => {
               :class="{ 'list-group-item-primary': isActiveItem(item) }"
               style="position: relative; min-height: 24px;">
 
-              <slot name="listItem" :item="item">
+              <slot name="listItem" :item="item satisfies ItemT">
 
-                <slot name="listItemName" :item="item">
-                  <slot name="listItemNamePrefix" :item="item" />
-                  <slot name="listItemNameLink" :item="item">
+                <slot name="listItemName" :item="item satisfies ItemT">
+                  <slot name="listItemNamePrefix" :item="item satisfies ItemT" />
+                  <slot name="listItemNameLink" :item="item satisfies ItemT">
                     <RouterLink :to="itemRoute(item)">
-                      <slot name="listItemNameText" :item="item">
-                        {{=[[ ]]=}}
-                        {{ "name" in item ? item.name : "" }}
-                        [[={{ }}=]]
+                      <slot name="listItemNameText" :item="item satisfies ItemT">
+                        {{  "name" in item ? item.name : "" }}
                       </slot>
                     </RouterLink>
                   </slot>
-                  <slot name="listItemNameSuffix" :item="item" />
+                  <slot name="listItemNameSuffix" :item="item satisfies ItemT" />
                 </slot>
 
-                <slot name="listItemId" :item="item">
+                <slot name="listItemId" :item="item satisfies ItemT">
                   <div style="position: absolute; top: 0; right: 3px; font-size: .7rem;">
-                    <slot name="listItemIdLink" :item="item">
+                    <slot name="listItemIdLink" :item="item satisfies ItemT">
                       <RouterLink :to="itemRoute(item)" class="text-muted">
-                        <slot name="listItemIdText" :item="item">
-                          {{=[[ ]]=}}
-                          #{{
-                          [[={{ }}=]]
-                            item.{{primaryKey}}
-                          {{=[[ ]]=}}
-                          }}
-                          [[={{ }}=]]
+                        <slot name="listItemIdText" :item="item satisfies ItemT">
+                          #{{ item[store.primaryKey] }}
                         </slot>
                       </RouterLink>
                     </slot>
                   </div>
                 </slot>
+
               </slot>
 
             </li>
@@ -172,7 +172,7 @@ onBeforeRouteUpdate((to, from) => {
     </div>
 
     <div class="col-lg-9">
-      <slot v-if="store.item" name="editor" :item="store.item"
+      <slot v-if="store.item" name="editor" :item="store.item satisfies ItemT"
         :key="itemKey(store.item, 'editor')" />
       <slot v-else name="editorPlaceholder">
         <EditorPlaceholder />

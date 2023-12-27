@@ -1,4 +1,3 @@
-{{BANNER}}
 
 {{#apiTypes.typeDeclarations}}
 {{.}}

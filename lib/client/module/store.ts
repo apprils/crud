@@ -1,32 +1,31 @@
-{{BANNER}}
 
 import { defineStore } from "pinia";
 
-import type { StoreOnActionListener } from "pinia";
+import type { StoreOnActionListener, } from "pinia";
 
-import type {
-  StoreState, StoreGetters, StoreActions,
-  Pager, ItemId,
-} from "@appril/crud/client";
+import type { StoreState, StoreGetters, StoreActions } from "@appril/crud/client";
 
-import type { ItemT, ItemAssetsT, EnvT } from "./types";
-
-import custom from "{{crudDir}}/store";
+import {
+  type ItemT,
+  type ItemAssetsT,
+  type EnvT,
+  primaryKey, modelName,
+} from "@crud:virtual-module-placeholder/assets";
 
 type StateT = StoreState<ItemT, ItemAssetsT, EnvT>
 type GettersT = StoreGetters<ItemT, ItemAssetsT, EnvT>
 type ActionsT = StoreActions<ItemT, ItemAssetsT, EnvT>
 
 export const useStore = defineStore<
-  "{{basename}}",
+  typeof modelName,
   StateT,
   GettersT,
   ActionsT
->("{{basename}}", {
+>(modelName, {
 
   state: () => {
     return {
-      primaryKey: "{{primaryKey}}",
+      primaryKey,
       env: {} as EnvT,
       items: [],
       item: undefined,
@@ -45,22 +44,18 @@ export const useStore = defineStore<
     }
   },
 
-  getters: {
-    ...custom.getters,
-  },
-
   actions: {
 
     setEnv(
-      env: EnvT,
+      env,
     ) {
       // $patch({ env }) would cause cache issues with complex/nested items
-      this.$patch((state) => { state.env = env as EnvT })
+      this.$patch((state) => { state.env = env })
     },
 
     setItems(
-      items: any[],
-      pager: Pager,
+      items,
+      pager,
     ) {
       // $patch({ items, pager }) would cause cache issues with complex/nested items
       this.$patch((state) => {
@@ -70,74 +65,88 @@ export const useStore = defineStore<
     },
 
     setItem(
-      item: any,
+      item,
     ) {
       // $patch({ item }) would cause cache issues with complex/nested items
-      this.$patch((state) => state.item = { ...state.item, ...item })
+      this.$patch((state) => {
+        state.item = item
+      })
     },
 
     setItemAssets(
-      itemAssets: any,
+      itemAssets,
     ) {
       // $patch({ itemAssets }) would cause cache issues with complex/nested items
-      this.$patch((state) => state.itemAssets = itemAssets)
+      this.$patch((state) => {
+        state.itemAssets = itemAssets
+      })
     },
 
     insertItem(
-      id: ItemId,
-      item: any,
+      id,
+      item,
     ) {
       // signalling item created
     },
 
     patchItem(
-      updates: any,
+      updates,
     ) {
       // $patch({ item }) would cause cache issues with complex/nested items
-      this.$patch((state) => state.item = { ...state.item, ...updates })
+      this.$patch((state) => {
+        if (state.item && updates) {
+          state.item = { ...state.item, ...updates }
+        }
+      })
     },
 
     patchItemAssets(
-      updates: any,
+      updates,
     ) {
       // $patch({ itemAssets }) would cause cache issues with complex/nested items
-      this.$patch((state) => state.itemAssets = { ...state.itemAssets, ...updates })
+      this.$patch((state) => {
+        if (state.itemAssets && updates) {
+          state.itemAssets = { ...state.itemAssets || {}, ...updates }
+        }
+      })
     },
 
     updateItem(
-      id: ItemId,
-      updates: any,
+      id,
+      updates,
     ) {
       this.$patch((state) => {
-        Object.assign(state.item || {}, updates)
-        for (const item of state.items) {
-          if (item[state.primaryKey] == id) {
-            Object.assign(item, updates)
+        if (state.item && updates) {
+          state.item = { ...state.item, ...updates }
+          for (const item of state.items) {
+            if (item && item[primaryKey] == id) {
+              Object.assign(item, updates)
+            }
           }
         }
       })
     },
 
     unshiftItem(
-      item: any,
+      item,
     ) {
       this.items.unshift(item)
     },
 
     async removeItem(
-      id: ItemId,
+      id,
     ) {
-      this.$patch((state) => state.items = state.items.filter((e: any) => e[state.primaryKey] != id))
+      this.$patch((state) => {
+        state.items = state.items.filter((e) => e[primaryKey] != id)
+      })
     },
-
-    ...custom.actions,
 
   },
 
 })
 
-export const actionListeners: StoreOnActionListener<
-  "{{basename}}",
+const actionListeners: StoreOnActionListener<
+  typeof modelName,
   StateT,
   GettersT,
   ActionsT
@@ -146,11 +155,14 @@ export const actionListeners: StoreOnActionListener<
   function({ store, name, args, after }) {
 
     if (name === "setItem") {
+
       const [ item ] = args
-      const id = item?.[store.primaryKey]
+
+      const id = item?.[primaryKey]
+
       if (id) {
         after(() => {
-          if (!store.items.some((e) => e[store.primaryKey] == id)) {
+          if (!store.items.some((e) => e[primaryKey] == id)) {
             store.unshiftItem(item)
           }
         })
@@ -165,7 +177,10 @@ export const actionListeners: StoreOnActionListener<
       store.itemEvent = { event: "Updated", id: args[0] }
     }
     else if (name === "patchItem") {
-      store.itemEvent = { event: "Updated", id: store.item?.[store.primaryKey] as ItemId }
+      store.itemEvent = {
+        event: "Updated",
+        id: store.item?.[primaryKey]
+      }
     }
     else if (name === "removeItem") {
       store.itemEvent = { event: "Deleted", id: args[0] }
@@ -173,7 +188,11 @@ export const actionListeners: StoreOnActionListener<
 
   },
 
-  ...custom.actionListeners,
-
 ]
+
+export default {
+  useStore,
+  get actionListeners() { return [ ...actionListeners ] },
+  set actionListeners(_) { throw "actionListeners is readonly" },
+}
 

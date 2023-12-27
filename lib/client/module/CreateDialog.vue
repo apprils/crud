@@ -1,12 +1,14 @@
 
 <script setup lang="ts">
-{{BANNER}}
 
 import { IconOrSpinner } from "@appril/ui";
 
-import type { ItemT, ItemI } from "./types";
-import { store } from "./base";
-import { useHandlers } from "./handlers";
+import {
+  type ItemT,
+  type ItemI,
+  store,
+  useHandlers,
+} from "@crud:virtual-module-placeholder/base";
 
 const props = defineProps<{
   modelValue: ItemI;
@@ -40,7 +42,7 @@ function close() {
 
   <template #header.fw-semibold.fst-italic>
     <slot name="header" :create="create">
-      New {{modelName}}
+      New {{ store.$id }}
     </slot>
   </template>
 

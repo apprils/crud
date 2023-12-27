@@ -1,4 +1,6 @@
 
+import { resolve, join } from "path";
+
 import * as tsquery from "@phenomnomnominal/tsquery";
 
 import {
@@ -9,6 +11,8 @@ import {
   type Node,
 } from "typescript";
 
+import type { ApiTypes } from "../client/@types";
+
 const METHODS = [
   "envHandler",
   "retrieveHandler",
@@ -18,16 +22,15 @@ const METHODS_REGEX = new RegExp(`\\b(${ METHODS.join("|") })\\b`)
 
 type Method = typeof METHODS[number]
 
-type TypeDefinitions = {
-  EnvT?: string;
-  ItemAssetsT?: string;
-}
-
-export function parseFile(
+export function extractTypes(
   src: string,
+  opt: {
+    root: string;
+    base: string;
+  },
 ): {
   typeDeclarations: string[];
-} & TypeDefinitions {
+} & ApiTypes {
 
   const ast = tsquery.ast(src)
 
@@ -52,17 +55,15 @@ export function parseFile(
   )
 
   const typeDeclarations = new Set
-  const typeDefinitions: TypeDefinitions = {}
+  const typeDefinitions: ApiTypes = {}
 
   for (const node of importDeclarations) {
 
-    // handling relative paths, namely replacing
-    // ../ with ../../
-    // ./ with ../
-    const path = node.moduleSpecifier.getText()
-      .replace(/^\W|\W$/g, "")      // removing quotes
-      .replace(/^\.\.\//, "../../") // ../ -> ../../ (should go before ./)
-      .replace(/^\.\//, "../")      // ./ -> ../
+    let path = node.moduleSpecifier.getText().replace(/^\W|\W$/g, ""/** removing quotes */)
+
+    if (/^\.\.?\/?/.test(path)) {
+      path = join(opt.root, resolve(opt.base, path))
+    }
 
     for (const spec of tsquery.match(node, "ImportSpecifier") as ImportSpecifier[]) {
 

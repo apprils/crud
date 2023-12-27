@@ -1,5 +1,5 @@
 
-import api from "./@base/api";
+import { {{basename}} as api } from "..";
 
 export default [
 

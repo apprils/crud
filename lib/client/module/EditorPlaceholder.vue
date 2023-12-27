@@ -1,8 +1,7 @@
 
 <script setup lang="ts">
-{{BANNER}}
 
-import { store } from "./base";
+import { store } from "@crud:virtual-module-placeholder/base";
 
 </script>
 
@@ -10,10 +9,7 @@ import { store } from "./base";
 
 <div class="d-flex justify-content-center">
   <h2>
-    Total Items:
-    {{=[[ ]]=}}
-    {{ store.pager.totalItems }}
-    [[={{ }}=]]
+    Total Items: {{ store.pager.totalItems }}
   </h2>
 </div>
 
