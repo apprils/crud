@@ -1,92 +1,105 @@
 
-import type { RetrieveMiddleware as Middleware } from "./@types";
+import {
+  type Middleware,
+  get,
+} from "@appril/core/router";
 
-type Methods =
-  | "init"
-  | "query"
-  | "returning"
-  | "before"
-  | "retrieve"
-  | "after"
-  | "serialize"
-  | "response"
+import type {
+  Ctx, Context, GenericObject,
+  DefaultHandler, CustomHandler,
+} from "./@types";
 
-export default function <QueryBuilderT, RecordT, StateT, ContextT>(): {
-  [key in Methods]: Middleware<QueryBuilderT, RecordT, StateT, ContextT>;
-} {
+export default function retrieveHandlerFactory<
+  ItemT,
+  QueryBuilder,
+>(
+  init: Middleware<any, any>,
+) {
 
-  return {
+  type CrudContextExtend = {
+    queryBuilder: QueryBuilder;
+  }
 
-    init(env, next) {
+  type CtxT = Ctx<
+    ItemT,
+    CrudContextExtend
+  >
 
-      const { crud } = env
+  type ReturnT = ItemT | undefined
 
-      crud.query = crud.dbi.clone().where(crud.primaryKey, env.params._id)
-      crud.returning = []
+  type CustomSetup = {
+    queryBuilder?: (ctx: CtxT) => Promise<QueryBuilder>;
+    assets?: (ctx: CtxT, item: ItemT) => Promise<GenericObject>;
+  }
 
-      return next()
+  const defaultHandler: DefaultHandler<CtxT, ReturnT> = async function(
+    ctx: CtxT,
+  ): Promise<ReturnT> {
 
-    },
+    const { crud } = ctx
 
-    query(env, next) {
-      return next()
-    },
-
-    returning(env, next) {
-      return next()
-    },
-
-    before(env, next) {
-      return next()
-    },
-
-    async retrieve(env, next) {
-
-      const { crud } = env
-      const { query }: any = crud
-
-      const returning = crud.returning.length
-        ? [ crud.primaryKey, ...crud.returning ]
-        : "*"
-
-      const item: RecordT = await query.first(returning)
-
-      if (!item) {
-        return
-      }
-
-      if (crud.returningExclude.length) {
-
-        crud.item = Object.entries(item).reduce((memo, [ col, val ]) => ({
-          ...memo,
-          ...crud.returningExclude.includes(col)
-            ? {}
-            : { [col]: val }
-        }), {} as RecordT)
-
-      }
-      else {
-        crud.item = item
-      }
-
-      return next()
-
-    },
-
-    after(env, next) {
-      return next()
-    },
-
-    serialize(env, next) {
-      return next()
-    },
-
-    response(env, next) {
-      env.body = env.crud.item
-      return next()
-    },
+    return crud.queryBuilder
+      // @ts-expect-error
+      .where(crud.primaryKey, ctx.params._id)
+      .find(crud.returningLiteral)
 
   }
+
+  function handlerFactory(
+    customSetup: CustomSetup, 
+  ): unknown
+
+  function handlerFactory(
+    customHandler?: CustomHandler<CtxT, ReturnT>,
+  ): unknown
+
+  function handlerFactory(
+    arg: unknown,
+  ) {
+
+    let customSetup: CustomSetup
+    let customHandler: CustomHandler<CtxT, ReturnT>
+
+    if (typeof arg === "function") {
+      customHandler = arg as typeof customHandler
+    }
+    else {
+      customSetup = arg as typeof customSetup
+    }
+
+    return get<
+      any,
+      Context<ItemT, CrudContextExtend>
+    >(":_id", [
+
+      init,
+
+      async (ctx, next) => {
+
+        ctx.crud.queryBuilder = await customSetup?.queryBuilder?.(ctx) || ctx.crud.dbi.clone()
+
+        const item = customHandler
+          ? await customHandler(ctx, { defaultHandler })
+          : await defaultHandler(ctx)
+
+        if (!item) {
+          return
+        }
+
+        ctx.body = {
+          item,
+          assets: await customSetup?.assets?.(ctx, item)
+        }
+
+        return next()
+
+      }
+
+    ])
+
+  }
+
+  return handlerFactory
 
 }
 

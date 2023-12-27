@@ -1,14 +1,12 @@
 
 <script setup lang="ts">
-{{BANNER}}
 
 import { ref } from "vue";
 import { Icon, Confirm } from "@appril/ui";
 
-import { store, modelName, useHandlers } from "./base";
+import { store, useHandlers } from "@crud:virtual-module-placeholder/base";
 
 const { deleteItem, itemDeleted, closeItem } = useHandlers()
-
 const deleteItemId = ref<null | string>(null)
 
 </script>
@@ -18,9 +16,7 @@ const deleteItemId = ref<null | string>(null)
 <Confirm v-model="deleteItemId" @on-confirm="() => deleteItem().then(itemDeleted)">
   You are about to
   <b class="text-danger">DELETE</b>
-  {{=[[ ]]=}}
-  {{ modelName }} #{{ deleteItemId }}!
-  [[={{ }}=]]
+  {{ store.$id }} #{{ deleteItemId }}!
 </Confirm>
 
 <div class="d-flex gap-2" style="position: fixed; top: 12px; right: 20px; z-index: 1030;">
@@ -33,7 +29,7 @@ const deleteItemId = ref<null | string>(null)
 
   <slot name="deleteButton">
     <button v-if="store.item" type="button" class="btn btn-sm btn-outline-danger"
-      @click="deleteItemId = String(store.item.{{primaryKey}})">
+      @click="deleteItemId = String(store.item[store.primaryKey])">
       <Icon trash />
     </button>
   </slot>

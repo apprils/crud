@@ -7,3 +7,5 @@ export const config: Config = {
   sidePages: 4,
 }
 
+export default config
+

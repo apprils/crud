@@ -1,10 +1,12 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "@appril/dev/tsconfig.lib.json",
   "include": [
     ".",
     "env.d.ts"
   ],
   "compilerOptions": {
+    "emitDeclarationOnly": true,
     "outDir": "../../pkg/vite-plugin"
   }
 }
+

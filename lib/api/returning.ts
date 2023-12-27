@@ -1,15 +1,15 @@
 
 import {
   type Middleware,
-  get,
+  use,
 } from "@appril/core/router";
 
 import type {
-  Ctx, Context,
-  GenericObject, DefaultHandler,
+  CrudContext, Context, Ctx,
+  DefaultHandler,
 } from "./@types";
 
-export default function envHandlerFactory<
+export default function returningHandlerFactory<
   ItemT,
 >(
   init: Middleware<any, any>,
@@ -17,17 +17,19 @@ export default function envHandlerFactory<
 
   type CtxT = Ctx<ItemT>
 
-  return function handlerFactory<ReturnT extends GenericObject = {}>(
+  type ReturnT = CrudContext<ItemT>["returning"]
+
+  return function handlerFactory(
     handler: DefaultHandler<CtxT, ReturnT>,
   ) {
 
-    return get<
+    return use<
       any,
       Context<ItemT>
-    >("env", [
+    >([
       init,
       async (ctx, next) => {
-        ctx.body = await handler(ctx)
+        ctx.crud.returning = await handler(ctx)
         return next()
       }
     ])

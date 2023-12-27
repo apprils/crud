@@ -1,10 +1,9 @@
 
 <script setup lang="ts">
-{{BANNER}}
 
 import { Icon } from "@appril/ui";
 
-import { store, useHandlers } from "./base"
+import { store, useHandlers } from "@crud:virtual-module-placeholder/base";
 
 const { gotoPage } = useHandlers()
 
@@ -21,9 +20,7 @@ const { gotoPage } = useHandlers()
 
   <button type="button" @click="gotoPage(store.pager.prevPage)"
     class="btn btn-outline-secondary" :disabled="!store.pager.prevPage">
-    {{=[[ ]]=}}
     <Icon angle-left /> {{ store.pager.prevPage }}
-    [[={{ }}=]]
   </button>
 
   <input type="text" :value="store.pager.currentPage"
@@ -32,9 +29,7 @@ const { gotoPage } = useHandlers()
 
   <button type="button" @click="gotoPage(store.pager.nextPage)"
     class="btn btn-outline-secondary" :disabled="!store.pager.nextPage">
-    {{=[[ ]]=}}
     {{ store.pager.nextPage }} <Icon angle-right />
-    [[={{ }}=]]
   </button>
 
   <button type="button" @click="gotoPage(store.pager.totalPages)"
@@ -47,11 +42,9 @@ const { gotoPage } = useHandlers()
 
 <div class="d-flex justify-content-center">
   <small v-if="store.pager.totalItems > 0" class="text-muted">
-    {{=[[ ]]=}}
     {{ store.pager.offset + 1 }}
     - {{ store.pager.offset + store.items.length }}
     of {{ store.pager.totalItems }}
-    [[={{ }}=]]
   </small>
 </div>
 

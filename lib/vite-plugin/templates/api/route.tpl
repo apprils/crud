@@ -1,5 +1,17 @@
 
-import { {{varName}} as $api } from "..";
+import { {{basename}} as api } from "..";
 
-export default $api()
+export default [
+
+  api.listHandler(),
+
+  api.retrieveHandler(),
+
+  api.createHandler(),
+
+  api.updateHandler(),
+
+  api.deleteHandler(),
+
+]
 

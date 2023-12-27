@@ -13,15 +13,24 @@ export function render<Context = {}>(template: string, context: Context): string
   return mustache.render(template, { ...context })
 }
 
-export function renderToFile<Context = {}>(
+export async function renderToFile<Context = {}>(
   file: string,
   template: string,
   context: Context,
+  opts: { overwrite?: boolean } = {},
 ): Promise<void> {
+
+  if (opts?.overwrite === false) {
+    if (await fsx.exists(file)) {
+      return
+    }
+  }
+
   return fsx.outputFile(
     file,
     render(template, context),
     "utf8"
   )
+
 }
 

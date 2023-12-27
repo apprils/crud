@@ -1,18 +1,18 @@
 
 <script setup lang="ts">
-{{BANNER}}
 
-import { ref } from "vue";
-import { IconOrSpinner, Error } from "@appril/ui";
+import { IconOrSpinner } from "@appril/ui";
 
-import type { ItemT, ItemI } from "./base";
-import { store, useHandlers } from "./base";
+import {
+  type ItemT,
+  type ItemI,
+  store,
+  useHandlers,
+} from "@crud:virtual-module-placeholder/base";
 
 const props = defineProps<{
   modelValue: ItemI;
 }>()
-
-const { createItem, itemCreated } = useHandlers()
 
 const emit = defineEmits<{
   mounted: [];
@@ -20,17 +20,13 @@ const emit = defineEmits<{
   close: [];
 }>()
 
-const creating = ref(false)
-const error = ref(null)
+const { createItem, itemCreated } = useHandlers()
 
 function create() {
-  creating.value = true
   return createItem(props.modelValue)
     .then(itemCreated)
     .then((item) => emit("created", item))
     .then(close)
-    .catch((e: any) => error.value = e.message)
-    .finally(() => creating.value = false)
 }
 
 function close() {
@@ -42,13 +38,11 @@ function close() {
 
 <template>
 
-<Error v-model="error" />
-
 <Modal @mounted="$emit('mounted')" @close="close">
 
   <template #header.fw-semibold.fst-italic>
     <slot name="header" :create="create">
-      New {{modelName}}
+      New {{ store.$id }}
     </slot>
   </template>
 
@@ -59,7 +53,7 @@ function close() {
   <template #footer>
     <slot name="footer" :create="create">
       <button type="button" @click="create" class="btn btn-primary">
-        <IconOrSpinner plus :spin="creating" />
+        <IconOrSpinner plus :spin="store.loading" />
         Create
       </button>
     </slot>

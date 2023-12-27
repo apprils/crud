@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-{{BANNER}}
+  // mandatory
 </script>
 
 <template>

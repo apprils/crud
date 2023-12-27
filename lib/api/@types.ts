@@ -1,111 +1,42 @@
 
-import type { DefaultContext, Middleware } from "@appril/core/router";
+import type {
+  DefaultState,
+  DefaultContext,
+  Ctx as DefaultCtx,
+} from "@appril/core/router";
 
-export type Config = {
-  primaryKey: string;
+export type Config<ItemT = any> = {
+  primaryKey: keyof ItemT;
   itemsPerPage: number;
   sidePages: number;
 }
 
-export type Payload = Record<string, any>
+export type CrudContext<ItemT, Extend = {}> = {
+  readonly dbi: any;
+  readonly columns: (keyof ItemT)[],
+  readonly primaryKey: keyof ItemT;
+  returning?: (keyof ItemT)[];
+  returningExclude?: (keyof ItemT)[];
+  returningLiteral: (keyof ItemT)[] | "*";
+} & Extend
+
+export type Context<ItemT, Extend = unknown> = DefaultContext & {
+  readonly crud: CrudContext<ItemT, Extend>
+}
+
+export type Ctx<ItemT, Extend = unknown> = DefaultCtx<
+  DefaultState,
+  Context<ItemT, Extend>
+>;
+
+export type DefaultHandler<CtxT, ReturnT> = (ctx: CtxT) => Promise<ReturnT>;
+
+export type CustomHandler<CtxT, ReturnT> = (
+  ctx: CtxT,
+  opt: { defaultHandler: DefaultHandler<CtxT, ReturnT> },
+) => Promise<ReturnT>;
 
 export type Dataset = Record<string, any>
 
-type Context<CrudContextT, ContextT> = {
-  crud: {
-    dbi: any;
-    primaryKey: string;
-    returningExclude: string[];
-  } & CrudContextT;
-} & DefaultContext & ContextT
-
-export type GenericMiddleware<StateT = {}, ContextT = {}> = Middleware<
-  StateT,
-  Context<{}, ContextT>
->
-
-export type DatasetFromPayloadOption =
-  | boolean
-  | ((payload: Payload) => Dataset)
-  | { [key: string]: { nullify?: boolean, exclude?: boolean } | ((payload: Payload) => any) }
-
-export type DatasetFromPayloadContext = {
-  payload: Payload;
-  dataset: any;
-}
-
-export type DatasetMiddleware<StateT, ContextT> = Middleware<
-  StateT,
-  Context<DatasetFromPayloadContext, ContextT>
->
-
-type EnvContext = {}
-
-export type EnvMiddleware<StateT, ContextT> = Middleware<
-  StateT,
-  Context<EnvContext, ContextT>
->
-
-type ListContext<QueryBuilderT, RecordT> = {
-  returning: string[];
-  itemsPerPage: number;
-  sidePages: number;
-  query: QueryBuilderT;
-  items: RecordT[];
-  pager: {
-    totalItems: number;
-    totalPages: number;
-    currentPage: number;
-    nextPage: number;
-    prevPage: number;
-    offset: number;
-  };
-}
-
-export type ListMiddleware<QueryBuilderT, RecordT, StateT, ContextT> = Middleware<
-  StateT,
-  Context<ListContext<QueryBuilderT, RecordT>, ContextT>
->
-
-type RetrieveContext<QueryBuilderT, RecordT> = {
-  query: QueryBuilderT;
-  returning: string[];
-  item: RecordT;
-}
-
-export type RetrieveMiddleware<QueryBuilderT, RecordT, StateT, ContextT> = Middleware<
-  StateT,
-  Context<RetrieveContext<QueryBuilderT, RecordT>, ContextT>
->
-
-type CreateContext<RecordT> = {
-  item: RecordT;
-  returning: string[];
-}
-
-export type CreateMiddleware<RecordT, StateT, ContextT> = Middleware<
-  StateT,
-  Context<CreateContext<RecordT> & DatasetFromPayloadContext, ContextT>
->
-
-type UpdateContext<RecordT> = {
-  item: RecordT;
-  returning: string[];
-}
-
-export type UpdateMiddleware<RecordT, StateT, ContextT> = Middleware<
-  StateT,
-  Context<UpdateContext<RecordT> & DatasetFromPayloadContext, ContextT>
->
-
-type DeleteContext<QueryBuilderT, RecordT> = {
-  query: QueryBuilderT;
-  item: RecordT;
-  returning: string[];
-}
-
-export type DeleteMiddleware<QueryBuilderT, RecordT, StateT, ContextT> = Middleware<
-  StateT,
-  Context<DeleteContext<QueryBuilderT, RecordT>, ContextT>
->
+export type GenericObject = Record<string, any>
 
