@@ -9,8 +9,8 @@ declare module "*.vue" {
 
 declare module "@appril/crud/client" {
   export * from "./@types";
-  export const Layout: any;
-  export const CreateDialog: any;
+  import { handlersFactory } from import("./handlers");
+  export { handlersFactory };
 }
 
 declare module "@crud:virtual-module-placeholder/assets" {
