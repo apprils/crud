@@ -9,8 +9,9 @@ declare module "*.vue" {
 
 declare module "@appril/crud/client" {
   export * from "./@types";
+  import { storeFactory } from import("./store");
   import { handlersFactory } from import("./handlers");
-  export { handlersFactory };
+  export { storeFactory, handlersFactory };
 }
 
 declare module "@crud:virtual-module-placeholder/assets" {
@@ -53,12 +54,7 @@ declare module "@crud:virtual-module-placeholder/store" {
   >;
 
   export const useStore: UseStore = function() {};
-  const actionListeners: any[] = []
-
-  export default {
-    useStore,
-    actionListeners,
-  };
+  export const actionListeners: any[] = []
 
 }
 
