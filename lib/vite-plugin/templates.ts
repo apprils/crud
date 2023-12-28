@@ -1,40 +1,40 @@
 
 import type { Templates } from "./@types";
 
-import apiTpl from "./templates/module/_api.ts.tpl";
-import baseTpl from "./templates/module/_base.ts.tpl";
+import apiTpl from "./templates/client/_api.ts.tpl";
+import baseTpl from "./templates/client/_base.ts.tpl";
 
-import ControlButtonsTpl from "./templates/module/_ControlButtons.vue.tpl";
-import ControlButtonsDtsTpl from "./templates/module/_ControlButtons.vue.d.ts.tpl";
+import ControlButtonsTpl from "./templates/client/_ControlButtons.vue.tpl";
+import ControlButtonsDtsTpl from "./templates/client/_ControlButtons.vue.d.ts.tpl";
 
-import CreateDialogTpl from "./templates/module/_CreateDialog.vue.tpl";
-import CreateDialogDtsTpl from "./templates/module/_CreateDialog.vue.d.ts.tpl";
+import CreateDialogTpl from "./templates/client/_CreateDialog.vue.tpl";
+import CreateDialogDtsTpl from "./templates/client/_CreateDialog.vue.d.ts.tpl";
 
-import EditorPlaceholderTpl from "./templates/module/_EditorPlaceholder.vue.tpl";
-import EditorPlaceholderDtsTpl from "./templates/module/_EditorPlaceholder.vue.d.ts.tpl";
+import EditorPlaceholderTpl from "./templates/client/_EditorPlaceholder.vue.tpl";
+import EditorPlaceholderDtsTpl from "./templates/client/_EditorPlaceholder.vue.d.ts.tpl";
 
-import handlersTpl from "./templates/module/_handlers.ts.tpl";
-import indexTpl from "./templates/module/_index.ts.tpl";
+import handlersTpl from "./templates/client/_handlers.ts.tpl";
+import indexTpl from "./templates/client/_index.ts.tpl";
 
-import LayoutTpl from "./templates/module/_Layout.vue.tpl";
-import LayoutDtsTpl from "./templates/module/_Layout.vue.d.ts.tpl";
+import LayoutTpl from "./templates/client/_Layout.vue.tpl";
+import LayoutDtsTpl from "./templates/client/_Layout.vue.d.ts.tpl";
 
-import OverlayTpl from "./templates/module/_Overlay.vue.tpl";
-import OverlayDtsTpl from "./templates/module/_Overlay.vue.d.ts.tpl";
+import OverlayTpl from "./templates/client/_Overlay.vue.tpl";
+import OverlayDtsTpl from "./templates/client/_Overlay.vue.d.ts.tpl";
 
-import PagerTpl from "./templates/module/_Pager.vue.tpl";
-import PagerDtsTpl from "./templates/module/_Pager.vue.d.ts.tpl";
+import PagerTpl from "./templates/client/_Pager.vue.tpl";
+import PagerDtsTpl from "./templates/client/_Pager.vue.d.ts.tpl";
 
-import setupTpl from "./templates/module/_setup.ts.tpl";
-import storeTpl from "./templates/module/_store.ts.tpl";
+import setupTpl from "./templates/client/_setup.ts.tpl";
+import storeTpl from "./templates/client/_store.ts.tpl";
 
-import assetsTpl from "./templates/module/assets.tpl";
-import apiTypesTpl from "./templates/module/apiTypes.tpl";
-import moduleTpl from "./templates/module/module.tpl";
+import assetsTpl from "./templates/client/assets.tpl";
+import apiTypesTpl from "./templates/client/apiTypes.tpl";
+import modulesTpl from "./templates/client/modules.tpl";
 
-import apiBundleTpl from "./templates/api/bundle.tpl";
+import apiConstructorsTpl from "./templates/api/_constructors.tpl";
 
-export const defaultTemplatesFactory = (): Required<Templates> => ({
+export const clientTemplatesFactory = (): Required<Templates> => ({
 
   "assets.ts": assetsTpl,
   "apiTypes.ts": apiTypesTpl,
@@ -69,7 +69,7 @@ export const defaultTemplatesFactory = (): Required<Templates> => ({
 })
 
 export const extraTemplatesFactory = () => ({
-  module: moduleTpl,
-  apiBundle: apiBundleTpl,
+  clientModules: modulesTpl,
+  apiConstructors: apiConstructorsTpl,
 })
 

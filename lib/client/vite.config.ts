@@ -38,7 +38,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
 
   for (
     const entry of await readdir(
-      resolve(__dirname, "module"),
+      resolve(__dirname, "templates"),
       { withFileTypes: true }
     )
   ) {
@@ -62,7 +62,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
       }
 
       await writeFile(
-        resolve(__dirname, `module/${ basename(name) }`),
+        resolve(__dirname, `templates/${ basename(name) }`),
         text,
         "utf8"
       )

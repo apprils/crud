@@ -19,11 +19,11 @@ import type {
 
 import type { ApiTypes } from "../client/@types";
 
-import { defaultTemplatesFactory, extraTemplatesFactory } from "./templates";
+import { clientTemplatesFactory, extraTemplatesFactory } from "./templates";
 import { BANNER, renderToFile, render } from "./render";
 import { extractTypes } from "./ast";
 
-const defaultTemplates = defaultTemplatesFactory()
+const clientTemplates = clientTemplatesFactory()
 const extraTemplates = extraTemplatesFactory()
 
 type DbxConfig = PgtsConfig & {
@@ -75,7 +75,7 @@ export async function vitePluginApprilCrud(
   const typesImportBase = join(dbxConfig.importBase, dbxConfig.base, dbxConfig.typesDir)
   const tablesImportBase = join(dbxConfig.importBase, dbxConfig.base, dbxConfig.tablesDir)
 
-  const templates = { ...defaultTemplates }
+  const templates = { ...clientTemplates }
 
   for (
     const [
@@ -147,7 +147,7 @@ export async function vitePluginApprilCrud(
     {
 
       // generating a bundle file containing api constructors for all tables
-      await renderToFile(rootPath(apiDir, base, "index.ts"), extraTemplates.apiBundle, {
+      await renderToFile(rootPath(apiDir, base, "index.ts"), extraTemplates.apiConstructors, {
         BANNER,
         typesImportBase,
         tablesImportBase,
@@ -178,10 +178,10 @@ export async function vitePluginApprilCrud(
         prefix
       )
 
-      // do not render client/module/* templates, they contain no mustache code!
+      // do not render templates/client/_* files, they contain no mustache code!
       // rendering them would break vue templates!
       // only 2 templates contains mustache code - assets.ts and apiTypes.ts,
-      // and client/module/* templates imports them for module static data.
+      // and templates/client/_* files imports them for module static data.
       if (tpl === "assets.ts" || tpl === "apiTypes.ts") {
 
         const context: Record<string, any> = {
@@ -227,7 +227,7 @@ export async function vitePluginApprilCrud(
 
     }
 
-    for (const tpl of Object.keys(defaultTemplates) as (keyof Templates)[]) {
+    for (const tpl of Object.keys(clientTemplates) as (keyof Templates)[]) {
       const mdl = moduleFactory(tpl)
       avModules[mdl.id] = mdl
     }
@@ -235,7 +235,7 @@ export async function vitePluginApprilCrud(
     // regenerating whole bundle, even if single table updated
     await renderToFile(
       rootPath(base + ".d.ts"),
-      extraTemplates.module,
+      extraTemplates.clientModules,
       {
         BANNER,
         avModules: Object.values(avModules),
