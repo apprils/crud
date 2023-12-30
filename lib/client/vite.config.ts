@@ -79,8 +79,8 @@ export default defineConfig(async (): Promise<UserConfig> => {
       emptyOutDir: true,
       lib: {
         entry: resolve(__dirname, "index.ts"),
-        formats: [ "es" ],
-        fileName: () => "index.js",
+        formats: [ "es", "cjs" ],
+        fileName: (format, name) => `${ name }.${ format.replace("es", "mjs") }`,
       },
       rollupOptions: {
         external: Object.keys(peerDependencies),

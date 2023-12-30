@@ -31,7 +31,8 @@
       "types": "./pkg/api/api/index.d.ts"
     },
     "./client": {
-      "import": "./pkg/client/index.js",
+      "import": "./pkg/client/index.mjs",
+      "require": "./pkg/client/index.cjs",
       "types": "./pkg/client/index.d.ts"
     },
     "./vite-plugin": {
