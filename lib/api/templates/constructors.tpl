@@ -1,17 +1,18 @@
 {{BANNER}}
 
-import apiFactory from "@appril/crud/api";
-
-import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
+
+{{factoryCode}}
 
 {{#tables}}
 {{! prepending basename cause aliases importing same names as tables }}
-import { {{declaredName}} as {{basename}}{{declaredName}} } from "{{tablesImportBase}}/{{schema}}/@index";
+import { {{declaredName}} as {{basename}}{{declaredName}} } from "{{tablesImportBase}}";
 
-export const {{basename}} = apiFactory<
-  import("{{typesImportBase}}/{{schema}}/@types").{{recordName}},
-  import("{{typesImportBase}}/{{schema}}/@types").{{queryBuilder}}
+export const {{basename}} = $crudHandlersFactory<
+  import("@appril/dbx:{{declaredName}}").QueryT,
+  import("@appril/dbx:{{declaredName}}").RecordT,
+  import("@appril/dbx:{{declaredName}}").InsertT,
+  import("@appril/dbx:{{declaredName}}").UpdateT
 >(
   {{basename}}{{declaredName}},
   {

@@ -48,7 +48,7 @@
     "build:client": "cd lib/client; vite build",
     "postbuild:client": "cp -fv lib/client/@types.ts pkg/client/index.d.ts",
     "// ✨ build vite-plugin": "",
-    "prebuild:vite-plugin": "for f in lib/api/templates/*; do cp -fv $f lib/vite-plugin/templates/api/_$(basename $f); done; for f in lib/client/templates/*; do cp -fv $f lib/vite-plugin/templates/client/_$(basename $f).tpl; done",
+    "prebuild:vite-plugin": "for f in lib/api/templates/*; do cp -fv $f lib/vite-plugin/templates/api/_$(basename ${f%.*}).tpl; done; for f in lib/client/templates/*; do cp -fv $f lib/vite-plugin/templates/client/_$(basename $f).tpl; done",
     "build:vite-plugin": "esbundler lib/vite-plugin/index.ts --sourcemap=inline --outdir=pkg/vite-plugin",
     "postbuild:vite-plugin": "tsc -p lib/vite-plugin/tsconfig.json; rsync -a lib/vite-plugin/templates pkg/vite-plugin",
     "// ✨ build": "",

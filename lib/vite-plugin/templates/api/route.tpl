@@ -3,15 +3,15 @@ import { {{basename}} as api } from "..";
 
 export default [
 
-  api.listHandler(),
+  api.list(),
 
-  api.retrieveHandler(),
+  api.retrieve(),
 
-  api.createHandler(),
+  api.create(),
 
-  api.updateHandler(),
+  api.update(),
 
-  api.deleteHandler(),
+  api.delete(),
 
 ]
 
