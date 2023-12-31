@@ -5,10 +5,10 @@ import { fromZodError } from "zod-validation-error";
 import type { ApiTypes } from "@appril/crud/client";
 
 export type {
-  {{recordName}} as ItemT,
-  {{insertName}} as ItemI,
-  {{updateName}} as ItemU,
-} from "{{typesImportBase}}/{{schema}}/@types";
+  RecordT as ItemT,
+  InsertT as ItemI,
+  UpdateT as ItemU,
+} from "@appril/dbx:{{declaredName}}";
 
 export type { EnvT, ItemAssetsT } from "@crud:virtual-module-placeholder/apiTypes";
 
