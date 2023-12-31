@@ -35,7 +35,7 @@ import moduleDtsTpl from "./templates/client/moduleDts.tpl";
 import apiFactoryTpl from "./templates/api/_factory.tpl";
 import apiConstructorsTpl from "./templates/api/_constructors.tpl";
 
-export const clientTemplatesFactory = (): Required<Templates> & { moduleDts: string } => ({
+export const clientTemplatesFactory = (): Required<Templates> => ({
 
   "assets.ts": assetsTpl,
   "apiTypes.ts": apiTypesTpl,
@@ -67,12 +67,15 @@ export const clientTemplatesFactory = (): Required<Templates> & { moduleDts: str
   "setup.ts": setupTpl,
   "store.ts": storeTpl,
 
-  moduleDts: moduleDtsTpl,
 
 })
 
 export const apiTemplatesFactory = () => ({
   factory: apiFactoryTpl,
   constructors: apiConstructorsTpl,
+})
+
+export const extraTemplatesFactory = () => ({
+  moduleDts: moduleDtsTpl,
 })
 

@@ -19,12 +19,13 @@ import type {
 
 import type { ApiTypes } from "../client/@types";
 
-import { clientTemplatesFactory, apiTemplatesFactory } from "./templates";
+import { clientTemplatesFactory, apiTemplatesFactory, extraTemplatesFactory } from "./templates";
 import { BANNER, renderToFile, render } from "./render";
 import { extractTypes } from "./ast";
 
 const clientTemplates = clientTemplatesFactory()
 const apiTemplates = apiTemplatesFactory()
+const extraTemplates = extraTemplatesFactory()
 
 type DbxConfig = PgtsConfig & {
   connection: string | ConnectionConfig;
@@ -236,7 +237,7 @@ export async function vitePluginApprilCrud(
     // regenerating whole bundle, even if single table updated
     await renderToFile(
       rootPath(base + ".d.ts"),
-      clientTemplates.moduleDts,
+      extraTemplates.moduleDts,
       {
         BANNER,
         avModules: Object.values(avModules),
