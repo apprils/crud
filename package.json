@@ -45,6 +45,7 @@
     "build:api": "esbundler lib/api/index.ts --sourcemap=inline --outdir=pkg/api",
     "postbuild:api": "tsc -p lib/api/tsconfig.json",
     "// ✨ build client": "",
+    "build:client-templates": "cd lib/client; vite -c vite.config-templates.ts build",
     "build:client": "cd lib/client; vite build",
     "postbuild:client": "cp -fv lib/client/@types.ts pkg/client/index.d.ts",
     "// ✨ build vite-plugin": "",
