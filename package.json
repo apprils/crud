@@ -57,8 +57,13 @@
   },
   "release-it": {
     "hooks": {
-      "before:init": [ "npm run build" ],
-      "after:release": [ "mkdir -p var/pub", "npm pack --pack-destination var/pub" ]
+      "before:init": [
+        "npm run build"
+      ],
+      "after:release": [
+        "mkdir -p var/pub",
+        "npm pack --pack-destination var/pub"
+      ]
     }
   },
   "dependencies": {
