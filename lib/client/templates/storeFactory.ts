@@ -3,7 +3,7 @@ import { type StoreOnActionListener, defineStore } from "pinia";
 
 import type { StoreState, StoreGetters, StoreActions } from "@appril/crud/client";
 
-export function storeFactory<
+export default function storeFactory<
   ItemT,
   ItemAssetsT,
   EnvT

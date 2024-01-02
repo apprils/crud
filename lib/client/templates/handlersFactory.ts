@@ -9,7 +9,7 @@ import type {
   ListResponse, RetrieveResponse, DefaultErrorHandler,
 } from "@appril/crud/client";
 
-export function handlersFactory<
+export default function handlersFactory<
   ItemT,
   ItemI,
   ItemU,

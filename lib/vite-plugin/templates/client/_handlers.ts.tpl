@@ -7,7 +7,7 @@ import type {
   DefaultErrorHandler,
 } from "@appril/crud/client";
 
-import { handlersFactory } from "@appril/crud/client";
+import handlersFactory from "@appril/crud:handlersFactory";
 
 import { useStore } from "@crud:virtual-module-placeholder/store";
 

@@ -9,10 +9,15 @@ declare module "*.vue" {
 
 declare module "@appril/crud/client" {
   import("./@types"); // mandatory for export types to work
-  import { storeFactory } from import("./store");
-  import { handlersFactory } from import("./handlers");
-  export { storeFactory, handlersFactory };
   export * from "./@types";
+}
+
+declare module "@appril/crud:storeFactory" {
+  export { default } from import("./templates/storeFactory");
+}
+
+declare module "@appril/crud:handlersFactory" {
+  export { default } from import("./templates/handlersFactory");
 }
 
 declare module "@crud:virtual-module-placeholder/assets" {

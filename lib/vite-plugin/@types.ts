@@ -6,7 +6,7 @@ import type {
 
 export type { ConnectionConfig, PgtsConfig, TableDeclaration }
 
-export type Templates = {
+export type ClientModuleTemplates = {
 
   "assets.ts"?: string;
   "apiTypes.ts"?: string;
@@ -40,7 +40,11 @@ export type Templates = {
 
 }
 
-export type AmbientVirtualTsModuleName =
+export type AVFactoryModuleName =
+  | "@appril/crud:storeFactory"
+  | "@appril/crud:handlersFactory"
+
+export type AVTsModuleName =
   | "assets"
   | "apiTypes"
   | "api"
@@ -50,7 +54,7 @@ export type AmbientVirtualTsModuleName =
   | "store"
   | "" // index
 
-export type AmbientVirtualVueModuleName =
+export type AVVueModuleName =
 
   | "ControlButtons.vue"
   | "ControlButtons.vue.d.ts"
@@ -70,18 +74,19 @@ export type AmbientVirtualVueModuleName =
   | "Pager.vue"
   | "Pager.vue.d.ts"
 
-export type AmbientVirtualModuleName = 
-  | AmbientVirtualTsModuleName
-  | AmbientVirtualVueModuleName
+export type AVModuleName =
+  | AVFactoryModuleName
+  | AVTsModuleName
+  | AVVueModuleName
 
-export type AmbientVirtualModule = {
+export type AVModule = {
   id: string;
-  name: AmbientVirtualModuleName;
+  name: AVModuleName;
   ambientCode: string;
   virtualCode: string;
 }
 
-export type AmbientVirtualModuleMap = Record<string, AmbientVirtualModule>
+export type AVModuleMap = Record<string, AVModule>
 
 export type Table = TableDeclaration & {
   basename: string;
@@ -97,7 +102,7 @@ export type Config = {
   schema?: string;
   base: string;
   apiDir?: string;
-  templates?: Templates;
+  templates?: ClientModuleTemplates;
   alias?: Record<string, string | string[]>;
   tableFilter?: (t: TableDeclaration) => boolean;
   meta?: Record<string, Record<string, any>> | ((t: Table) => Record<string, any>);

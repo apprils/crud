@@ -1,5 +1,5 @@
 
-import { storeFactory } from "@appril/crud/client";
+import storeFactory from "@appril/crud:storeFactory";
 
 import {
   type ItemT,

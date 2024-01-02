@@ -1,5 +1,5 @@
 
-import type { Templates } from "./@types";
+import type { ClientModuleTemplates, AVFactoryModuleName } from "./@types";
 
 import apiTpl from "./templates/client/_api.ts.tpl";
 import baseTpl from "./templates/client/_base.ts.tpl";
@@ -13,6 +13,7 @@ import CreateDialogDtsTpl from "./templates/client/_CreateDialog.vue.d.ts.tpl";
 import EditorPlaceholderTpl from "./templates/client/_EditorPlaceholder.vue.tpl";
 import EditorPlaceholderDtsTpl from "./templates/client/_EditorPlaceholder.vue.d.ts.tpl";
 
+import handlersFactoryTpl from "./templates/client/_handlersFactory.ts.tpl";
 import handlersTpl from "./templates/client/_handlers.ts.tpl";
 import indexTpl from "./templates/client/_index.ts.tpl";
 
@@ -25,8 +26,10 @@ import OverlayDtsTpl from "./templates/client/_Overlay.vue.d.ts.tpl";
 import PagerTpl from "./templates/client/_Pager.vue.tpl";
 import PagerDtsTpl from "./templates/client/_Pager.vue.d.ts.tpl";
 
-import setupTpl from "./templates/client/_setup.ts.tpl";
+import storeFactoryTpl from "./templates/client/_storeFactory.ts.tpl";
 import storeTpl from "./templates/client/_store.ts.tpl";
+
+import setupTpl from "./templates/client/_setup.ts.tpl";
 
 import assetsTpl from "./templates/client/assets.tpl";
 import apiTypesTpl from "./templates/client/apiTypes.tpl";
@@ -35,7 +38,7 @@ import moduleDtsTpl from "./templates/client/moduleDts.tpl";
 import apiFactoryTpl from "./templates/api/_factory.tpl";
 import apiConstructorsTpl from "./templates/api/_constructors.tpl";
 
-export const clientTemplatesFactory = (): Required<Templates> => ({
+export const clientTemplatesFactory = (): Required<ClientModuleTemplates> => ({
 
   "assets.ts": assetsTpl,
   "apiTypes.ts": apiTypesTpl,
@@ -67,7 +70,11 @@ export const clientTemplatesFactory = (): Required<Templates> => ({
   "setup.ts": setupTpl,
   "store.ts": storeTpl,
 
+})
 
+export const factoryTemplatesFactory = (): Record<AVFactoryModuleName, string> => ({
+  "@appril/crud:storeFactory": storeFactoryTpl,
+  "@appril/crud:handlersFactory": handlersFactoryTpl,
 })
 
 export const apiTemplatesFactory = () => ({

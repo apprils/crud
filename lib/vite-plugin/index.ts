@@ -12,18 +12,23 @@ import type { Plugin, ResolvedConfig } from "vite";
 
 import type {
   ConnectionConfig, PgtsConfig, Config,
-  Templates, Table, TableDeclaration,
-  AmbientVirtualTsModuleName, AmbientVirtualVueModuleName,
-  AmbientVirtualModuleMap, AmbientVirtualModule,
+  ClientModuleTemplates, Table, TableDeclaration,
+  AVFactoryModuleName, AVTsModuleName, AVVueModuleName,
+  AVModuleMap, AVModule,
 } from "./@types";
 
 import type { ApiTypes } from "../client/@types";
 
-import { clientTemplatesFactory, apiTemplatesFactory, extraTemplatesFactory } from "./templates";
+import {
+  clientTemplatesFactory, factoryTemplatesFactory,
+  apiTemplatesFactory, extraTemplatesFactory,
+} from "./templates";
+
 import { BANNER, renderToFile, render } from "./render";
 import { extractTypes } from "./ast";
 
 const clientTemplates = clientTemplatesFactory()
+const factoryTemplates = factoryTemplatesFactory()
 const apiTemplates = apiTemplatesFactory()
 const extraTemplates = extraTemplatesFactory()
 
@@ -83,7 +88,7 @@ export async function vitePluginApprilCrud(
       name,
       file,
     ] of Object.entries({ ...crudConfig.templates }) as [
-      name: keyof Templates,
+      name: keyof ClientModuleTemplates,
       file: string
     ][]
   ) {
@@ -93,7 +98,24 @@ export async function vitePluginApprilCrud(
     }
   }
 
-  const avModules: AmbientVirtualModuleMap = {}
+  const avModules = {} as AVModuleMap
+
+  for (
+    const [
+      name,
+      code
+    ] of Object.entries(factoryTemplates) as [
+      name: AVFactoryModuleName,
+      code: string
+    ][]
+  ) {
+    avModules[name] = {
+      id: name,
+      name,
+      ambientCode: code,
+      virtualCode: code,
+    }
+  }
 
   const generateApiFiles = async (
     tables: Table[],
@@ -172,8 +194,8 @@ export async function vitePluginApprilCrud(
     )
 
     const moduleFactory = (
-      tpl: keyof Templates,
-    ): AmbientVirtualModule => {
+      tpl: keyof ClientModuleTemplates,
+    ): AVModule => {
 
       let virtualCode = templates[tpl].replace(
         /@crud:virtual-module-placeholder/g,
@@ -217,10 +239,10 @@ export async function vitePluginApprilCrud(
           }
 
           if (/\.vue/.test(tpl)) { // keeping .vue and .vue.d.ts extensions
-            return tpl as AmbientVirtualVueModuleName
+            return tpl as AVVueModuleName
           }
 
-          return tpl.replace(/\.ts$/, "") as AmbientVirtualTsModuleName
+          return tpl.replace(/\.ts$/, "") as AVTsModuleName
 
         },
         ambientCode,
@@ -229,7 +251,7 @@ export async function vitePluginApprilCrud(
 
     }
 
-    for (const tpl of Object.keys(clientTemplates) as (keyof Templates)[]) {
+    for (const tpl of Object.keys(clientTemplates) as (keyof ClientModuleTemplates)[]) {
       const mdl = moduleFactory(tpl)
       avModules[mdl.id] = mdl
     }
