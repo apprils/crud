@@ -6,7 +6,7 @@ declare const _default: __VLS_WithTemplateSlots<import("vue").DefineComponent<__
     mounted: () => void;
     created: (item: ItemT) => void;
     close: () => void;
-}, string, import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps, Readonly<import("vue").ExtractPropTypes<__VLS_TypePropsToRuntimeProps<{
+}, string, import("vue").PublicProps, Readonly<import("vue").ExtractPropTypes<__VLS_TypePropsToRuntimeProps<{
     modelValue: ItemI;
 }>>> & {
     onMounted?: () => any;
