@@ -272,7 +272,7 @@ export function $crudHandlersFactory<
 
     type CustomSetup = {
       dataset?: (ctx: CtxT) => MaybePromise<ItemI>;
-      datasetExtend?: (ctx: CtxT) => MaybePromise<Partial<ItemI>>;
+      datasetExtend?: (ctx: CtxT) => MaybePromise<Partial<ItemI> | undefined>;
       zodSchema?: (ctx: CtxT) => MaybePromise<Record<string, ZodTypeAny>>;
       zodErrorHandler?: (ctx: CtxT) => MaybePromise<Function>;
     }
@@ -365,7 +365,7 @@ export function $crudHandlersFactory<
 
     type CustomSetup = {
       dataset?: (ctx: CtxT) => MaybePromise<ItemU>;
-      datasetExtend?: (ctx: CtxT) => MaybePromise<Partial<ItemU>>;
+      datasetExtend?: (ctx: CtxT) => MaybePromise<Partial<ItemU> | undefined>;
       zodSchema?: (ctx: CtxT) => MaybePromise<Record<string, ZodTypeAny>>;
       zodErrorHandler?: (ctx: CtxT) => MaybePromise<Function>;
     }
