@@ -14,8 +14,8 @@ import {
 import type { ApiTypes } from "../client/@types";
 
 const METHODS = [
-  "envHandler",
-  "retrieveHandler",
+  "env",
+  "retrieve",
 ] as const
 
 const METHODS_REGEX = new RegExp(`\\b(${ METHODS.join("|") })\\b`)
@@ -99,7 +99,7 @@ export function extractTypes(
       continue
     }
 
-    if (method === "retrieveHandler") {
+    if (method === "retrieve") {
 
       for (const node of [
         ...tsquery.match(
@@ -115,7 +115,7 @@ export function extractTypes(
       }
 
     }
-    else if (method === "envHandler") {
+    else if (method === "env") {
       typeDefinitions.EnvT = getReturnType(firstArg)
     }
 
