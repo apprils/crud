@@ -532,7 +532,7 @@ export function $crudHandlersFactory<
     }
 
     type CustomSetup = {
-      queryBuilder?: (ctx: CtxT) => MaybePromise<QueryT>;
+      queryBuilder?: (ctx: CtxT) => MaybePromise<typeof dbi>;
       filter?: (ctx: CtxT, queryBuilder: QueryT) => MaybePromise<void>;
       orderBy?: (ctx: CtxT) => MaybePromise<(string | Record<string, "asc" | "desc">)[]>;
       itemsPerPage?: (ctx: CtxT) => MaybePromise<number>;
@@ -688,7 +688,7 @@ export function $crudHandlersFactory<
 
     type CrudContextExtend = {
       _id: PKeyT;
-      queryBuilder: QueryBuilder;
+      queryBuilder: QueryT;
     }
 
     type CtxT = Ctx<
@@ -700,7 +700,7 @@ export function $crudHandlersFactory<
     type ReturnT = ItemT | undefined
 
     type CustomSetup = {
-      queryBuilder?: (ctx: CtxT) => MaybePromise<QueryBuilder>;
+      queryBuilder?: (ctx: CtxT) => MaybePromise<typeof dbi>;
       assets?: (ctx: CtxT, item: ItemT) => MaybePromise<GenericObject>;
     }
 
