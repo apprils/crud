@@ -56,6 +56,7 @@ type QueryBuilder = {
   clone: Function;
   select: Function;
   orderBy: Function;
+  orderByRaw: Function;
 }
 
 export function $crudHandlersFactory<
@@ -534,7 +535,7 @@ export function $crudHandlersFactory<
     type CustomSetup = {
       queryBuilder?: (ctx: CtxT) => MaybePromise<typeof dbi>;
       filter?: (ctx: CtxT, queryBuilder: QueryT) => MaybePromise<void>;
-      orderBy?: (ctx: CtxT) => MaybePromise<(string | Record<string, "asc" | "desc">)[]>;
+      orderBy?: (ctx: CtxT) => MaybePromise<(string | Record<string, "asc" | "desc" | "raw">)[]>;
       itemsPerPage?: (ctx: CtxT) => MaybePromise<number>;
       sidePages?: (ctx: CtxT) => MaybePromise<number>;
     }
@@ -660,7 +661,9 @@ export function $crudHandlersFactory<
             }
             else {
               for (const [ col, ord ] of Object.entries(entry)) {
-                ctx.crud.queryBuilder.orderBy(col, ord)
+                ord === "raw"
+                  ? ctx.crud.queryBuilder.orderByRaw(col)
+                  : ctx.crud.queryBuilder.orderBy(col, ord)
               }
             }
           }
