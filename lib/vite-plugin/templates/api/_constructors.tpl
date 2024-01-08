@@ -12,7 +12,8 @@ export const {{basename}} = $crudHandlersFactory<
   import("@appril/dbx:{{declaredName}}").QueryT,
   import("@appril/dbx:{{declaredName}}").RecordT,
   import("@appril/dbx:{{declaredName}}").InsertT,
-  import("@appril/dbx:{{declaredName}}").UpdateT
+  import("@appril/dbx:{{declaredName}}").UpdateT,
+  import("@appril/dbx:{{declaredName}}").RecordT["{{primaryKey}}"]
 >(
   {{basename}}{{declaredName}},
   {

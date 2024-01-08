@@ -62,7 +62,8 @@ export function $crudHandlersFactory<
   QueryT extends QueryBuilder,
   ItemT,
   ItemI,
-  ItemU
+  ItemU,
+  PKeyT = unknown
 >(
   dbi: any,
   opt: {
@@ -349,6 +350,7 @@ export function $crudHandlersFactory<
   function updateHandlerFactory() {
 
     type CrudContextExtend = {
+      _id: PKeyT;
       dataset: Dataset;
       validatedDataset: Dataset;
       zodSchema?: Record<string, ZodTypeAny>;
@@ -414,6 +416,12 @@ export function $crudHandlersFactory<
 
         initHandler,
 
+        (ctx, next) => {
+          // @ts-expect-error
+          ctx.crud._id = ctx.params._id
+          return next()
+        },
+
         async (ctx, next) => {
 
           ctx.crud.dataset = {
@@ -442,7 +450,15 @@ export function $crudHandlersFactory<
 
   function deleteHandlerFactory() {
 
-    type CtxT = Ctx<QueryT, ItemT>
+    type CrudContextExtend = {
+      _id: PKeyT;
+    }
+
+    type CtxT = Ctx<
+      QueryT,
+      ItemT,
+      CrudContextExtend
+    >
 
     type ReturnT = ItemT | undefined
 
@@ -467,10 +483,16 @@ export function $crudHandlersFactory<
 
       return $del<
         any,
-        Context<QueryT, ItemT>
+        Context<QueryT, ItemT, CrudContextExtend>
       >(":_id", [
 
         initHandler,
+
+        (ctx, next) => {
+          // @ts-expect-error
+          ctx.crud._id = ctx.params._id
+          return next()
+        },
 
         async (ctx, next) => {
 
@@ -665,6 +687,7 @@ export function $crudHandlersFactory<
   function retrieveHandlerFactory() {
 
     type CrudContextExtend = {
+      _id: PKeyT;
       queryBuilder: QueryBuilder;
     }
 
@@ -721,6 +744,12 @@ export function $crudHandlersFactory<
       >(":_id", [
 
         initHandler,
+
+        (ctx, next) => {
+          // @ts-expect-error
+          ctx.crud._id = ctx.params._id
+          return next()
+        },
 
         async (ctx, next) => {
 
