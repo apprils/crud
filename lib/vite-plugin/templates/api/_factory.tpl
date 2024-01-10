@@ -533,9 +533,8 @@ export function $crudHandlersFactory<
     }
 
     type CustomSetup = {
-      queryBuilder?: (ctx: CtxT) => MaybePromise<typeof dbi>;
-      filter?: (ctx: CtxT, queryBuilder: QueryT) => MaybePromise<void>;
-      orderBy?: (ctx: CtxT) => MaybePromise<(string | Record<string, "asc" | "desc" | "raw">)[]>;
+      // used for filters, sorting etc.
+      queryTuner?: (ctx: CtxT, query: QueryT) => MaybePromise<void>;
       itemsPerPage?: (ctx: CtxT) => MaybePromise<number>;
       sidePages?: (ctx: CtxT) => MaybePromise<number>;
     }
@@ -651,22 +650,9 @@ export function $crudHandlersFactory<
 
         async (ctx, next) => {
 
-          ctx.crud.queryBuilder = await customSetup?.queryBuilder?.(ctx) || ctx.crud.dbi.clone()
+          ctx.crud.queryBuilder = ctx.crud.dbi.clone()
 
-          await customSetup?.filter?.(ctx, ctx.crud.queryBuilder)
-
-          for (const entry of await customSetup?.orderBy?.(ctx) || [ { [ctx.crud.primaryKey]: "desc" } ]) {
-            if (typeof entry === "string") {
-              ctx.crud.queryBuilder.orderBy(entry)
-            }
-            else {
-              for (const [ col, ord ] of Object.entries(entry)) {
-                ord === "raw"
-                  ? ctx.crud.queryBuilder.orderByRaw(col)
-                  : ctx.crud.queryBuilder.orderBy(col, ord)
-              }
-            }
-          }
+          await customSetup?.queryTuner?.(ctx, ctx.crud.queryBuilder)
 
           ctx.crud.itemsPerPage = await customSetup?.itemsPerPage?.(ctx) || itemsPerPage
           ctx.crud.sidePages = await customSetup?.sidePages?.(ctx) || sidePages
@@ -703,7 +689,8 @@ export function $crudHandlersFactory<
     type ReturnT = ItemT | undefined
 
     type CustomSetup = {
-      queryBuilder?: (ctx: CtxT) => MaybePromise<typeof dbi>;
+      // used for filters, sorting etc.
+      queryTuner?: (ctx: CtxT, query: QueryT) => MaybePromise<void>;
       assets?: (ctx: CtxT, item: ItemT) => MaybePromise<GenericObject>;
     }
 
@@ -756,7 +743,9 @@ export function $crudHandlersFactory<
 
         async (ctx, next) => {
 
-          ctx.crud.queryBuilder = await customSetup?.queryBuilder?.(ctx) || ctx.crud.dbi.clone()
+          ctx.crud.queryBuilder = ctx.crud.dbi.clone()
+
+          await customSetup?.queryTuner?.(ctx, ctx.crud.queryBuilder)
 
           const item = customHandler
             ? await customHandler(ctx, { defaultHandler })
