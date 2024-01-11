@@ -6,13 +6,10 @@ import { IconOrSpinner } from "@appril/ui";
 import {
   type ItemT,
   type ItemI,
-  store,
-  useHandlers,
+  store, useHandlers,
 } from "@crud:virtual-module-placeholder/base";
 
-const props = defineProps<{
-  modelValue: ItemI;
-}>()
+const model = defineModel<ItemI>()
 
 const emit = defineEmits<{
   mounted: [];
@@ -23,7 +20,7 @@ const emit = defineEmits<{
 const { createItem, itemCreated } = useHandlers()
 
 function create() {
-  return createItem(props.modelValue)
+  return createItem(model.value)
     .then(itemCreated)
     .then((item) => emit("created", item))
     .then(close)
