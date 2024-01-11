@@ -9,7 +9,7 @@ import { fromZodError } from "zod-validation-error";
 import { {{declaredName}} as {{basename}}{{declaredName}} } from "{{tablesImportBase}}";
 
 export const {{basename}} = $crudHandlersFactory<
-  import("@appril/dbx:{{declaredName}}").QueryT,
+  "{{declaredName}}",
   import("@appril/dbx:{{declaredName}}").RecordT,
   import("@appril/dbx:{{declaredName}}").InsertT,
   import("@appril/dbx:{{declaredName}}").UpdateT,
