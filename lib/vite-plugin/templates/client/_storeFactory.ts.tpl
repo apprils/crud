@@ -65,7 +65,7 @@ export default function storeFactory<
         items,
       ) {
         this.$patch((state) => {
-          state.listItems = [ ...items ]
+          state.listItems = items
         })
       },
 

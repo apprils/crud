@@ -519,7 +519,7 @@ export function $crudHandlersFactory<
     type CustomSetup = {
       // used for filters, sorting etc.
       queryHandler?: (ctx: CtxT, query: QueryBuilder<TableName>) => MaybePromise<void>;
-      // used to fetch additional data
+      // used to fetch additional items-related data
       assets?: (ctx: CtxT, items: ItemT[]) => MaybePromise<GenericObject>;
       itemsPerPage?: (ctx: CtxT) => MaybePromise<number>;
       sidePages?: (ctx: CtxT) => MaybePromise<number>;
