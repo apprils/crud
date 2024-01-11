@@ -5,8 +5,9 @@ import type { StoreState, StoreGetters, StoreActions } from "@appril/crud/client
 
 export default function storeFactory<
   ItemT,
-  ItemAssetsT,
-  EnvT
+  EnvT,
+  ListAssetsT,
+  ItemAssetsT
 >(
   {
     modelName,
@@ -17,9 +18,9 @@ export default function storeFactory<
   },
 ) {
 
-  type StateT = StoreState<ItemT, ItemAssetsT, EnvT>
-  type GettersT = StoreGetters<ItemT, ItemAssetsT, EnvT>
-  type ActionsT = StoreActions<ItemT, ItemAssetsT, EnvT>
+  type StateT = StoreState<ItemT, EnvT, ListAssetsT, ItemAssetsT>
+  type GettersT = StoreGetters<ItemT, EnvT, ListAssetsT, ItemAssetsT>
+  type ActionsT = StoreActions<ItemT, EnvT, ListAssetsT, ItemAssetsT>
 
   const useStore = defineStore<
     typeof modelName,
@@ -32,12 +33,8 @@ export default function storeFactory<
       return {
         primaryKey,
         env: {} as EnvT,
-        items: [],
-        item: undefined,
-        itemAssets: undefined,
-        itemEvent: { event: undefined, id: undefined },
-        loading: false,
-        pager: {
+        listItems: [],
+        listPager: {
           totalItems: 0,
           totalPages: 0,
           currentPage: 0,
@@ -45,6 +42,11 @@ export default function storeFactory<
           prevPage: 0,
           offset: 0,
         },
+        listAssets: undefined,
+        item: undefined,
+        itemAssets: undefined,
+        itemEvent: { event: undefined, id: undefined },
+        loading: false,
         createDialog: false,
       }
     },
@@ -59,13 +61,27 @@ export default function storeFactory<
         })
       },
 
-      setItems(
+      setListItems(
         items,
+      ) {
+        this.$patch((state) => {
+          state.listItems = items
+        })
+      },
+
+      setListPager(
         pager,
       ) {
         this.$patch((state) => {
-          state.items = [ ...items ]
-          state.pager = { ...pager }
+          state.listPager = pager
+        })
+      },
+
+      setListAssets(
+        assets,
+      ) {
+        this.$patch((state) => {
+          state.listAssets = assets
         })
       },
 
@@ -119,7 +135,7 @@ export default function storeFactory<
         this.$patch((state) => {
           if (state.item && updates) {
             state.item = { ...state.item, ...updates }
-            for (const item of state.items) {
+            for (const item of state.listItems) {
               // @ts-expect-error
               if (item?.[primaryKey] == id) {
                 Object.assign(item, updates)
@@ -133,8 +149,10 @@ export default function storeFactory<
         item,
       ) {
         this.$patch((state) => {
-          // @ts-expect-error
-          state.items.unshift(item)
+          state.listItems.unshift(
+            // @ts-expect-error
+            item
+          )
         })
       },
 
@@ -142,8 +160,7 @@ export default function storeFactory<
         id,
       ) {
         this.$patch((state) => {
-          // @ts-expect-error
-          state.items = state.items.filter((e) => e[primaryKey] != id)
+          state.listItems = state.listItems.filter((e: any) => e[primaryKey] != id)
         })
       },
 
@@ -169,8 +186,7 @@ export default function storeFactory<
 
         if (id) {
           after(() => {
-            // @ts-expect-error
-            if (!store.items.some((e) => e[primaryKey] == id)) {
+            if (!store.listItems.some((e: any) => e[primaryKey] === id)) {
               store.unshiftItem(item)
             }
           })

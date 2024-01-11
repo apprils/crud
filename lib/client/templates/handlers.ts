@@ -15,8 +15,9 @@ import {
   type ItemT,
   type ItemI,
   type ItemU,
-  type ItemAssetsT,
   type EnvT,
+  type ListAssetsT,
+  type ItemAssetsT,
   apiTypes, regularColumns,
   zodSchema, zodErrorHandler,
 } from "@crud:virtual-module-placeholder/assets";
@@ -31,8 +32,9 @@ export const useHandlers: UseHandlers<
   ItemT,
   ItemI,
   ItemU,
-  ItemAssetsT,
-  EnvT
+  EnvT,
+  ListAssetsT,
+  ItemAssetsT
 > = (opt) => {
 
   const router = useRouter()
@@ -48,8 +50,9 @@ export const useHandlers: UseHandlers<
     ItemT,
     ItemI,
     ItemU,
-    ItemAssetsT,
-    EnvT
+    EnvT,
+    ListAssetsT,
+    ItemAssetsT
   >({
     store,
     router,

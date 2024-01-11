@@ -2,7 +2,9 @@
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
-import type { ApiTypes } from "@appril/crud/client";
+import {
+  type ApiTypes,
+} from "@appril/crud/client";
 
 export type {
   RecordT as ItemT,
@@ -10,7 +12,11 @@ export type {
   UpdateT as ItemU,
 } from "@appril/dbx:{{declaredName}}";
 
-export type { EnvT, ItemAssetsT } from "@crud:virtual-module-placeholder/apiTypes";
+export {
+  type EnvT,
+  type ListAssetsT,
+  type ItemAssetsT,
+} from "@crud:virtual-module-placeholder/apiTypes";
 
 export const primaryKey = "{{primaryKey}}";
 

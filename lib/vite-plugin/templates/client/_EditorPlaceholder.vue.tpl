@@ -9,7 +9,7 @@ import { store } from "@crud:virtual-module-placeholder/base";
 
 <div class="d-flex justify-content-center">
   <h2>
-    Total Items: {{ store.pager.totalItems }}
+    Total Items: {{ store.listPager.totalItems }}
   </h2>
 </div>
 

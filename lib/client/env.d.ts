@@ -28,8 +28,10 @@ declare module "@crud:virtual-module-placeholder/assets" {
   export type ItemT = any;
   export type ItemI = any;
   export type ItemU = any;
-  export type ItemAssetsT = any;
+
   export type EnvT = any;
+  export type ListAssetsT = any;
+  export type ItemAssetsT = any;
 
   export const primaryKey: keyof ItemT = "";
   export const modelName: string = "";
@@ -48,15 +50,17 @@ declare module "@crud:virtual-module-placeholder/store" {
 
   import type {
     ItemT,
-    ItemAssetsT,
     EnvT,
+    ListAssetsT,
+    ItemAssetsT,
   } from "@crud:virtual-module-placeholder/assets";
 
   type UseStore = import("./@types").UseStore<
     "generic",
     ItemT,
-    ItemAssetsT,
-    EnvT
+    EnvT,
+    ListAssetsT,
+    ItemAssetsT
   >;
 
   export const useStore: UseStore = function() {};
@@ -70,16 +74,18 @@ declare module "@crud:virtual-module-placeholder/handlers" {
     ItemT,
     ItemI,
     ItemU,
-    ItemAssetsT,
     EnvT,
+    ListAssetsT,
+    ItemAssetsT,
   } from "@crud:virtual-module-placeholder/assets";
 
   type UseHandlers = import("./@types").UseHandlers<
     ItemT,
     ItemI,
     ItemU,
-    ItemAssetsT,
-    EnvT
+    EnvT,
+    ListAssetsT,
+    ItemAssetsT
   >;
 
   type UseModel = import("./@types").UseModel<ItemT>;

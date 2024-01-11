@@ -136,8 +136,8 @@ export function $crudHandlersFactory<
   } = {
     crud: Object.defineProperties({} as CrudContext, {
       dbi: { get() { return dbi }, configurable: false },
-      columns: { get() { return [ ...opt.columns ] }, configurable: false },
       primaryKey: { get() { return primaryKey }, configurable: false },
+      columns: { get() { return [ ...opt.columns ] }, configurable: false },
       returningLiteral: { get: returningLiteral, configurable: false },
       validatedDataset: { get: validatedDataset, configurable: false },
     }),
@@ -519,6 +519,8 @@ export function $crudHandlersFactory<
     type CustomSetup = {
       // used for filters, sorting etc.
       queryHandler?: (ctx: CtxT, query: QueryBuilder<TableName>) => MaybePromise<void>;
+      // used to fetch additional data
+      assets?: (ctx: CtxT, items: ItemT[]) => MaybePromise<GenericObject>;
       itemsPerPage?: (ctx: CtxT) => MaybePromise<number>;
       sidePages?: (ctx: CtxT) => MaybePromise<number>;
     }
@@ -641,9 +643,15 @@ export function $crudHandlersFactory<
           ctx.crud.itemsPerPage = await customSetup?.itemsPerPage?.(ctx) || itemsPerPage
           ctx.crud.sidePages = await customSetup?.sidePages?.(ctx) || sidePages
 
-          ctx.body = customHandler
+          const { items, pager } = customHandler
             ? await customHandler(ctx, { defaultHandler })
             : await defaultHandler(ctx)
+
+          ctx.body = {
+            items,
+            pager,
+            assets: await customSetup?.assets?.(ctx, items),
+          }
 
           return next()
 
@@ -674,6 +682,7 @@ export function $crudHandlersFactory<
     type CustomSetup = {
       // used for filters, sorting etc.
       queryHandler?: (ctx: CtxT, query: QueryBuilder<TableName>) => MaybePromise<void>;
+      // used to fetch additional item-related data
       assets?: (ctx: CtxT, item: ItemT) => MaybePromise<GenericObject>;
     }
 

@@ -7,9 +7,10 @@ export type GenericObject = Record<string, any>
 
 export type EnvResponse<EnvT> = UnwrapRef<EnvT | undefined>
 
-export type ListResponse<ItemT> = UnwrapRef<{
+export type ListResponse<ItemT, ListAssetsT> = UnwrapRef<{
   items: ItemT[];
   pager: Pager;
+  assets: ListAssetsT;
 }>
 
 export type RetrieveResponse<ItemT, ItemAssetsT> = UnwrapRef<{
@@ -26,15 +27,21 @@ export type Pager = {
   offset: number;
 }
 
-export type StoreState<ItemT, ItemAssetsT, EnvT> = {
+export type StoreState<
+  ItemT,
+  EnvT,
+  ListAssetsT,
+  ItemAssetsT
+> = {
   primaryKey: keyof ItemT;
   env: EnvT;
-  items: ItemT[];
+  listItems: ItemT[];
+  listPager: Pager;
+  listAssets: ListAssetsT | undefined;
   item: ItemT | undefined;
   itemAssets: ItemAssetsT | undefined;
   itemEvent: StoreItemEvent;
   loading: boolean;
-  pager: Pager;
   createDialog: boolean;
 }
 
@@ -43,17 +50,34 @@ export type StoreItemEvent = {
   id: ItemId | undefined;
 }
 
-export type StoreGetters<ItemT, ItemAssetsT, EnvT> = {}
+export type StoreGetters<
+  ItemT,
+  EnvT,
+  ListAssetsT,
+  ItemAssetsT
+> = {}
 
-export type StoreActions<ItemT, ItemAssetsT, EnvT> = {
+export type StoreActions<
+  ItemT,
+  EnvT,
+  ListAssetsT,
+  ItemAssetsT
+> = {
 
   setEnv: (
     env: UnwrapRef<EnvT>,
   ) => void;
 
-  setItems: (
+  setListItems: (
     items: UnwrapRef<ItemT[]>,
+  ) => void;
+
+  setListPager: (
     pager: Pager,
+  ) => void;
+
+  setListAssets: (
+    assets: UnwrapRef<ListAssetsT>,
   ) => void;
 
   setItem: (
@@ -95,13 +119,14 @@ export type StoreActions<ItemT, ItemAssetsT, EnvT> = {
 export type UseStore<
   Id extends string,
   ItemT,
-  ItemAssetsT,
-  EnvT
+  EnvT,
+  ListAssetsT,
+  ItemAssetsT
 > = () => Store<
   Id,
-  StoreState<ItemT, ItemAssetsT, EnvT>,
-  StoreGetters<ItemT, ItemAssetsT, EnvT>,
-  StoreActions<ItemT, ItemAssetsT, EnvT>
+  StoreState<ItemT, EnvT, ListAssetsT, ItemAssetsT>,
+  StoreGetters<ItemT, EnvT, ListAssetsT, ItemAssetsT>,
+  StoreActions<ItemT, EnvT, ListAssetsT, ItemAssetsT>
 >
 
 export type DefaultErrorHandler = (e: any) => any
@@ -110,8 +135,9 @@ export type UseHandlers<
   ItemT,
   ItemI,
   ItemU,
-  ItemAssetsT,
   EnvT,
+  ListAssetsT,
+  ItemAssetsT
 > = (
   opt?: {
     errorHandler?: DefaultErrorHandler;
@@ -120,16 +146,18 @@ export type UseHandlers<
   ItemT,
   ItemI,
   ItemU,
-  ItemAssetsT,
-  EnvT
+  EnvT,
+  ListAssetsT,
+  ItemAssetsT
 >
 
 export type Handlers<
   ItemT,
   ItemI,
   ItemU,
-  ItemAssetsT,
   EnvT,
+  ListAssetsT,
+  ItemAssetsT
 > = {
 
   loadEnv: (
@@ -142,10 +170,10 @@ export type Handlers<
 
   loadItems: (
     query?: GenericObject,
-  ) => Promise<ListResponse<ItemT>>;
+  ) => Promise<ListResponse<ItemT, ListAssetsT>>;
 
   itemsLoaded: (
-    response: ListResponse<ItemT> | void,
+    response: ListResponse<ItemT, ListAssetsT> | void,
   ) => void;
 
   loadItem: (
@@ -211,15 +239,15 @@ export type Handlers<
 
   $applyFilters: (
     model: Record<string, any>,
-  ) => Promise<ListResponse<ItemT> | void>;
+  ) => Promise<ListResponse<ItemT, ListAssetsT> | void>;
 
-  applyFilters: () => Promise<ListResponse<ItemT> | void>;
+  applyFilters: () => Promise<ListResponse<ItemT, ListAssetsT> | void>;
 
   $resetFilters: (
     model: Record<string, any>,
-  ) => Promise<ListResponse<ItemT> | void>;
+  ) => Promise<ListResponse<ItemT, ListAssetsT> | void>;
 
-  resetFilters: () => Promise<ListResponse<ItemT> | void>;
+  resetFilters: () => Promise<ListResponse<ItemT, ListAssetsT> | void>;
 
 }
 
@@ -232,6 +260,7 @@ export type UseModel<ItemT> = (
 
 export type ApiTypes = {
   EnvT?: string;
+  ListAssetsT?: string;
   ItemAssetsT?: string;
 }
 

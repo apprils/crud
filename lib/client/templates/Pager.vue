@@ -14,37 +14,37 @@ const { gotoPage } = useHandlers()
 <div class="input-group input-group-sm">
 
   <button type="button" @click="gotoPage(1)"
-    class="btn btn-outline-secondary" :disabled="store.pager.currentPage <= 1">
+    class="btn btn-outline-secondary" :disabled="store.listPager.currentPage <= 1">
     <Icon angles-left />
   </button>
 
-  <button type="button" @click="gotoPage(store.pager.prevPage)"
-    class="btn btn-outline-secondary" :disabled="!store.pager.prevPage">
-    <Icon angle-left /> {{ store.pager.prevPage }}
+  <button type="button" @click="gotoPage(store.listPager.prevPage)"
+    class="btn btn-outline-secondary" :disabled="!store.listPager.prevPage">
+    <Icon angle-left /> {{ store.listPager.prevPage }}
   </button>
 
-  <input type="text" :value="store.pager.currentPage"
+  <input type="text" :value="store.listPager.currentPage"
     @keyup.enter.prevent="gotoPage(($event.target as HTMLInputElement).value)"
     class="form-control text-center">
 
-  <button type="button" @click="gotoPage(store.pager.nextPage)"
-    class="btn btn-outline-secondary" :disabled="!store.pager.nextPage">
-    {{ store.pager.nextPage }} <Icon angle-right />
+  <button type="button" @click="gotoPage(store.listPager.nextPage)"
+    class="btn btn-outline-secondary" :disabled="!store.listPager.nextPage">
+    {{ store.listPager.nextPage }} <Icon angle-right />
   </button>
 
-  <button type="button" @click="gotoPage(store.pager.totalPages)"
+  <button type="button" @click="gotoPage(store.listPager.totalPages)"
     class="btn btn-outline-secondary"
-      :disabled="store.pager.currentPage >= store.pager.totalPages">
+      :disabled="store.listPager.currentPage >= store.listPager.totalPages">
     <Icon angles-right />
   </button>
 
 </div>
 
 <div class="d-flex justify-content-center">
-  <small v-if="store.pager.totalItems > 0" class="text-muted">
-    {{ store.pager.offset + 1 }}
-    - {{ store.pager.offset + store.items.length }}
-    of {{ store.pager.totalItems }}
+  <small v-if="store.listPager.totalItems > 0" class="text-muted">
+    {{ store.listPager.offset + 1 }}
+    - {{ store.listPager.offset + store.listItems.length }}
+    of {{ store.listPager.totalItems }}
   </small>
 </div>
 

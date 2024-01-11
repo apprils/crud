@@ -13,8 +13,9 @@ export default function handlersFactory<
   ItemT,
   ItemI,
   ItemU,
-  ItemAssetsT,
-  EnvT
+  EnvT,
+  ListAssetsT,
+  ItemAssetsT
 >(
   {
     store,
@@ -26,7 +27,7 @@ export default function handlersFactory<
     zodErrorHandler,
     errorHandler,
   }: {
-    store: ReturnType<UseStore<"generic", ItemT, ItemAssetsT, EnvT>>;
+    store: ReturnType<UseStore<"generic", ItemT, EnvT, ListAssetsT, ItemAssetsT>>;
     router: ReturnType<typeof useRouter>;
     route: ReturnType<typeof useRoute>;
     api: FetchMapper;
@@ -62,8 +63,9 @@ export default function handlersFactory<
     ItemT,
     ItemI,
     ItemU,
-    ItemAssetsT,
-    EnvT
+    EnvT,
+    ListAssetsT,
+    ItemAssetsT
   > = {
 
     loadEnv(
@@ -96,7 +98,7 @@ export default function handlersFactory<
     ) {
       store.loading = true
       return api
-        .get<ListResponse<ItemT>>("list", query || route.query)
+        .get<ListResponse<ItemT, ListAssetsT>>("list", query || route.query)
         .catch(errorHandler)
         .finally(() => store.loading = false)
     },
@@ -105,7 +107,9 @@ export default function handlersFactory<
       response,
     ) {
       if (response) {
-        store.setItems(response.items, response.pager)
+        store.setListItems(response.items)
+        store.setListPager(response.pager)
+        store.setListAssets(response.assets)
       }
     },
 
@@ -269,7 +273,7 @@ export default function handlersFactory<
 
     gotoPrevPage() {
       const _page = Number(route.query._page || 0)
-      return !store.items.length && _page > 1
+      return !store.listItems.length && _page > 1
         ? router.replace({ query: { ...route.query, _page: _page - 1 } })
         : Promise.resolve()
     },

@@ -213,8 +213,10 @@ export async function vitePluginApprilCrud(
         }
 
         if (tpl === "assets.ts") {
-          const { EnvT, ItemAssetsT } = apiTypes
-          context.apiTypesLiteral = JSON.stringify({ EnvT, ItemAssetsT } satisfies ApiTypes)
+          const keys: (keyof ApiTypes)[] = [ "EnvT", "ListAssetsT", "ItemAssetsT" ] as const
+          context.apiTypesLiteral = JSON.stringify(
+            keys.reduce((a,k) => ({ ...a, [k]: k in apiTypes }), {})
+          )
         }
 
         virtualCode = render(virtualCode, {

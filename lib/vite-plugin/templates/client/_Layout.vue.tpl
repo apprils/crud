@@ -126,7 +126,7 @@ function itemKey(
         <slot name="list">
           <ul class="list-group shadow-sm">
 
-            <li v-for="item of store.items" :key="itemKey(item, 'list')"
+            <li v-for="item of store.listItems" :key="itemKey(item, 'list')"
               class="list-group-item list-group-item-compact"
               :class="{ 'list-group-item-primary': isActiveItem(item) }"
               style="position: relative; min-height: 24px;">

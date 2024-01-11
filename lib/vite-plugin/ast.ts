@@ -15,12 +15,19 @@ import type { ApiTypes } from "../client/@types";
 
 const METHODS = [
   "env",
+  "list",
   "retrieve",
 ] as const
 
 const METHODS_REGEX = new RegExp(`\\b(${ METHODS.join("|") })\\b`)
 
 type Method = typeof METHODS[number]
+
+const TYPENAME_BY_METHOD: Record<Method, keyof ApiTypes> = {
+  env: "EnvT",
+  list: "ListAssetsT",
+  retrieve: "ItemAssetsT",
+}
 
 export function extractTypes(
   src: string,
@@ -99,25 +106,38 @@ export function extractTypes(
       continue
     }
 
-    if (method === "retrieve") {
+    let typeDefinition
+
+    if (method === "env") {
+      typeDefinition = getReturnType(firstArg)
+    }
+    else if (method === "list" || method === "retrieve") {
 
       for (const node of [
+
         ...tsquery.match(
           firstArg,
           "ObjectLiteralExpression > MethodDeclaration > Identifier[name=assets]"
         ).map((e) => e.parent),
+
         ...tsquery.match(
           firstArg,
           "ObjectLiteralExpression > PropertyAssignment > Identifier[name=assets] ~ ArrowFunction"
         ),
+
       ]) {
-        typeDefinitions.ItemAssetsT = getReturnType(node)
+        typeDefinition = getReturnType(node)
       }
 
     }
-    else if (method === "env") {
-      typeDefinitions.EnvT = getReturnType(firstArg)
+
+    if (!typeDefinition) {
+      continue
     }
+
+    typeDefinitions[
+      TYPENAME_BY_METHOD[method]
+    ] = typeDefinition
 
   }
 

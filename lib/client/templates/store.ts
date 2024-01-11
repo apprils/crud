@@ -3,15 +3,17 @@ import storeFactory from "@appril/crud:storeFactory";
 
 import {
   type ItemT,
-  type ItemAssetsT,
   type EnvT,
+  type ListAssetsT,
+  type ItemAssetsT,
   primaryKey, modelName,
 } from "@crud:virtual-module-placeholder/assets";
 
 const { useStore, actionListeners } = storeFactory<
   ItemT,
-  ItemAssetsT,
-  EnvT
+  EnvT,
+  ListAssetsT,
+  ItemAssetsT
 >({
   modelName,
   primaryKey,
