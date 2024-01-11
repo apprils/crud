@@ -5,7 +5,7 @@ import { type ZodTypeAny, z } from "zod";
 import { type FetchMapper } from "@appril/more/fetch";
 
 import type {
-  ItemId, Handlers, GenericObject, ApiTypes, UseStore,
+  ItemId, Handlers, GenericObject, ApiTypesLiteral, UseStore,
   ListResponse, RetrieveResponse, DefaultErrorHandler,
 } from "@appril/crud/client";
 
@@ -31,7 +31,7 @@ export default function handlersFactory<
     router: ReturnType<typeof useRouter>;
     route: ReturnType<typeof useRoute>;
     api: FetchMapper;
-    apiTypes: ApiTypes,
+    apiTypes: ApiTypesLiteral,
     zodSchema: Record<string, ZodTypeAny>;
     zodErrorHandler: Function;
     errorHandler: DefaultErrorHandler;

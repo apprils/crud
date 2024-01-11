@@ -22,7 +22,7 @@ declare module "@appril/crud:handlersFactory" {
 
 declare module "@crud:virtual-module-placeholder/assets" {
 
-  import type { ApiTypes } from "@appril/crud/client";
+  import type { ApiTypesLiteral } from "@appril/crud/client";
   import type { ZodTypeAny } from "zod";
 
   export type ItemT = any;
@@ -37,7 +37,7 @@ declare module "@crud:virtual-module-placeholder/assets" {
   export const modelName: string = "";
 
   export const apiBase: string = "";
-  export const apiTypes: ApiTypes = {};
+  export const apiTypes: ApiTypesLiteral = {};
 
   export const regularColumns: (keyof ItemT)[] = [];
 

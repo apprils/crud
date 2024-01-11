@@ -264,3 +264,5 @@ export type ApiTypes = {
   ItemAssetsT?: string;
 }
 
+export type ApiTypesLiteral = Record<keyof ApiTypes, boolean>
+

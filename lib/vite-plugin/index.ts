@@ -17,7 +17,7 @@ import type {
   AVModuleMap, AVModule,
 } from "./@types";
 
-import type { ApiTypes } from "../client/@types";
+import type { ApiTypesLiteral } from "../client/@types";
 
 import {
   clientTemplatesFactory, factoryTemplatesFactory,
@@ -213,10 +213,19 @@ export async function vitePluginApprilCrud(
         }
 
         if (tpl === "assets.ts") {
-          const keys: (keyof ApiTypes)[] = [ "EnvT", "ListAssetsT", "ItemAssetsT" ] as const
-          context.apiTypesLiteral = JSON.stringify(
-            keys.reduce((a,k) => ({ ...a, [k]: k in apiTypes }), {})
-          )
+
+          const apiTypesLiteral: ApiTypesLiteral = {
+            EnvT: false,
+            ListAssetsT: false,
+            ItemAssetsT: false,
+          }
+
+          for (const key of Object.keys(apiTypesLiteral) as (keyof ApiTypesLiteral)[]) {
+            apiTypesLiteral[key] = key in apiTypes
+          }
+
+          context.apiTypesLiteral = JSON.stringify(apiTypesLiteral)
+
         }
 
         virtualCode = render(virtualCode, {
