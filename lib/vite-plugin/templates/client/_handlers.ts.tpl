@@ -130,22 +130,20 @@ export const useModel: UseModel<
   opt,
 ) {
 
-  const modelColumns: (keyof ItemT)[] = [ ...opt?.columns || regularColumns ]
+  const columns: (keyof ItemT)[] = [ ...opt?.columns || regularColumns ]
 
   const model = ref<Partial<ItemT>>(
-    modelColumns.reduce((a,c) => {
-      return {
-        ...a,
-        [c]: store.item?.[c],
-      }
-    }, {})
+    columns.reduce(
+      (a,c) => ({ ...a, [c]: store.item?.[c] }),
+      {}
+    )
   )
 
   if (opt?.reactive !== false) {
 
     const { updateItem, itemUpdated } = useHandlers()
 
-    for (const col of modelColumns) {
+    for (const col of columns) {
       watch(
         () => model.value[col as string],
         // without async there are issues with error handling
