@@ -235,23 +235,34 @@ export type Handlers<
     _page?: number | string | undefined,
   ) => Promise<any>;
 
-  filtersModel: Ref<Record<string, any>>;
+}
 
-  $applyFilters: (
-    model: Record<string, any>,
+export type UseFilters<
+  ItemT,
+  ListAssetsT
+> = <T extends string = "">(
+  params: readonly T[]
+) => {
+
+  model: Record<T, any>;
+
+  $apply: (
+    model: Record<T, any>,
   ) => Promise<ListResponse<ItemT, ListAssetsT> | void>;
 
-  applyFilters: () => Promise<ListResponse<ItemT, ListAssetsT> | void>;
+  apply: () => Promise<ListResponse<ItemT, ListAssetsT> | void>;
 
-  $resetFilters: (
-    model: Record<string, any>,
+  $reset: (
+    model: Record<T, any>,
   ) => Promise<ListResponse<ItemT, ListAssetsT> | void>;
 
-  resetFilters: () => Promise<ListResponse<ItemT, ListAssetsT> | void>;
+  reset: () => Promise<ListResponse<ItemT, ListAssetsT> | void>;
 
 }
 
-export type UseModel<ItemT> = (
+export type UseModel<
+  ItemT
+> = (
   opt?: {
     columns?: (keyof ItemT)[];
     reactive?: boolean;

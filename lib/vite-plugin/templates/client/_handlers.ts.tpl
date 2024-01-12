@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import type {
-  UseHandlers, UseModel,
+  UseHandlers, UseFilters, UseModel,
   DefaultErrorHandler,
 } from "@appril/crud/client";
 
@@ -35,7 +35,9 @@ export const useHandlers: UseHandlers<
   EnvT,
   ListAssetsT,
   ItemAssetsT
-> = (opt) => {
+> = (
+  opt,
+) => {
 
   const router = useRouter()
   const route = useRoute()
@@ -63,6 +65,62 @@ export const useHandlers: UseHandlers<
     zodErrorHandler,
     errorHandler,
   })
+
+}
+
+export const useFilters: UseFilters<
+  ItemT,
+  ListAssetsT
+> = function useFilters(
+  params,
+) {
+
+  const router = useRouter()
+  const route = useRoute()
+
+  const model = ref(
+    params.reduce(
+      (a,p) => ({ ...a, [p]: route.query[p] }),
+      {}
+    )
+  )
+
+  const { loadItems, itemsLoaded } = useHandlers()
+
+  const handlers: ReturnType<UseFilters<ItemT, ListAssetsT>> = {
+
+    model: model.value,
+
+    $apply(
+      model,
+    ) {
+      return router.push({ query: { ...route.query, ...model.value, _page: undefined } })
+        .then(() => loadItems())
+        .then(itemsLoaded)
+    },
+
+    apply() {
+      return handlers.$apply(model)
+    },
+
+    $reset(
+      model,
+    ) {
+      for (const key of Object.keys(model.value)) {
+        model.value[key] = undefined
+      }
+      return router.push({ query: { ...route.query, ...model.value, _page: undefined } })
+        .then(() => loadItems())
+        .then(itemsLoaded)
+    },
+
+    reset() {
+      return handlers.$reset(model)
+    },
+
+  }
+
+  return handlers
 
 }
 

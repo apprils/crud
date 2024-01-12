@@ -88,10 +88,12 @@ declare module "@crud:virtual-module-placeholder/handlers" {
     ItemAssetsT
   >;
 
+  type UseFilters = import("./@types").UseFilters<ItemT, ListAssetsT>;
+
   type UseModel = import("./@types").UseModel<ItemT>;
 
   export const useHandlers: UseHandlers = function() {};
-
+  export const useFilters: UseFilters = function() {};
   export const useModel: UseModel = function() {};
 
 }

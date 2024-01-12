@@ -38,8 +38,6 @@ export default function handlersFactory<
   },
 ) {
 
-  const filtersModel = ref({ ...route.query })
-
   const validatedDataset = (dataset: any) => {
 
     if (!zodSchema) {
@@ -282,33 +280,6 @@ export default function handlersFactory<
       _page,
     ) {
       return router.push({ query: { ...route.query, _page } })
-    },
-
-    filtersModel,
-
-    $applyFilters(
-      model,
-    ) {
-      return router.push({ query: { ...route.query, ...model.value, _page: undefined } })
-        .then(() => handlers.loadItems())
-        .then(handlers.itemsLoaded)
-    },
-
-    applyFilters() {
-      return handlers.$applyFilters(filtersModel)
-    },
-
-    $resetFilters(
-      model,
-    ) {
-      model.value = Object.keys(model.value).reduce((m,k) => ({ ...m, [k]: undefined }), {})
-      return router.push({ query: { ...route.query, ...model.value, _page: undefined } })
-        .then(() => handlers.loadItems())
-        .then(handlers.itemsLoaded)
-    },
-
-    resetFilters() {
-      return handlers.$resetFilters(filtersModel)
     },
 
   }

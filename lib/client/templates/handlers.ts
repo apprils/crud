@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import type {
-  UseHandlers, UseModel,
+  UseHandlers, UseFilters, UseModel,
   DefaultErrorHandler,
 } from "@appril/crud/client";
 
@@ -35,7 +35,9 @@ export const useHandlers: UseHandlers<
   EnvT,
   ListAssetsT,
   ItemAssetsT
-> = (opt) => {
+> = (
+  opt,
+) => {
 
   const router = useRouter()
   const route = useRoute()
@@ -66,28 +68,82 @@ export const useHandlers: UseHandlers<
 
 }
 
+export const useFilters: UseFilters<
+  ItemT,
+  ListAssetsT
+> = function useFilters(
+  params,
+) {
+
+  const router = useRouter()
+  const route = useRoute()
+
+  const model = ref(
+    params.reduce(
+      (a,p) => ({ ...a, [p]: route.query[p] }),
+      {}
+    )
+  )
+
+  const { loadItems, itemsLoaded } = useHandlers()
+
+  const handlers: ReturnType<UseFilters<ItemT, ListAssetsT>> = {
+
+    model: model.value,
+
+    $apply(
+      model,
+    ) {
+      return router.push({ query: { ...route.query, ...model.value, _page: undefined } })
+        .then(() => loadItems())
+        .then(itemsLoaded)
+    },
+
+    apply() {
+      return handlers.$apply(model)
+    },
+
+    $reset(
+      model,
+    ) {
+      for (const key of Object.keys(model.value)) {
+        model.value[key] = undefined
+      }
+      return router.push({ query: { ...route.query, ...model.value, _page: undefined } })
+        .then(() => loadItems())
+        .then(itemsLoaded)
+    },
+
+    reset() {
+      return handlers.$reset(model)
+    },
+
+  }
+
+  return handlers
+
+}
+
 export const useModel: UseModel<
   ItemT
 > = function useModel(
   opt,
 ) {
 
-  const modelColumns: (keyof ItemT)[] = [ ...opt?.columns || regularColumns ]
+  const columns: (keyof ItemT)[] = [ ...opt?.columns || regularColumns ]
 
   const model = ref<Partial<ItemT>>(
-    modelColumns.reduce((a,c) => {
-      return {
-        ...a,
-        [c]: store.item?.[c],
-      }
-    }, {})
+    columns.reduce(
+      (a,c) => ({ ...a, [c]: store.item?.[c] }),
+      {}
+    )
   )
 
   if (opt?.reactive !== false) {
 
     const { updateItem, itemUpdated } = useHandlers()
 
-    for (const col of modelColumns) {
+    for (const col of columns) {
       watch(
         () => model.value[col as string],
         // without async there are issues with error handling
