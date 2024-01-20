@@ -10,10 +10,10 @@ import { {{declaredName}} as {{basename}}{{declaredName}} } from "{{tablesImport
 
 export const {{basename}} = $crudHandlersFactory<
   "{{declaredName}}",
-  import("@appril/dbx:{{declaredName}}").RecordT,
-  import("@appril/dbx:{{declaredName}}").InsertT,
-  import("@appril/dbx:{{declaredName}}").UpdateT,
-  import("@appril/dbx:{{declaredName}}").RecordT["{{primaryKey}}"]
+  import("@dbx:{{declaredName}}").RecordT,
+  import("@dbx:{{declaredName}}").InsertT,
+  import("@dbx:{{declaredName}}").UpdateT,
+  import("@dbx:{{declaredName}}").RecordT["{{primaryKey}}"]
 >(
   {{basename}}{{declaredName}},
   {

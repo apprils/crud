@@ -8,7 +8,7 @@ export type {
   RecordT as ItemT,
   InsertT as ItemI,
   UpdateT as ItemU,
-} from "@appril/dbx:{{declaredName}}";
+} from "@dbx:{{declaredName}}";
 
 export type {
   EnvT,
