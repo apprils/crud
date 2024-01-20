@@ -123,6 +123,7 @@ export async function vitePluginApprilCrud(
 
     const routes: Record<string, {
       name: string;
+      basename: string;
       file: string;
       template: string;
       meta: Record<string, any>;
@@ -132,6 +133,7 @@ export async function vitePluginApprilCrud(
 
       routes[table.apiPath] = {
         name: table.apiPath,
+        basename: table.basename,
         file: table.apiFile,
         template: resolve(__dirname, "templates/api/route.tpl"),
         meta: typeof meta === "function"
