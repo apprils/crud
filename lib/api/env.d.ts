@@ -1,7 +1,6 @@
 
 declare module "@appril/crud/client" {
-  import("../client/@types"); // mandatory for export types to work
-  export * from "../client/@types";
+  export type Pager = any;
 }
 
 declare module "@appril/crud/api" {
