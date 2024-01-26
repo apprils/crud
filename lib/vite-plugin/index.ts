@@ -36,8 +36,6 @@ type DbxConfig = PgtsConfig & {
   connection: string | ConnectionConfig;
   base: string;
   importBase: string;
-  typesDir: string;
-  tablesDir: string;
 }
 
 export async function vitePluginApprilCrud(
@@ -55,8 +53,7 @@ export async function vitePluginApprilCrud(
   } = crudConfig
 
   const {
-    tables: tableDeclarations,
-    schemas,
+    tables,
   } = await pgts(dbxConfig.connection, {
     ...dbxConfig,
     ...schema
@@ -75,11 +72,8 @@ export async function vitePluginApprilCrud(
   }
 
   const rootPath = (...path: string[]) => resolve(String(process.env.PWD), join(...path))
-  const tablesPath = (...path: string[]) => rootPath(dbxConfig.base, dbxConfig.tablesDir, ...path)
 
   const sourceFolder = basename(rootPath())
-  const typesImportBase = join(dbxConfig.importBase, dbxConfig.base, dbxConfig.typesDir)
-  const tablesImportBase = join(dbxConfig.importBase, dbxConfig.base, dbxConfig.tablesDir)
 
   const templates = { ...clientTemplates }
 
@@ -172,13 +166,16 @@ export async function vitePluginApprilCrud(
     {
 
       // generating a bundle file containing api constructors for all tables
-      await renderToFile(rootPath(apiDir, base, "index.ts"), apiTemplates.constructors, {
-        BANNER,
-        typesImportBase,
-        tablesImportBase,
-        tables,
-        factoryCode: apiTemplates.factory,
-      })
+      await renderToFile(
+        rootPath(apiDir, base, "index.ts"),
+        apiTemplates.constructors, {
+          BANNER,
+          dbxConfig,
+          tables,
+          factoryCode: apiTemplates.factory,
+        },
+        { format: true },
+      )
 
     }
 
@@ -231,8 +228,7 @@ export async function vitePluginApprilCrud(
         }
 
         virtualCode = render(virtualCode, {
-          typesImportBase,
-          tablesImportBase,
+          dbxConfig,
           ...table,
           ...context,
         })
@@ -276,7 +272,8 @@ export async function vitePluginApprilCrud(
       {
         BANNER,
         avModules: Object.values(avModules),
-      }
+      },
+      { format: true },
     )
 
   }
@@ -346,25 +343,17 @@ export async function vitePluginApprilCrud(
 
     }
 
-    for (const schema of schemas) {
+    // regenerating api files when table added/removed
+    watchMap.dbxFiles[
+      rootPath(dbxConfig.base, "base.ts")
+    ] = async () => {
 
-      // regenerating schema's tables files/modules when new table added.
-      // tables/{schema}/@index.ts is a bundle file containing all tables in a schema.
-      // watching it to know when new table added.
-      watchMap.dbxFiles[
-        tablesPath(schema, "@index.ts")
-      ] = async () => {
+      await generateApiFiles(
+        tables.flatMap(tableFlatMapper)
+      )
 
-        const tables = tableDeclarations
-          .filter((e) => e.schema === schema)
-          .flatMap(tableFlatMapper)
-
-        await generateApiFiles(tables)
-
-        // do not call generateAmbientVirtualModules here,
-        // it is called by watchMap.apiFiles
-
-      }
+      // do not call generateAmbientVirtualModules here,
+      // it is called by watchMap.apiFiles
 
     }
 

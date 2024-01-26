@@ -1,21 +1,19 @@
 {{BANNER}}
 
-import { fromZodError } from "zod-validation-error";
+import { fromZodError as apprilCrud$fromZodError } from "zod-validation-error";
+import * as apprilCrud$apprilDbx$Tables from "{{dbxConfig.importBase}}/{{dbxConfig.base}}/base";
 
 {{factoryCode}}
 
 {{#tables}}
-{{! prepending basename cause aliases importing same names as tables }}
-import { {{declaredName}} as {{basename}}{{declaredName}} } from "{{tablesImportBase}}";
-
 export const {{basename}} = $crudHandlersFactory<
-  "{{declaredName}}",
-  import("@dbx:{{declaredName}}").RecordT,
-  import("@dbx:{{declaredName}}").InsertT,
-  import("@dbx:{{declaredName}}").UpdateT,
-  import("@dbx:{{declaredName}}").RecordT["{{primaryKey}}"]
+  "{{dbxConfig.base}}:{{name}}",
+  import("{{dbxConfig.base}}:{{name}}").RecordT,
+  import("{{dbxConfig.base}}:{{name}}").InsertT,
+  import("{{dbxConfig.base}}:{{name}}").UpdateT,
+  import("{{dbxConfig.base}}:{{name}}").RecordT["{{primaryKey}}"]
 >(
-  {{basename}}{{declaredName}},
+  apprilCrud$apprilDbx$Tables.{{declaredName}},
   {
     primaryKey: "{{primaryKey}}",
     columns: [
@@ -30,18 +28,9 @@ export const {{basename}} = $crudHandlersFactory<
       {{/zodSchema}}
     {{/columns}}
     },
-    zodErrorHandler,
+    zodErrorHandler: (e: any) => apprilCrud$fromZodError(e, { prefix: null, issueSeparator: ";\n" }),
   }
-)
+);
 
 {{/tables}}
-
-function zodErrorHandler(
-  error: any,
-) {
-  return fromZodError(error, {
-    prefix: null,
-    issueSeparator: ";\n",
-  })
-}
 

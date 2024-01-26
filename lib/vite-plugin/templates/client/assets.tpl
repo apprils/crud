@@ -8,7 +8,7 @@ export type {
   RecordT as ItemT,
   InsertT as ItemI,
   UpdateT as ItemU,
-} from "@dbx:{{declaredName}}";
+} from "{{dbxConfig.base}}:{{name}}";
 
 export type {
   EnvT,
@@ -28,7 +28,7 @@ export const regularColumns = [
   {{#regularColumns}}
   "{{name}}",
   {{/regularColumns}}
-]
+];
 
 export const zodSchema = {
 {{#columns}}
@@ -36,7 +36,7 @@ export const zodSchema = {
   {{name}}: {{zodSchema}},
   {{/zodSchema}}
 {{/columns}}
-}
+};
 
 export function zodErrorHandler(
   error: any,
@@ -45,5 +45,5 @@ export function zodErrorHandler(
     prefix: null,
     issueSeparator: ";\n",
   })
-}
+};
 
