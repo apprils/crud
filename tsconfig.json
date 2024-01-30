@@ -1,0 +1,10 @@
+{
+  "extends": "@appril/tsconfig/lib.json",
+  "include": [
+    "lib/api",
+    "lib/vite-plugin"
+  ],
+  "compilerOptions": {
+    "tsBuildInfoFile": "var/.cache/.tsBuildInfoFile"
+  }
+}

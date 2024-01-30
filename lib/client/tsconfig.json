@@ -2,6 +2,8 @@
   "extends": "@appril/tsconfig/app-vue.json",
   "include": [
     "."
-  ]
+  ],
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../var/.cache/.tsBuildInfoFile.client"
+  }
 }
-
