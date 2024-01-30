@@ -1,4 +1,3 @@
-
 import type { ClientModuleTemplates, AVFactoryModuleName } from "./@types";
 
 import apiTpl from "./templates/client/_api.ts.tpl";
@@ -39,7 +38,6 @@ import apiFactoryTpl from "./templates/api/_factory.tpl";
 import apiConstructorsTpl from "./templates/api/_constructors.tpl";
 
 export const clientTemplatesFactory = (): Required<ClientModuleTemplates> => ({
-
   "assets.ts": assetsTpl,
   "apiTypes.ts": apiTypesTpl,
 
@@ -69,20 +67,21 @@ export const clientTemplatesFactory = (): Required<ClientModuleTemplates> => ({
 
   "setup.ts": setupTpl,
   "store.ts": storeTpl,
+});
 
-})
-
-export const factoryTemplatesFactory = (): Record<AVFactoryModuleName, string> => ({
+export const factoryTemplatesFactory = (): Record<
+  AVFactoryModuleName,
+  string
+> => ({
   "@appril/crud:storeFactory": storeFactoryTpl,
   "@appril/crud:handlersFactory": handlersFactoryTpl,
-})
+});
 
 export const apiTemplatesFactory = () => ({
   factory: apiFactoryTpl,
   constructors: apiConstructorsTpl,
-})
+});
 
 export const extraTemplatesFactory = () => ({
   moduleDts: moduleDtsTpl,
-})
-
+});

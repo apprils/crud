@@ -5,7 +5,6 @@
   ],
   "compilerOptions": {
     "rootDir": ".",
-    "tsBuildInfoFile": "../../var/.cache/.tsBuildInfoFile.api",
     "outDir": "../../pkg/api"
   }
 }

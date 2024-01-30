@@ -56,14 +56,11 @@
     "prebuild": "mkdir -p pkg; find pkg -type f -exec rm -fv {} \\;",
     "build": "set -e; for e in api client vite-plugin; do npm run build:$e; done"
   },
+  "prettier": "@appril/prettier-config",
   "release-it": {
     "hooks": {
       "before:init": [
         "npm run build"
-      ],
-      "after:release": [
-        "mkdir -p var/pub",
-        "npm pack --pack-destination var/pub"
       ]
     }
   },
@@ -79,6 +76,7 @@
   },
   "devDependencies": {
     "@appril/dbx": "^0.2.6",
+    "@appril/prettier-config": "^0.2.2",
     "@appril/tsconfig": "^0.2.3",
     "@types/fs-extra": "^11.0.4",
     "@types/koa": "^2.14.0",
@@ -88,6 +86,7 @@
     "esbuild": "^0.19.12",
     "knex": "^3.1.0",
     "koa": "^2.15.0",
+    "prettier": "^3.2.4",
     "release-it": "^17.0.3",
     "typescript": "^5.3.3",
     "vite": "^5.0.12",

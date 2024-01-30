@@ -1,4 +1,3 @@
-
 import storeFactory from "@appril/crud:storeFactory";
 
 import {
@@ -6,7 +5,8 @@ import {
   type EnvT,
   type ListAssetsT,
   type ItemAssetsT,
-  primaryKey, modelName,
+  primaryKey,
+  modelName,
 } from "@crud:virtual-module-placeholder/assets";
 
 const { useStore, actionListeners } = storeFactory<
@@ -17,7 +17,6 @@ const { useStore, actionListeners } = storeFactory<
 >({
   modelName,
   primaryKey,
-})
+});
 
-export { useStore, actionListeners }
-
+export { useStore, actionListeners };

@@ -1,9 +1,10 @@
-
 import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import type {
-  UseHandlers, UseFilters, UseModel,
+  UseHandlers,
+  UseFilters,
+  UseModel,
   DefaultErrorHandler,
 } from "@appril/crud/client";
 
@@ -18,15 +19,17 @@ import {
   type EnvT,
   type ListAssetsT,
   type ItemAssetsT,
-  apiTypes, regularColumns,
-  zodSchema, zodErrorHandler,
+  apiTypes,
+  regularColumns,
+  zodSchema,
+  zodErrorHandler,
 } from "@crud:virtual-module-placeholder/assets";
 
 import { api } from "@crud:virtual-module-placeholder/api";
 
-const store = useStore()
+const store = useStore();
 
-let defaultErrorHandler: DefaultErrorHandler
+let defaultErrorHandler: DefaultErrorHandler;
 
 export const useHandlers: UseHandlers<
   ItemT,
@@ -35,27 +38,17 @@ export const useHandlers: UseHandlers<
   EnvT,
   ListAssetsT,
   ItemAssetsT
-> = (
-  opt,
-) => {
-
-  const router = useRouter()
-  const route = useRoute()
+> = (opt) => {
+  const router = useRouter();
+  const route = useRoute();
 
   if (opt?.errorHandler && !defaultErrorHandler) {
-    defaultErrorHandler = opt.errorHandler
+    defaultErrorHandler = opt.errorHandler;
   }
 
-  const errorHandler = opt?.errorHandler || defaultErrorHandler
+  const errorHandler = opt?.errorHandler || defaultErrorHandler;
 
-  return handlersFactory<
-    ItemT,
-    ItemI,
-    ItemU,
-    EnvT,
-    ListAssetsT,
-    ItemAssetsT
-  >({
+  return handlersFactory<ItemT, ItemI, ItemU, EnvT, ListAssetsT, ItemAssetsT>({
     store,
     router,
     route,
@@ -64,96 +57,72 @@ export const useHandlers: UseHandlers<
     zodSchema,
     zodErrorHandler,
     errorHandler,
-  })
+  });
+};
 
-}
-
-export const useFilters: UseFilters<
-  ItemT,
-  ListAssetsT
-> = function useFilters(
+export const useFilters: UseFilters<ItemT, ListAssetsT> = function useFilters(
   params,
 ) {
-
-  const router = useRouter()
-  const route = useRoute()
+  const router = useRouter();
+  const route = useRoute();
 
   const model = ref(
-    params.reduce(
-      (a,p) => ({ ...a, [p]: route.query[p] }),
-      {}
-    )
-  )
+    params.reduce((a, p) => ({ ...a, [p]: route.query[p] }), {}),
+  );
 
-  const { loadItems, itemsLoaded } = useHandlers()
+  const { loadItems, itemsLoaded } = useHandlers();
 
   const handlers: ReturnType<UseFilters<ItemT, ListAssetsT>> = {
-
     model: model.value,
 
-    $apply(
-      model,
-    ) {
-      return router.push({ query: { ...route.query, ...model.value, _page: undefined } })
+    $apply(model) {
+      return router
+        .push({ query: { ...route.query, ...model.value, _page: undefined } })
         .then(() => loadItems())
-        .then(itemsLoaded)
+        .then(itemsLoaded);
     },
 
     apply() {
-      return handlers.$apply(model)
+      return handlers.$apply(model);
     },
 
-    $reset(
-      model,
-    ) {
+    $reset(model) {
       for (const key of Object.keys(model.value)) {
-        model.value[key] = undefined
+        model.value[key] = undefined;
       }
-      return router.push({ query: { ...route.query, ...model.value, _page: undefined } })
+      return router
+        .push({ query: { ...route.query, ...model.value, _page: undefined } })
         .then(() => loadItems())
-        .then(itemsLoaded)
+        .then(itemsLoaded);
     },
 
     reset() {
-      return handlers.$reset(model)
+      return handlers.$reset(model);
     },
+  };
 
-  }
+  return handlers;
+};
 
-  return handlers
-
-}
-
-export const useModel: UseModel<
-  ItemT
-> = function useModel(
-  opt,
-) {
-
-  const columns: (keyof ItemT)[] = [ ...opt?.columns || regularColumns ]
+export const useModel: UseModel<ItemT> = function useModel(opt) {
+  const columns: (keyof ItemT)[] = [...(opt?.columns || regularColumns)];
 
   const model = ref<Partial<ItemT>>(
-    columns.reduce(
-      (a,c) => ({ ...a, [c]: store.item?.[c] }),
-      {}
-    )
-  )
+    columns.reduce((a, c) => ({ ...a, [c]: store.item?.[c] }), {}),
+  );
 
   if (opt?.reactive !== false) {
-
-    const { updateItem, itemUpdated } = useHandlers()
+    const { updateItem, itemUpdated } = useHandlers();
 
     for (const col of columns) {
       watch(
         () => model.value[col as string],
         // without async there are issues with error handling
-        async (val) => await updateItem({ [col]: val } as Partial<ItemU>).then(itemUpdated)
-      )
+        async (val) =>
+          await updateItem({ [col]: val } as Partial<ItemU>).then(itemUpdated),
+      );
     }
-
   }
 
-  return model
-
-}
-
+  return model;
+};

@@ -1,10 +1,9 @@
-
 /// <reference types="vite/client" />
 
 declare module "*.vue" {
   import type { DefineComponent } from "vue";
-  const component: DefineComponent<{}, {}, any>
-  export default component
+  const component: DefineComponent<{}, {}, any>;
+  export default component;
 }
 
 declare module "@appril/crud/client" {
@@ -13,15 +12,14 @@ declare module "@appril/crud/client" {
 }
 
 declare module "@appril/crud:storeFactory" {
-  export { default } from import("./templates/storeFactory");
+  export { default } from "./templates/storeFactory";
 }
 
 declare module "@appril/crud:handlersFactory" {
-  export { default } from import("./templates/handlersFactory");
+  export { default } from "./templates/handlersFactory";
 }
 
 declare module "@crud:virtual-module-placeholder/assets" {
-
   import type { ApiTypesLiteral } from "@appril/crud/client";
   import type { ZodTypeAny } from "zod";
 
@@ -42,12 +40,10 @@ declare module "@crud:virtual-module-placeholder/assets" {
   export const regularColumns: (keyof ItemT)[] = [];
 
   export const zodSchema: Record<string, ZodTypeAny> = {};
-  export const zodErrorHandler: Function = function() {};
-
+  export const zodErrorHandler: Function = function () {};
 }
 
 declare module "@crud:virtual-module-placeholder/store" {
-
   import type {
     ItemT,
     EnvT,
@@ -63,13 +59,11 @@ declare module "@crud:virtual-module-placeholder/store" {
     ItemAssetsT
   >;
 
-  export const useStore: UseStore = function() {};
-  export const actionListeners: any[] = []
-
+  export const useStore: UseStore = function () {};
+  export const actionListeners: any[] = [];
 }
 
 declare module "@crud:virtual-module-placeholder/handlers" {
-
   import type {
     ItemT,
     ItemI,
@@ -92,21 +86,17 @@ declare module "@crud:virtual-module-placeholder/handlers" {
 
   type UseModel = import("./@types").UseModel<ItemT>;
 
-  export const useHandlers: UseHandlers = function() {};
-  export const useFilters: UseFilters = function() {};
-  export const useModel: UseModel = function() {};
-
+  export const useHandlers: UseHandlers = function () {};
+  export const useFilters: UseFilters = function () {};
+  export const useModel: UseModel = function () {};
 }
 
 declare module "@crud:virtual-module-placeholder/api" {
-
   import type { FetchMapper } from "@appril/more/fetch";
-  export const api: FetchMapper = function() {};
-
+  export const api: FetchMapper = function () {};
 }
 
 declare module "@crud:virtual-module-placeholder/base" {
-
   import { useStore } from "@crud:virtual-module-placeholder/store";
 
   export * from "@crud:virtual-module-placeholder/assets";
@@ -115,10 +105,8 @@ declare module "@crud:virtual-module-placeholder/base" {
   export * from "@crud:virtual-module-placeholder/api";
 
   export const store: ReturnType<typeof useStore> = {};
-
 }
 
 declare module "@crud:virtual-module-placeholder/setup" {
-  export {}
+  export {};
 }
-

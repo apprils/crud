@@ -4,7 +4,6 @@
     "."
   ],
   "compilerOptions": {
-    "tsBuildInfoFile": "../../var/.cache/.tsBuildInfoFile.vite-plugin",
     "outDir": "../../pkg/vite-plugin"
   }
 }
