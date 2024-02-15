@@ -1,8 +1,0 @@
-
-pkg
-var
-**/@type*.ts
-**/tsconfig*.json
-lib/client/templates/*.vue.d.ts
-lib/vite-plugin/templates/client/*.vue.d.ts.tpl
-
