@@ -1,5 +1,6 @@
 import { resolve, join } from "path";
 
+import { type ResolvedConfig } from "vite";
 import fsx from "fs-extra";
 
 import { renderToFile } from "./render";
@@ -10,37 +11,43 @@ export function resolvePath(...path: string[]): string {
   return resolve(CWD, join(...path));
 }
 
-export function filesGeneratorFactory() {
+export function filesGeneratorFactory(config: ResolvedConfig) {
   const generatedFiles = new Set<string>();
 
-  function generateFile<RenderContext = {}>(
+  function generateFile<RenderContext = object>(
     outfile: string,
     render: { template: string; context: RenderContext },
   ): Promise<void>;
 
   function generateFile(outfile: string, content: string): Promise<void>;
 
-  function generateFile(...args: any[]) {
+  function generateFile(
+    ...args: [string, string | { template: string; context: object }]
+  ) {
     const [outfile, rest] = args;
     generatedFiles.add(outfile);
     return typeof rest === "string"
       ? fsx.outputFile(resolvePath(outfile), rest, "utf8")
       : renderToFile(resolvePath(outfile), rest.template, rest.context);
   }
+
   return {
     generateFile,
-    persistGeneratedFiles(outfile: string, lineMapper?: (f: string) => string) {
+    persistGeneratedFiles(outFile: string, lineMapper?: (f: string) => string) {
       return persistGeneratedFiles(
-        outfile,
         lineMapper ? [...generatedFiles].map(lineMapper) : [...generatedFiles],
+        { cacheDir: config.cacheDir, outFile },
       );
     },
   };
 }
 
-export function persistGeneratedFiles(outfile: string, entries: string[]) {
+export function persistGeneratedFiles(
+  entries: string[],
+  { cacheDir, outFile }: { cacheDir: string; outFile: string },
+) {
   return fsx.outputFile(
-    resolvePath("../var/.cache/generatedFiles", outfile),
+    join(cacheDir, "generated-files-handler", outFile),
     [...entries].join("\n"),
   );
 }

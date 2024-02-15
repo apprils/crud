@@ -5,7 +5,10 @@ import { type UserConfig, defineConfig } from "vite";
 
 import { sfcDts } from "./sfc";
 
-type FindReplace = [find: string | RegExp, replace: string | RegExp | Function];
+type FindReplace = [
+  find: string | RegExp,
+  replace: string | RegExp | (() => unknown),
+];
 
 const replaceMap: Record<string, FindReplace[]> = {
   "Layout.vue": [
@@ -32,7 +35,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
     }
 
     for (let { name, text } of sfcDts(join(entry.path, entry.name))) {
-      if (basename(name) !== entry.name + ".d.ts") {
+      if (basename(name) !== `${entry.name}.d.ts`) {
         continue;
       }
 

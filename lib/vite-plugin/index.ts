@@ -33,7 +33,7 @@ import {
 } from "./templates";
 
 import { resolvePath, filesGeneratorFactory } from "./base";
-import { BANNER, renderToFile, render } from "./render";
+import { BANNER, render } from "./render";
 import { extractTypes } from "./ast";
 
 const clientTemplates = clientTemplatesFactory();
@@ -66,9 +66,9 @@ export async function vitePluginApprilCrud(
   });
 
   const watchMap: {
-    tplFiles: Record<string, Function>;
-    dbxFiles: Record<string, Function>;
-    apiFiles: Record<string, Function>;
+    tplFiles: Record<string, () => Promise<void>>;
+    dbxFiles: Record<string, () => Promise<void>>;
+    apiFiles: Record<string, () => Promise<void>>;
   } = {
     tplFiles: {},
     dbxFiles: {},
@@ -76,8 +76,6 @@ export async function vitePluginApprilCrud(
   };
 
   const sourceFolder = basename(resolvePath());
-
-  const filesGenerator = filesGeneratorFactory();
 
   const templates = { ...clientTemplates };
 
@@ -105,154 +103,156 @@ export async function vitePluginApprilCrud(
     };
   }
 
-  const generateApiFiles = async (tables: Table[]) => {
-    const routes: Record<
-      string,
-      {
-        name: string;
-        basename: string;
-        file: string;
-        template: string;
-        meta: Record<string, any>;
-      }
-    > = {};
+  async function configResolved(viteConfig: ResolvedConfig) {
+    const filesGenerator = filesGeneratorFactory(viteConfig);
 
-    for (const table of tables) {
-      routes[table.apiPath] = {
-        name: table.apiPath,
-        basename: table.basename,
-        file: table.apiFile,
-        template: resolve(__dirname, "templates/api/route.tpl"),
-        meta:
-          typeof meta === "function"
-            ? meta(table)
-            : { ...meta?.["*"], ...meta?.[table.basename] },
-      };
+    const generateApiFiles = async (tables: Table[]) => {
+      const routes: Record<
+        string,
+        {
+          name: string;
+          basename: string;
+          file: string;
+          template: string;
+          meta: Record<string, unknown>;
+        }
+      > = {};
 
-      // watching api file to get apiTypes updates
-      watchMap.apiFiles[resolvePath(table.apiFile)] = async () => {
-        // apiTypes used by multiple table modules
-        // so regenerating all table modules
-        await generateAmbientVirtualModules(table);
-      };
-    }
-
-    {
-      // not creating route file directly,
-      // rather adding a coresponding entry to yml file
-      // and file will be created by api plugin
-
-      const content = [
-        BANNER.trim().replace(/^/gm, "#"),
-        stringify(routes),
-      ].join("\n");
-
-      await filesGenerator.generateFile(
-        join(apiDir, `_000_${base}_routes.yml`),
-        content,
-      );
-    }
-
-    // generating a bundle file containing api constructors for all tables
-    await filesGenerator.generateFile(join(apiDir, base, "index.ts"), {
-      template: apiTemplates.constructors,
-      context: {
-        BANNER,
-        dbxConfig,
-        tables,
-        factoryCode: apiTemplates.factory,
-      },
-    });
-  };
-
-  const generateAmbientVirtualModules = async (table: Table) => {
-    const prefix = [base, table.basename].join(":");
-
-    const apiTypes = extractTypes(
-      await fsx.readFile(resolvePath(table.apiFile), "utf8"),
-      { root: sourceFolder, base: dirname(table.apiFile) },
-    );
-
-    const moduleFactory = (tpl: keyof ClientModuleTemplates): AVModule => {
-      let virtualCode = templates[tpl].replace(
-        /@crud:virtual-module-placeholder/g,
-        prefix,
-      );
-
-      // do not render templates/client/_* files, they contain no mustache code!
-      // rendering them would break vue templates!
-      // only 2 templates contains mustache code - assets.ts and apiTypes.ts,
-      if (tpl === "assets.ts" || tpl === "apiTypes.ts") {
-        const context: Record<string, any> = {
-          apiTypes,
+      for (const table of tables) {
+        routes[table.apiPath] = {
+          name: table.apiPath,
+          basename: table.basename,
+          file: table.apiFile,
+          template: resolve(__dirname, "templates/api/route.tpl"),
+          meta:
+            typeof meta === "function"
+              ? meta(table)
+              : { ...meta?.["*"], ...meta?.[table.basename] },
         };
 
-        if (tpl === "assets.ts") {
-          const apiTypesLiteral: ApiTypesLiteral = {
-            EnvT: false,
-            ListAssetsT: false,
-            ItemAssetsT: false,
-          };
-
-          for (const key of Object.keys(
-            apiTypesLiteral,
-          ) as (keyof ApiTypesLiteral)[]) {
-            apiTypesLiteral[key] = key in apiTypes;
-          }
-
-          context.apiTypesLiteral = JSON.stringify(apiTypesLiteral);
-        }
-
-        virtualCode = render(virtualCode, {
-          dbxConfig,
-          ...table,
-          ...context,
-        });
+        // watching api file to get apiTypes updates
+        watchMap.apiFiles[resolvePath(table.apiFile)] = async () => {
+          // apiTypes used by multiple table modules
+          // so regenerating all table modules
+          await generateAmbientVirtualModules(table);
+        };
       }
 
-      const ambientCode = /\.vue$/.test(tpl)
-        ? `export { default } from "${prefix}/${tpl}.d.ts";`
-        : virtualCode;
+      {
+        // not creating route file directly,
+        // rather adding a corresponding entry to yml file
+        // and file will be created by api plugin
 
-      return {
-        get id() {
-          return join(prefix, this.name);
+        const content = [
+          BANNER.trim().replace(/^/gm, "#"),
+          stringify(routes),
+        ].join("\n");
+
+        await filesGenerator.generateFile(
+          join(apiDir, `_000_${base}_routes.yml`),
+          content,
+        );
+      }
+
+      // generating a bundle file containing api constructors for all tables
+      await filesGenerator.generateFile(join(apiDir, base, "index.ts"), {
+        template: apiTemplates.constructors,
+        context: {
+          BANNER,
+          dbxConfig,
+          tables,
+          factoryCode: apiTemplates.factory,
         },
-        get name() {
-          if (tpl === "index.ts") {
-            return "";
-          }
-
-          if (/\.vue/.test(tpl)) {
-            // keeping .vue and .vue.d.ts extensions
-            return tpl as AVVueModuleName;
-          }
-
-          return tpl.replace(/\.ts$/, "") as AVTsModuleName;
-        },
-        ambientCode,
-        virtualCode,
-      };
+      });
     };
 
-    for (const tpl of Object.keys(
-      clientTemplates,
-    ) as (keyof ClientModuleTemplates)[]) {
-      const mdl = moduleFactory(tpl);
-      avModules[mdl.id] = mdl;
-    }
+    const generateAmbientVirtualModules = async (table: Table) => {
+      const prefix = [base, table.basename].join(":");
 
-    // regenerating whole bundle, even if single table updated
-    await filesGenerator.generateFile(base + ".d.ts", {
-      template: extraTemplates.moduleDts,
-      context: {
-        BANNER,
-        avModules: Object.values(avModules),
-      },
-    });
-  };
+      const apiTypes = extractTypes(
+        await fsx.readFile(resolvePath(table.apiFile), "utf8"),
+        { root: sourceFolder, base: dirname(table.apiFile) },
+      );
 
-  async function configResolved(viteConfig: ResolvedConfig) {
+      const moduleFactory = (tpl: keyof ClientModuleTemplates): AVModule => {
+        let virtualCode = templates[tpl].replace(
+          /@crud:virtual-module-placeholder/g,
+          prefix,
+        );
+
+        // do not render templates/client/_* files, they contain no mustache code!
+        // rendering them would break vue templates!
+        // only 2 templates contains mustache code - assets.ts and apiTypes.ts,
+        if (tpl === "assets.ts" || tpl === "apiTypes.ts") {
+          const context: Record<string, unknown> = {
+            apiTypes,
+          };
+
+          if (tpl === "assets.ts") {
+            const apiTypesLiteral: ApiTypesLiteral = {
+              EnvT: false,
+              ListAssetsT: false,
+              ItemAssetsT: false,
+            };
+
+            for (const key of Object.keys(
+              apiTypesLiteral,
+            ) as (keyof ApiTypesLiteral)[]) {
+              apiTypesLiteral[key] = key in apiTypes;
+            }
+
+            context.apiTypesLiteral = JSON.stringify(apiTypesLiteral);
+          }
+
+          virtualCode = render(virtualCode, {
+            dbxConfig,
+            ...table,
+            ...context,
+          });
+        }
+
+        const ambientCode = /\.vue$/.test(tpl)
+          ? `export { default } from "${prefix}/${tpl}.d.ts";`
+          : virtualCode;
+
+        return {
+          get id() {
+            return join(prefix, this.name);
+          },
+          get name() {
+            if (tpl === "index.ts") {
+              return "";
+            }
+
+            if (/\.vue/.test(tpl)) {
+              // keeping .vue and .vue.d.ts extensions
+              return tpl as AVVueModuleName;
+            }
+
+            return tpl.replace(/\.ts$/, "") as AVTsModuleName;
+          },
+          ambientCode,
+          virtualCode,
+        };
+      };
+
+      for (const tpl of Object.keys(
+        clientTemplates,
+      ) as (keyof ClientModuleTemplates)[]) {
+        const mdl = moduleFactory(tpl);
+        avModules[mdl.id] = mdl;
+      }
+
+      // regenerating whole bundle, even if single table updated
+      await filesGenerator.generateFile(`${base}.d.ts`, {
+        template: extraTemplates.moduleDts,
+        context: {
+          BANNER,
+          avModules: Object.values(avModules),
+        },
+      });
+    };
+
     const apiAssets = {
       apiPath: {
         get(this: Table) {
@@ -329,12 +329,9 @@ export async function vitePluginApprilCrud(
       }
     }
 
-    await filesGenerator.persistGeneratedFiles(
-      join(sourceFolder, base),
-      (f) => {
-        return join(sourceFolder, f);
-      },
-    );
+    await filesGenerator.persistGeneratedFiles(base, (f) => {
+      return join(sourceFolder, f);
+    });
   }
 
   return {

@@ -94,7 +94,7 @@ export function extractTypes(
       continue;
     }
 
-    let typeDefinition;
+    let typeDefinition: string | undefined;
 
     if (method === "env") {
       typeDefinition = getReturnType(firstArg);

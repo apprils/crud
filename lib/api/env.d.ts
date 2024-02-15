@@ -1,5 +1,5 @@
 declare module "@appril/crud/client" {
-  export type Pager = any;
+  export type Pager = unknown;
 }
 
 declare module "@appril/crud/api" {

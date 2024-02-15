@@ -2,7 +2,7 @@
 
 declare module "*.vue" {
   import type { DefineComponent } from "vue";
-  const component: DefineComponent<{}, {}, any>;
+  const component: DefineComponent<object, object, unknown>;
   export default component;
 }
 
@@ -23,13 +23,13 @@ declare module "@crud:virtual-module-placeholder/assets" {
   import type { ApiTypesLiteral } from "@appril/crud/client";
   import type { ZodTypeAny } from "zod";
 
-  export type ItemT = any;
-  export type ItemI = any;
-  export type ItemU = any;
+  export type ItemT = unknown;
+  export type ItemI = unknown;
+  export type ItemU = unknown;
 
-  export type EnvT = any;
-  export type ListAssetsT = any;
-  export type ItemAssetsT = any;
+  export type EnvT = unknown;
+  export type ListAssetsT = unknown;
+  export type ItemAssetsT = unknown;
 
   export const primaryKey: keyof ItemT = "";
   export const modelName: string = "";
@@ -40,7 +40,7 @@ declare module "@crud:virtual-module-placeholder/assets" {
   export const regularColumns: (keyof ItemT)[] = [];
 
   export const zodSchema: Record<string, ZodTypeAny> = {};
-  export const zodErrorHandler: Function = function () {};
+  export const zodErrorHandler: () => void = () => {};
 }
 
 declare module "@crud:virtual-module-placeholder/store" {
@@ -59,8 +59,8 @@ declare module "@crud:virtual-module-placeholder/store" {
     ItemAssetsT
   >;
 
-  export const useStore: UseStore = function () {};
-  export const actionListeners: any[] = [];
+  export const useStore: UseStore = () => {};
+  export const actionListeners: unknown[] = [];
 }
 
 declare module "@crud:virtual-module-placeholder/handlers" {
@@ -86,14 +86,14 @@ declare module "@crud:virtual-module-placeholder/handlers" {
 
   type UseModel = import("./@types").UseModel<ItemT>;
 
-  export const useHandlers: UseHandlers = function () {};
-  export const useFilters: UseFilters = function () {};
-  export const useModel: UseModel = function () {};
+  export const useHandlers: UseHandlers = () => {};
+  export const useFilters: UseFilters = () => {};
+  export const useModel: UseModel = () => {};
 }
 
 declare module "@crud:virtual-module-placeholder/api" {
   import type { FetchMapper } from "@appril/more/fetch";
-  export const api: FetchMapper = function () {};
+  export const api: FetchMapper = () => {};
 }
 
 declare module "@crud:virtual-module-placeholder/base" {

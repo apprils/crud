@@ -17,7 +17,7 @@ export function sfcParser(src: string, opt: { file: string }): string {
 
   const id = createHash("sha256").update(file).digest("hex").substring(0, 10);
 
-  const scriptCompiled = compileScript(descriptor, { id: id + ":script" });
+  const scriptCompiled = compileScript(descriptor, { id: `${id}:script` });
 
   const scriptCode = rewriteDefault(scriptCompiled.content, "_sfc_main", [
     "typescript",
@@ -25,7 +25,7 @@ export function sfcParser(src: string, opt: { file: string }): string {
 
   const templateCompiled = compileTemplate({
     source: descriptor.template?.content || "",
-    id: id + ":template",
+    id: `${id}:template`,
     filename: file,
   });
 
@@ -127,7 +127,7 @@ export function sfcDts(sfcFile: string): { name: string; text: string }[] {
   });
 
   const { outputFiles } = program.__vue.languageService.getEmitOutput(
-    sfcFile + ".ts",
+    `${sfcFile}.ts`,
     true,
     true,
   );

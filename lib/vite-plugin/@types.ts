@@ -1,13 +1,12 @@
-
 import type {
-  ConnectionConfig, Config as PgtsConfig,
+  ConnectionConfig,
+  Config as PgtsConfig,
   TableDeclaration,
 } from "@appril/pgts";
 
-export type { ConnectionConfig, PgtsConfig, TableDeclaration }
+export type { ConnectionConfig, PgtsConfig, TableDeclaration };
 
 export type ClientModuleTemplates = {
-
   "assets.ts"?: string;
   "apiTypes.ts"?: string;
 
@@ -37,12 +36,11 @@ export type ClientModuleTemplates = {
 
   "setup.ts"?: string;
   "store.ts"?: string;
-
-}
+};
 
 export type AVFactoryModuleName =
   | "@appril/crud:storeFactory"
-  | "@appril/crud:handlersFactory"
+  | "@appril/crud:handlersFactory";
 
 export type AVTsModuleName =
   | "assets"
@@ -52,41 +50,35 @@ export type AVTsModuleName =
   | "handlers"
   | "setup"
   | "store"
-  | "" // index
+  | ""; // index
 
 export type AVVueModuleName =
-
   | "ControlButtons.vue"
   | "ControlButtons.vue.d.ts"
-
   | "CreateDialog.vue"
   | "CreateDialog.vue.d.ts"
-
   | "EditorPlaceholder.vue"
   | "EditorPlaceholder.vue.d.ts"
-
   | "Layout.vue"
   | "Layout.vue.d.ts"
-
   | "Overlay.vue"
   | "Overlay.vue.d.ts"
-
   | "Pager.vue"
-  | "Pager.vue.d.ts"
+  | "Pager.vue.d.ts";
 
 export type AVModuleName =
   | AVFactoryModuleName
   | AVTsModuleName
-  | AVVueModuleName
+  | AVVueModuleName;
 
 export type AVModule = {
   id: string;
   name: AVModuleName;
   ambientCode: string;
   virtualCode: string;
-}
+};
 
-export type AVModuleMap = Record<string, AVModule>
+export type AVModuleMap = Record<string, AVModule>;
 
 export type Table = TableDeclaration & {
   basename: string;
@@ -96,7 +88,7 @@ export type Table = TableDeclaration & {
   apiBase: string;
   // relative path to file inside sourceFolder, e.g. api/crud/products/index.ts
   apiFile: string;
-}
+};
 
 export type Config = {
   schema?: string;
@@ -105,6 +97,7 @@ export type Config = {
   templates?: ClientModuleTemplates;
   alias?: Record<string, string | string[]>;
   tableFilter?: (t: TableDeclaration) => boolean;
-  meta?: Record<string, Record<string, any>> | ((t: Table) => Record<string, any>);
-}
-
+  meta?:
+    | Record<string, Record<string, unknown>>
+    | ((t: Table) => Record<string, unknown>);
+};
