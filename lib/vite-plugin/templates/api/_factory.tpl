@@ -185,9 +185,10 @@ export function $crudHandlersFactory<
         CrudContext["returning"]
       >,
     ) {
-      return $use<any, Context>([
+      return $use([
         initHandler,
         async (ctx, next) => {
+          // @ts-ignore
           ctx.crud.returning = await handler(ctx);
           return next();
         },
@@ -204,9 +205,10 @@ export function $crudHandlersFactory<
         CrudContext["returningExclude"]
       >,
     ) {
-      return $use<any, Context>([
+      return $use([
         initHandler,
         async (ctx, next) => {
+          // @ts-ignore
           ctx.crud.returningExclude = await handler(ctx);
           return next();
         },
