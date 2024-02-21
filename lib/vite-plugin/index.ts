@@ -5,7 +5,6 @@ import fsx from "fs-extra";
 import pgts from "@appril/pgts";
 import { transform } from "esbuild";
 import { stringify } from "yaml";
-import { red } from "kleur/colors";
 
 import type { Plugin, ResolvedConfig } from "vite";
 
@@ -279,9 +278,7 @@ export async function vitePluginApprilCrud(
 
       if (!tableFilter || tableFilter(table)) {
         if (!table.primaryKey) {
-          console.log(
-            `${red(table.name)} - no primaryKey defined, skipping...`,
-          );
+          console.log(`[ ${table.name} ] - no primaryKey defined, skipping...`);
           return [];
         }
 

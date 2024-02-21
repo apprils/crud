@@ -73,7 +73,6 @@
     "@appril/pgts": "^0.2.8",
     "@phenomnomnominal/tsquery": "^6.1.3",
     "fs-extra": "^11.2.0",
-    "kleur": "^4.1.5",
     "mustache": "^4.2.0",
     "yaml": "^2.3.4"
   },
