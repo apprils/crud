@@ -1,11 +1,9 @@
 {{BANNER}}
 
-import { fromZodError as apprilCrud$fromZodError } from "zod-validation-error";
-import * as apprilCrud$apprilDbx$Tables from "{{dbxConfig.importBase}}/{{dbxConfig.base}}/base";
-
 {{factoryCode}}
 
 {{#tables}}
+import { {{declaredName}} as ${{basename}} } from "{{sourceFolder}}/../{{dbxConfig.base}}/{{schema}}";
 export const {{basename}} = $crudHandlersFactory<
   "{{dbxConfig.base}}:{{name}}",
   import("{{dbxConfig.base}}:{{name}}").RecordT,
@@ -13,7 +11,7 @@ export const {{basename}} = $crudHandlersFactory<
   import("{{dbxConfig.base}}:{{name}}").UpdateT,
   import("{{dbxConfig.base}}:{{name}}").RecordT["{{primaryKey}}"]
 >(
-  apprilCrud$apprilDbx$Tables.{{declaredName}},
+  ${{basename}},
   {
     primaryKey: "{{primaryKey}}",
     columns: [
@@ -28,8 +26,7 @@ export const {{basename}} = $crudHandlersFactory<
       {{/zodSchema}}
     {{/columns}}
     },
-    zodErrorHandler: (e: any) => apprilCrud$fromZodError(e, { prefix: null, issueSeparator: ";\n" }),
-  }
+  },
 );
 
 {{/tables}}

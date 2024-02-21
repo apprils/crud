@@ -44,7 +44,6 @@ const extraTemplates = extraTemplatesFactory();
 type DbxConfig = PgtsConfig & {
   connection: string | ConnectionConfig;
   base: string;
-  importBase: string;
 };
 
 export async function vitePluginApprilCrud(
@@ -159,6 +158,7 @@ export async function vitePluginApprilCrud(
         template: apiTemplates.constructors,
         context: {
           BANNER,
+          sourceFolder,
           dbxConfig,
           tables,
           factoryCode: apiTemplates.factory,
