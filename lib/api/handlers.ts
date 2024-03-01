@@ -1,4 +1,3 @@
-
 import type {
   DefaultState,
   DefaultContext,
@@ -10,12 +9,7 @@ import api from "@appril/core/router";
 
 import type { Knex } from "knex";
 import type { Instance, QueryBuilder } from "@appril/dbx";
-
-// @ts-ignore
-import { config } from "@appril/crud/api";
-
-// @ts-ignore
-import { type Pager } from "@appril/crud/client";
+import type { Pager } from "@appril/crud/client";
 
 import { type ZodTypeAny, type ZodRawShape, ZodError, z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -32,20 +26,24 @@ type CustomHandler<CtxT, ReturnT> = (
   opt: { defaultHandler: DefaultHandler<CtxT, ReturnT> },
 ) => MaybePromise<ReturnT>;
 
-type ZodSchema = Record<string, ZodTypeAny>
+type ZodSchema = Record<string, ZodTypeAny>;
 type ZodErrorHandler = (e: ZodError) => string;
 
-const defaultZodErrorHandler: ZodErrorHandler = (e) => fromZodError(e, {
-  prefix: null,
-  issueSeparator: ";\n",
-}).toString()
+import { config } from "./config";
 
-export function $crudHandlersFactory<
+const defaultZodErrorHandler: ZodErrorHandler = (e) => {
+  return fromZodError(e, {
+    prefix: null,
+    issueSeparator: ";\n",
+  }).toString();
+};
+
+export function handlersFactory<
   TableName extends Knex.TableNames,
   ItemT,
   ItemI,
   ItemU,
-  PKeyT = unknown,
+  PKeyT,
 >(
   dbx: Instance<TableName>,
   opt: {
@@ -53,7 +51,7 @@ export function $crudHandlersFactory<
     columns: (keyof ItemT)[];
     itemsPerPage?: number;
     sidePages?: number;
-    zodSchema?: ZodSchema;
+    zodSchema?: (_z: typeof z) => ZodSchema;
     zodErrorHandler?: ZodErrorHandler;
   },
 ) {
@@ -70,7 +68,6 @@ export function $crudHandlersFactory<
     readonly crud: CrudContext<Extend>;
   };
 
-  // @ts-ignore
   const { primaryKey, columns, itemsPerPage, sidePages } = {
     ...config,
     ...opt,
@@ -104,28 +101,28 @@ export function $crudHandlersFactory<
       return;
     }
 
-    const zodSchema = this.zodSchema || opt.zodSchema
+    const zodSchema = this.zodSchema || opt.zodSchema?.(z);
 
     if (!zodSchema) {
       return this.dataset;
     }
 
     const zodObject = z.object(
-      Object.keys(this.dataset).reduce(
-        (map: ZodRawShape, col) => {
-          map[col] = zodSchema[col]
-          return map
-        },
-        {},
-      ),
+      Object.keys(this.dataset).reduce((map: ZodRawShape, col) => {
+        map[col] = zodSchema[col];
+        return map;
+      }, {}),
     );
 
     try {
       zodObject.parse(this.dataset);
+      // biome-ignore lint:
     } catch (error: any) {
       throw (
-        this.zodErrorHandler || opt.zodErrorHandler || defaultZodErrorHandler
-      )(error)
+        this.zodErrorHandler ||
+        opt.zodErrorHandler ||
+        defaultZodErrorHandler
+      )(error);
     }
 
     return this.dataset;
@@ -170,11 +167,16 @@ export function $crudHandlersFactory<
     }
 
     return next();
-  }
+  };
 
   function envHandlerFactory() {
-    function envHandler<ReturnT extends GenericObject = Record<string, unknown>>(
-      handler: DefaultHandler<ParameterizedContext<DefaultState, Context>, ReturnT>,
+    function envHandler<
+      ReturnT extends GenericObject = Record<string, unknown>,
+    >(
+      handler: DefaultHandler<
+        ParameterizedContext<DefaultState, Context>,
+        ReturnT
+      >,
     ) {
       return api.get<DefaultState, Context>("env", [
         initHandler,
@@ -253,15 +255,13 @@ export function $crudHandlersFactory<
       const { crud } = ctx;
 
       const [item] = await crud.dbx
-        .insert(crud.validatedDataset as any)
+        .insert(crud.validatedDataset as never)
         .returning(crud.returningLiteral as []);
 
       return item as ReturnT;
     };
 
-    return (
-      arg?: CustomSetup | CustomHandler<CtxT, ReturnT>,
-    ) => {
+    return (arg?: CustomSetup | CustomHandler<CtxT, ReturnT>) => {
       let customSetup: CustomSetup;
       let customHandler: CustomHandler<CtxT, ReturnT>;
 
@@ -292,8 +292,7 @@ export function $crudHandlersFactory<
           return next();
         },
       ]);
-    }
-
+    };
   }
 
   function updateHandlerFactory() {
@@ -323,15 +322,13 @@ export function $crudHandlersFactory<
 
       const [item] = await crud.dbx
         .where(crud.primaryKey as string, ctx.params._id)
-        .update(crud.validatedDataset as any)
+        .update(crud.validatedDataset as never)
         .returning(crud.returningLiteral as []);
 
       return item as ReturnT;
     };
 
-    return (
-      arg?: CustomSetup | CustomHandler<CtxT, ReturnT>,
-    ) => {
+    return (arg?: CustomSetup | CustomHandler<CtxT, ReturnT>) => {
       let customSetup: CustomSetup;
       let customHandler: CustomHandler<CtxT, ReturnT>;
 
@@ -367,7 +364,7 @@ export function $crudHandlersFactory<
           return next();
         },
       ]);
-    }
+    };
   }
 
   function deleteHandlerFactory() {
@@ -392,9 +389,7 @@ export function $crudHandlersFactory<
       return item as ReturnT;
     };
 
-    return (
-      customHandler?: CustomHandler<CtxT, ReturnT>,
-    ) => {
+    return (customHandler?: CustomHandler<CtxT, ReturnT>) => {
       return api.del<DefaultState, ContextT>(":_id", [
         initHandler,
 
@@ -411,7 +406,7 @@ export function $crudHandlersFactory<
           return next();
         },
       ]);
-    }
+    };
   }
 
   function listHandlerFactory() {
@@ -503,7 +498,7 @@ export function $crudHandlersFactory<
         nextPage,
         prevPage,
         offset,
-      };
+      } as Pager;
 
       const items = (await crud.queryBuilder
         .select(crud.returningLiteral)
@@ -516,9 +511,7 @@ export function $crudHandlersFactory<
       };
     };
 
-    return (
-      arg?: CustomSetup | CustomHandler<CtxT, ReturnT>,
-    ) => {
+    return (arg?: CustomSetup | CustomHandler<CtxT, ReturnT>) => {
       let customSetup: CustomSetup;
       let customHandler: CustomHandler<CtxT, ReturnT>;
 
@@ -554,7 +547,7 @@ export function $crudHandlersFactory<
           return next();
         },
       ]);
-    }
+    };
   }
 
   function retrieveHandlerFactory() {
@@ -589,9 +582,7 @@ export function $crudHandlersFactory<
       return item as ReturnT;
     };
 
-    return (
-      arg?: CustomSetup | CustomHandler<CtxT, ReturnT>,
-    ) => {
+    return (arg?: CustomSetup | CustomHandler<CtxT, ReturnT>) => {
       let customSetup: CustomSetup;
       let customHandler: CustomHandler<CtxT, ReturnT>;
 
@@ -630,7 +621,7 @@ export function $crudHandlersFactory<
           return next();
         },
       ]);
-    }
+    };
   }
 
   return {
