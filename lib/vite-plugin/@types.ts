@@ -93,6 +93,15 @@ export type Table = TableDeclaration & {
 export type Config = {
   base: string;
   apiDir?: string;
+  /**
+    allowing multiple schemas. by default all schemas would be served.
+    same name tables would render inconsistently,
+    so consider serve schemas separately, each with own base.
+    eg. products table contained in both public and store schemas:
+    plugins: [
+      crudPlugin({ base: "crud", schemas: [ "public" ] }),
+      crudPlugin({ base: "crudStore", schemas: [ "store" ] }),
+    ] */
   schemas?: string[];
   templates?: ClientModuleTemplates;
   alias?: Record<string, string | string[]>;
