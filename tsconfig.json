@@ -1,7 +1,12 @@
 {
   "extends": "@appril/tsconfig/lib.json",
   "include": [
-    "lib/api",
-    "lib/vite-plugin"
-  ]
+    "lib"
+  ],
+  "exclude": [
+    "lib/*/templates/*.ts"
+  ],
+  "compilerOptions": {
+    "outDir": "pkg"
+  }
 }

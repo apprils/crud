@@ -11,23 +11,9 @@
   "files": [
     "pkg/*"
   ],
-  "// ✨ seems exports.types not fully supported by all editors yet?": "",
-  "typesVersions": {
-    "*": {
-      "api": [
-        "./pkg/api/index.d.ts"
-      ],
-      "client": [
-        "./pkg/client/index.d.ts"
-      ],
-      "vite-plugin": [
-        "./pkg/vite-plugin/vite-plugin/index.d.ts"
-      ]
-    }
-  },
   "exports": {
     "./api": {
-      "require": "./pkg/api/index.js",
+      "require": "./pkg/api.js",
       "types": "./pkg/api/index.d.ts"
     },
     "./client": {
@@ -35,29 +21,32 @@
       "types": "./pkg/client/index.d.ts"
     },
     "./vite-plugin": {
-      "require": "./pkg/vite-plugin/index.js",
-      "types": "./pkg/vite-plugin/lib/vite-plugin/index.d.ts"
+      "require": "./pkg/vite-plugin.js",
+      "types": "./pkg/vite-plugin/index.d.ts"
     }
   },
   "scripts": {
-    "// ✨ lint": "",
+    "// ✨ linters": "",
     "lint": "biome lint ./lib",
-    "// ✨ build": "",
-    "esbundler": "func() { e=$1; shift; esbuild $e --bundle --platform=node --target=node20 --packages=external --loader:.tpl=text $*; }; func",
+    "// ✨ types": "",
+    "tsc": "tsc --emitDeclarationOnly",
+    "// ✨ builders": "",
+    "esbuilder": "set -e; func() { e=$1; shift; esbuild lib/$e/index.ts --outfile=pkg/$e.js --bundle --platform=node --target=node20 --packages=external --loader:.tpl=text --sourcemap=inline $*; }; func",
     "// ✨ build api": "",
-    "build:api": "npm run esbundler -- lib/api/index.ts --sourcemap=inline --outdir=pkg/api",
-    "postbuild:api": "tsc -p lib/api/tsconfig.json",
+    "build:api": "npm run esbuilder api",
     "// ✨ build client": "",
     "build:client-templates": "cd lib/client; vite -c vite.config-templates.ts build",
     "build:client": "mkdir -p pkg/client; :> pkg/client/index.js",
     "postbuild:client": "cp -fv lib/client/@types.ts pkg/client/index.d.ts",
     "// ✨ build vite-plugin": "",
-    "prebuild:vite-plugin": "for f in lib/api/templates/*; do cp -fv $f lib/vite-plugin/templates/api/_$(basename ${f%.*}).tpl; done; for f in lib/client/templates/*; do cp -fv $f lib/vite-plugin/templates/client/_$(basename $f).tpl; done",
-    "build:vite-plugin": "npm run esbundler -- lib/vite-plugin/index.ts --sourcemap=inline --outdir=pkg/vite-plugin",
-    "postbuild:vite-plugin": "tsc -p lib/vite-plugin/tsconfig.json; rsync -a lib/vite-plugin/templates pkg/vite-plugin",
-    "// ✨ build package": "",
+    "build:vite-plugin:api-templates": "for f in lib/api/templates/*; do cp -fv $f lib/vite-plugin/templates/api/_$(basename ${f%.*}).tpl; done",
+    "build:vite-plugin:client-templates": "for f in lib/client/templates/*; do cp -fv $f lib/vite-plugin/templates/client/_$(basename $f).tpl; done",
+    "prebuild:vite-plugin": "npm run build:vite-plugin:api-templates; npm run build:vite-plugin:client-templates",
+    "build:vite-plugin": "npm run esbuilder vite-plugin",
+    "postbuild:vite-plugin": "rsync -a lib/vite-plugin/templates pkg/vite-plugin",
+    "// ✨ build": "",
     "prebuild": "mkdir -p pkg; find pkg -type f -exec rm -fv {} \\;",
-    "build": "set -e; npm run lint; for e in api client vite-plugin; do npm run build:$e; done"
+    "build": "set -e; npm run lint; npm run tsc; for e in api client vite-plugin; do npm run build:$e; done"
   },
   "prettier": "@appril/prettier-config",
   "release-it": {
