@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { store } from "@crud:virtual-module-placeholder/base";
+import { store } from "./base";
 </script>
 
 <template>

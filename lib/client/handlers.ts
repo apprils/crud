@@ -1,5 +1,3 @@
-/// <reference path="../env.d.ts" />
-
 import { useRouter, useRoute } from "vue-router";
 import { type ZodTypeAny, z } from "zod";
 import { type FetchMapper } from "@appril/more/fetch";
@@ -9,13 +7,13 @@ import type {
   Handlers,
   GenericObject,
   ApiTypesLiteral,
-  UseStore,
   ListResponse,
   RetrieveResponse,
   DefaultErrorHandler,
-} from "@appril/crud/client";
+  GenericStore,
+} from "./@types";
 
-export default function handlersFactory<
+export function handlersFactory<
   ItemT,
   ItemI,
   ItemU,
@@ -32,28 +30,25 @@ export default function handlersFactory<
   zodErrorHandler,
   errorHandler,
 }: {
-  store: ReturnType<UseStore<"generic", ItemT, EnvT, ListAssetsT, ItemAssetsT>>;
+  store: GenericStore<ItemT, EnvT, ListAssetsT, ItemAssetsT>;
   router: ReturnType<typeof useRouter>;
   route: ReturnType<typeof useRoute>;
   api: FetchMapper;
   apiTypes: ApiTypesLiteral;
   zodSchema: Record<string, ZodTypeAny>;
-  zodErrorHandler: Function;
+  zodErrorHandler: (e: unknown) => void;
   errorHandler: DefaultErrorHandler;
 }) {
-  const validatedDataset = (dataset: any) => {
-    if (!zodSchema) {
+  const validatedDataset = (dataset: unknown) => {
+    if (!zodSchema || !dataset) {
       return dataset;
     }
 
     const zodObject = z.object(
-      Object.keys(dataset).reduce(
-        (acc, col) => ({
-          ...acc,
-          [col]: zodSchema[col],
-        }),
-        {},
-      ),
+      Object.keys(dataset).reduce((map: Record<string, ZodTypeAny>, col) => {
+        map[col] = zodSchema[col];
+        return map;
+      }, {}),
     );
 
     zodObject.parse(dataset);
@@ -75,7 +70,9 @@ export default function handlersFactory<
         return api
           .get<EnvT>("env", query || route.query)
           .catch(errorHandler)
-          .finally(() => (store.loading = false));
+          .finally(() => {
+            store.loading = false;
+          });
       }
 
       return Promise.resolve(undefined);
@@ -93,7 +90,9 @@ export default function handlersFactory<
       return api
         .get<ListResponse<ItemT, ListAssetsT>>("list", query || route.query)
         .catch(errorHandler)
-        .finally(() => (store.loading = false));
+        .finally(() => {
+          store.loading = false;
+        });
     },
 
     itemsLoaded(response) {
@@ -109,7 +108,9 @@ export default function handlersFactory<
       return api
         .get<RetrieveResponse<ItemT, ItemAssetsT>>(id)
         .catch(errorHandler)
-        .finally(() => (store.loading = false));
+        .finally(() => {
+          store.loading = false;
+        });
     },
 
     itemLoaded({ item, assets }) {
@@ -118,17 +119,22 @@ export default function handlersFactory<
       window.scrollTo(0, 0);
     },
 
-    createItem(dataset) {
+    createItem(_dataset) {
+      let dataset: ItemI;
       try {
-        dataset = validatedDataset(dataset) as ItemI;
-      } catch (error: any) {
-        return Promise.reject(errorHandler(zodErrorHandler?.(error) || error));
+        dataset = validatedDataset(_dataset) as ItemI;
+      } catch (error: unknown) {
+        return Promise.reject(
+          errorHandler(zodErrorHandler ? zodErrorHandler(error) : error),
+        );
       }
       store.loading = true;
       return api
         .post<ItemT>(dataset)
         .catch(errorHandler)
-        .finally(() => (store.loading = false));
+        .finally(() => {
+          store.loading = false;
+        });
     },
 
     itemCreated(item) {
@@ -142,17 +148,22 @@ export default function handlersFactory<
       return item;
     },
 
-    $updateItem(id, dataset) {
+    $updateItem(id, _dataset) {
+      let dataset: ItemU;
       try {
-        dataset = validatedDataset(dataset);
-      } catch (error: any) {
-        return Promise.reject(errorHandler(zodErrorHandler?.(error) || error));
+        dataset = validatedDataset(_dataset) as ItemU;
+      } catch (error: unknown) {
+        return Promise.reject(
+          errorHandler(zodErrorHandler ? zodErrorHandler(error) : error),
+        );
       }
       store.loading = true;
       return api
         .patch<ItemT>(id, dataset)
         .catch(errorHandler)
-        .finally(() => (store.loading = false));
+        .finally(() => {
+          store.loading = false;
+        });
     },
 
     updateItem(dataset) {
@@ -181,7 +192,9 @@ export default function handlersFactory<
       return api
         .delete<ItemT>(id)
         .catch(errorHandler)
-        .finally(() => (store.loading = false));
+        .finally(() => {
+          store.loading = false;
+        });
     },
 
     deleteItem() {
@@ -231,7 +244,7 @@ export default function handlersFactory<
       const a = item?.[store.primaryKey];
       // @ts-expect-error
       const b = store.item[store.primaryKey];
-      return a == b;
+      return !a || !b ? false : String(a) === String(b);
     },
 
     gotoPrevPage() {

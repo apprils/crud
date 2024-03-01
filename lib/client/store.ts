@@ -1,5 +1,3 @@
-/// <reference path="../env.d.ts" />
-
 import { type StoreOnActionListener, defineStore } from "pinia";
 
 import type {
@@ -8,7 +6,7 @@ import type {
   StoreActions,
 } from "@appril/crud/client";
 
-export default function storeFactory<ItemT, EnvT, ListAssetsT, ItemAssetsT>({
+export function storeFactory<ItemT, EnvT, ListAssetsT, ItemAssetsT>({
   modelName,
   primaryKey,
 }: {
@@ -16,7 +14,7 @@ export default function storeFactory<ItemT, EnvT, ListAssetsT, ItemAssetsT>({
   primaryKey: keyof ItemT;
 }) {
   type StateT = StoreState<ItemT, EnvT, ListAssetsT, ItemAssetsT>;
-  type GettersT = StoreGetters<ItemT, EnvT, ListAssetsT, ItemAssetsT>;
+  type GettersT = StoreGetters;
   type ActionsT = StoreActions<ItemT, EnvT, ListAssetsT, ItemAssetsT>;
 
   const useStore = defineStore<typeof modelName, StateT, GettersT, ActionsT>(
@@ -81,7 +79,7 @@ export default function storeFactory<ItemT, EnvT, ListAssetsT, ItemAssetsT>({
           });
         },
 
-        insertItem(id, item) {
+        insertItem(_id, _item) {
           // signalling item created
         },
 
@@ -106,7 +104,9 @@ export default function storeFactory<ItemT, EnvT, ListAssetsT, ItemAssetsT>({
             if (state.item && updates) {
               state.item = { ...state.item, ...updates };
               for (const item of state.listItems) {
-                if (item?.[primaryKey] == id) {
+                // @ts-expect-error
+                if (String(item?.[primaryKey]) === String(id)) {
+                  // @ts-expect-error
                   Object.assign(item, updates);
                 }
               }
@@ -116,16 +116,16 @@ export default function storeFactory<ItemT, EnvT, ListAssetsT, ItemAssetsT>({
 
         unshiftItem(item) {
           this.$patch((state) => {
-            state.listItems.unshift(
-              item,
-            );
+            // @ts-expect-error
+            state.listItems.unshift(item);
           });
         },
 
         async removeItem(id) {
           this.$patch((state) => {
             state.listItems = state.listItems.filter(
-              (e: any) => e[primaryKey] != id,
+              // biome-ignore lint:
+              (e: any) => String(e[primaryKey]) !== String(id),
             );
           });
         },
@@ -139,7 +139,7 @@ export default function storeFactory<ItemT, EnvT, ListAssetsT, ItemAssetsT>({
     GettersT,
     ActionsT
   >[] = [
-    function ({ store, name, args, after }) {
+    ({ store, name, args, after }) => {
       if (name === "setItem") {
         const [item] = args;
 
@@ -148,6 +148,7 @@ export default function storeFactory<ItemT, EnvT, ListAssetsT, ItemAssetsT>({
 
         if (id) {
           after(() => {
+            // biome-ignore lint:
             if (!store.listItems.some((e: any) => e[primaryKey] === id)) {
               store.unshiftItem(item);
             }

@@ -6,7 +6,7 @@ import {
   type ItemT,
   type ItemI,
   store, useHandlers,
-} from "@crud:virtual-module-placeholder/base";
+} from "./base";
 
 const model = defineModel<ItemI>()
 

@@ -2,7 +2,7 @@
 
 import { Icon } from "@appril/ui";
 
-import { store, useHandlers } from "@crud:virtual-module-placeholder/base";
+import { store, useHandlers } from "./base";
 
 const { gotoPage } = useHandlers()
 </script>

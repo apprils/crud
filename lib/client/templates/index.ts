@@ -1,12 +1,19 @@
-/// <reference path="../env.d.ts" />
+import "./setup";
 
-import "@crud:virtual-module-placeholder/setup";
+import ControlButtons from "./ControlButtons.vue";
+import CreateDialog from "./CreateDialog.vue";
+import EditorPlaceholder from "./EditorPlaceholder.vue";
+import Layout from "./Layout.vue";
+import Overlay from "@crud:virtual-placeholder/../Overlay.vue";
+import Pager from "./Pager.vue";
 
-export { default as ControlButtons } from "@crud:virtual-module-placeholder/ControlButtons.vue";
-export { default as CreateDialog } from "@crud:virtual-module-placeholder/CreateDialog.vue";
-export { default as EditorPlaceholder } from "@crud:virtual-module-placeholder/EditorPlaceholder.vue";
-export { default as Layout } from "@crud:virtual-module-placeholder/Layout.vue";
-export { default as Overlay } from "@crud:virtual-module-placeholder/Overlay.vue";
-export { default as Pager } from "@crud:virtual-module-placeholder/Pager.vue";
+export {
+  ControlButtons,
+  CreateDialog,
+  EditorPlaceholder,
+  Layout,
+  Overlay,
+  Pager,
+};
 
-export * from "@crud:virtual-module-placeholder/base";
+export * from "./base";

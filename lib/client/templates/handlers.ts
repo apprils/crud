@@ -3,16 +3,15 @@
 import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import type {
-  UseHandlers,
-  UseFilters,
-  UseModel,
-  DefaultErrorHandler,
+import {
+  type UseHandlers,
+  type UseFilters,
+  type UseModel,
+  type DefaultErrorHandler,
+  handlersFactory,
 } from "@appril/crud/client";
 
-import handlersFactory from "@appril/crud:handlersFactory";
-
-import { useStore } from "@crud:virtual-module-placeholder/store";
+import { useStore } from "./store";
 
 import {
   type ItemT,
@@ -25,9 +24,9 @@ import {
   regularColumns,
   zodSchema,
   zodErrorHandler,
-} from "@crud:virtual-module-placeholder/assets";
+} from "./assets";
 
-import { api } from "@crud:virtual-module-placeholder/api";
+import { api } from "./api";
 
 const store = useStore();
 
@@ -51,6 +50,7 @@ export const useHandlers: UseHandlers<
   const errorHandler = opt?.errorHandler || defaultErrorHandler;
 
   return handlersFactory<ItemT, ItemI, ItemU, EnvT, ListAssetsT, ItemAssetsT>({
+    // @ts-expect-error
     store,
     router,
     route,
@@ -62,24 +62,27 @@ export const useHandlers: UseHandlers<
   });
 };
 
-export const useFilters: UseFilters<ItemT, ListAssetsT> = function useFilters(
-  params,
-) {
+export const useFilters: UseFilters = function useFilters(params) {
   const router = useRouter();
   const route = useRoute();
 
   const model = ref(
-    params.reduce((a, p) => ({ ...a, [p]: route.query[p] }), {}),
+    params.reduce((map: Record<string, unknown>, param) => {
+      map[param] = route.query[param];
+      return map;
+    }, {}),
   );
 
   const { loadItems, itemsLoaded } = useHandlers();
 
-  const handlers: ReturnType<UseFilters<ItemT, ListAssetsT>> = {
+  const handlers: ReturnType<UseFilters> = {
     model: model.value,
 
     $apply(model) {
       return router
-        .push({ query: { ...route.query, ...model.value || {}, _page: undefined } })
+        .push({
+          query: { ...route.query, ...(model.value || {}), _page: undefined },
+        })
         .then(() => loadItems())
         .then(itemsLoaded);
     },
@@ -110,7 +113,10 @@ export const useModel: UseModel<ItemT> = function useModel(opt) {
   const columns: (keyof ItemT)[] = [...(opt?.columns || regularColumns)];
 
   const model = ref<Partial<ItemT>>(
-    columns.reduce((a, c) => ({ ...a, [c]: store.item?.[c] }), {}),
+    columns.reduce((map: Record<string, unknown>, col) => {
+      map[col] = store.item?.[col];
+      return map;
+    }, {}),
   );
 
   if (opt?.reactive !== false) {
@@ -121,8 +127,8 @@ export const useModel: UseModel<ItemT> = function useModel(opt) {
         () => model.value[col],
         // without async there are issues with error handling
         async (val) => {
-          const updates = await updateItem({ [col]: val })
-          itemUpdated(updates as Partial<ItemT>)
+          const updates = await updateItem({ [col]: val });
+          itemUpdated(updates as Partial<ItemT>);
         },
       );
     }

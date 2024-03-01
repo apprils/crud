@@ -1,6 +1,6 @@
 /// <reference path="../env.d.ts" />
 
-import storeFactory from "@appril/crud:storeFactory";
+import { storeFactory } from "@appril/crud/client";
 
 import {
   type ItemT,
@@ -9,7 +9,7 @@ import {
   type ItemAssetsT,
   primaryKey,
   modelName,
-} from "@crud:virtual-module-placeholder/assets";
+} from "./assets";
 
 const { useStore, actionListeners } = storeFactory<
   ItemT,
@@ -19,6 +19,6 @@ const { useStore, actionListeners } = storeFactory<
 >({
   modelName,
   primaryKey,
-});
+} as { modelName: string; primaryKey: keyof ItemT });
 
 export { useStore, actionListeners };

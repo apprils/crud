@@ -1,6 +1,4 @@
-/// <reference path="../env.d.ts" />
-
-import { store, actionListeners } from "@crud:virtual-module-placeholder/base";
+import { store, actionListeners } from "./base";
 
 for (const listener of actionListeners) {
   store.$onAction(listener);

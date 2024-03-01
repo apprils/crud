@@ -8,12 +8,12 @@ import {
   type ItemT,
   store,
   useHandlers,
-} from "@crud:virtual-module-placeholder/base";
+} from "./base";
 
-import ControlButtons from "@crud:virtual-module-placeholder/ControlButtons.vue";
-import Pager from "@crud:virtual-module-placeholder/Pager.vue";
-import EditorPlaceholder from "@crud:virtual-module-placeholder/EditorPlaceholder.vue";
-import Overlay from "@crud:virtual-module-placeholder/Overlay.vue";
+import ControlButtons from "./ControlButtons.vue";
+import Pager from "./Pager.vue";
+import EditorPlaceholder from "./EditorPlaceholder.vue";
+import Overlay from "./Overlay.vue";
 
 const props = defineProps<{
   fullpageEditor?: boolean | "true" | "false";
@@ -124,8 +124,7 @@ function itemKey(
                     <slot name="listItemNameLink" :item="item satisfies ItemT">
                       <RouterLink :to="itemRoute(item)">
                         <slot name="listItemNameText" :item="item satisfies ItemT">
-                          {{
-                            // @ts-expect-error
+                          {{ // @ts-expect-error
                             item.name || ""
                           }}
                         </slot>
@@ -139,10 +138,7 @@ function itemKey(
                       <slot name="listItemIdLink" :item="item satisfies ItemT">
                         <RouterLink :to="itemRoute(item)" class="text-muted">
                           <slot name="listItemIdText" :item="item satisfies ItemT">
-                            #{{
-                              // @ts-expect-error
-                              item[store.primaryKey]
-                            }}
+                            #{{ item[store.primaryKey] }}
                           </slot>
                         </RouterLink>
                       </slot>

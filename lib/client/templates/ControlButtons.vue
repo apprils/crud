@@ -3,7 +3,7 @@
 import { ref } from "vue";
 import { Icon, Confirm } from "@appril/ui";
 
-import { store, useHandlers } from "@crud:virtual-module-placeholder/base";
+import { store, useHandlers } from "./base";
 
 const { deleteItem, itemDeleted, closeItem } = useHandlers()
 const deleteItemId = ref<null | string>(null)

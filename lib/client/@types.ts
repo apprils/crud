@@ -1,5 +1,4 @@
 import type { Ref, UnwrapRef } from "vue";
-import type { Store } from "pinia";
 import type { RouteLocationRaw } from "vue-router";
 
 export type ItemId = number | string;
@@ -45,8 +44,7 @@ export type StoreItemEvent = {
   id: ItemId | undefined;
 };
 
-// biome-ignore lint:
-export type StoreGetters<ItemT, EnvT, ListAssetsT, ItemAssetsT> = any;
+export type StoreGetters = import("pinia").StoreGetters<object>;
 
 export type StoreActions<ItemT, EnvT, ListAssetsT, ItemAssetsT> = {
   setEnv: (env: UnwrapRef<EnvT>) => void;
@@ -74,18 +72,13 @@ export type StoreActions<ItemT, EnvT, ListAssetsT, ItemAssetsT> = {
   removeItem: (_id: ItemId) => Promise<void>;
 };
 
-export type UseStore<
-  Id extends string,
-  ItemT,
-  EnvT,
-  ListAssetsT,
-  ItemAssetsT,
-> = () => Store<
-  Id,
-  StoreState<ItemT, EnvT, ListAssetsT, ItemAssetsT>,
-  StoreGetters<ItemT, EnvT, ListAssetsT, ItemAssetsT>,
-  StoreActions<ItemT, EnvT, ListAssetsT, ItemAssetsT>
->;
+export type GenericStore<ItemT, EnvT, ListAssetsT, ItemAssetsT> =
+  import("pinia").Store<
+    "generic",
+    StoreState<ItemT, EnvT, ListAssetsT, ItemAssetsT>,
+    StoreGetters,
+    StoreActions<ItemT, EnvT, ListAssetsT, ItemAssetsT>
+  >;
 
 export type DefaultErrorHandler = <T = never>(e: unknown) => T;
 
@@ -138,7 +131,7 @@ export type Handlers<ItemT, ItemI, ItemU, EnvT, ListAssetsT, ItemAssetsT> = {
   gotoPage: (_page?: number | string | undefined) => Promise<unknown>;
 };
 
-export type UseFilters<ItemT, ListAssetsT> = <T extends string = "">(
+export type UseFilters = <T extends string = "">(
   params: readonly T[],
 ) => {
   model: Record<T, unknown>;
