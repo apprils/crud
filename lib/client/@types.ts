@@ -1,5 +1,6 @@
 import type { Ref, UnwrapRef } from "vue";
 import type { Store } from "pinia";
+import type { RouteLocationRaw } from "vue-router";
 
 export type ItemId = number | string;
 export type GenericObject = Record<string, unknown>;
@@ -44,7 +45,8 @@ export type StoreItemEvent = {
   id: ItemId | undefined;
 };
 
-export type StoreGetters<ItemT, EnvT, ListAssetsT, ItemAssetsT> = object;
+// biome-ignore lint:
+export type StoreGetters<ItemT, EnvT, ListAssetsT, ItemAssetsT> = any;
 
 export type StoreActions<ItemT, EnvT, ListAssetsT, ItemAssetsT> = {
   setEnv: (env: UnwrapRef<EnvT>) => void;
@@ -85,7 +87,7 @@ export type UseStore<
   StoreActions<ItemT, EnvT, ListAssetsT, ItemAssetsT>
 >;
 
-export type DefaultErrorHandler = (e: unknown) => unknown;
+export type DefaultErrorHandler = <T = never>(e: unknown) => T;
 
 export type UseHandlers<ItemT, ItemI, ItemU, EnvT, ListAssetsT, ItemAssetsT> =
   (opt?: {
@@ -93,7 +95,7 @@ export type UseHandlers<ItemT, ItemI, ItemU, EnvT, ListAssetsT, ItemAssetsT> =
   }) => Handlers<ItemT, ItemI, ItemU, EnvT, ListAssetsT, ItemAssetsT>;
 
 export type Handlers<ItemT, ItemI, ItemU, EnvT, ListAssetsT, ItemAssetsT> = {
-  loadEnv: (query?: GenericObject) => Promise<EnvT>;
+  loadEnv: (query?: GenericObject) => Promise<EnvT | undefined>;
 
   envLoaded: (env: EnvResponse<EnvT>) => EnvResponse<EnvT>;
 
@@ -101,7 +103,7 @@ export type Handlers<ItemT, ItemI, ItemU, EnvT, ListAssetsT, ItemAssetsT> = {
     query?: GenericObject,
   ) => Promise<ListResponse<ItemT, ListAssetsT>>;
 
-  itemsLoaded: (response: ListResponse<ItemT, ListAssetsT> | never) => void;
+  itemsLoaded: (response: ListResponse<ItemT, ListAssetsT>) => void;
 
   loadItem: (id: ItemId) => Promise<RetrieveResponse<ItemT, ItemAssetsT>>;
 
@@ -127,7 +129,7 @@ export type Handlers<ItemT, ItemI, ItemU, EnvT, ListAssetsT, ItemAssetsT> = {
 
   closeItem: () => Promise<unknown>;
 
-  itemRoute: (item?: ItemT) => { query: Record<string, unknown> };
+  itemRoute: (item?: ItemT) => RouteLocationRaw;
 
   isActiveItem: (item: ItemT) => boolean;
 
@@ -141,17 +143,13 @@ export type UseFilters<ItemT, ListAssetsT> = <T extends string = "">(
 ) => {
   model: Record<T, unknown>;
 
-  $apply: (
-    model: Record<T, unknown>,
-  ) => Promise<ListResponse<ItemT, ListAssetsT> | never>;
+  $apply: (model: Record<T, unknown> | Ref) => void;
 
-  apply: () => Promise<ListResponse<ItemT, ListAssetsT> | never>;
+  apply: () => void;
 
-  $reset: (
-    model: Record<T, unknown>,
-  ) => Promise<ListResponse<ItemT, ListAssetsT> | never>;
+  $reset: (model: Record<T, unknown> | Ref) => void;
 
-  reset: () => Promise<ListResponse<ItemT, ListAssetsT> | never>;
+  reset: () => void;
 };
 
 export type UseModel<ItemT> = (opt?: {

@@ -60,7 +60,7 @@ declare module "@crud:virtual-module-placeholder/store" {
   >;
 
   export const useStore: UseStore = () => {};
-  export const actionListeners: unknown[] = [];
+  export const actionListeners: (() => void)[] = [];
 }
 
 declare module "@crud:virtual-module-placeholder/handlers" {

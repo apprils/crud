@@ -1,3 +1,5 @@
+/// <reference path="../env.d.ts" />
+
 import { store, actionListeners } from "@crud:virtual-module-placeholder/base";
 
 for (const listener of actionListeners) {

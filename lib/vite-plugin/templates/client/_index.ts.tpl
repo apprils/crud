@@ -1,3 +1,5 @@
+/// <reference path="../env.d.ts" />
+
 import "@crud:virtual-module-placeholder/setup";
 
 export { default as ControlButtons } from "@crud:virtual-module-placeholder/ControlButtons.vue";

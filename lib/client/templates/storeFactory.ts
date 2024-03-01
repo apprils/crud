@@ -1,3 +1,5 @@
+/// <reference path="../env.d.ts" />
+
 import { type StoreOnActionListener, defineStore } from "pinia";
 
 import type {
@@ -104,7 +106,6 @@ export default function storeFactory<ItemT, EnvT, ListAssetsT, ItemAssetsT>({
             if (state.item && updates) {
               state.item = { ...state.item, ...updates };
               for (const item of state.listItems) {
-                // @ts-expect-error
                 if (item?.[primaryKey] == id) {
                   Object.assign(item, updates);
                 }
@@ -116,7 +117,6 @@ export default function storeFactory<ItemT, EnvT, ListAssetsT, ItemAssetsT>({
         unshiftItem(item) {
           this.$patch((state) => {
             state.listItems.unshift(
-              // @ts-expect-error
               item,
             );
           });

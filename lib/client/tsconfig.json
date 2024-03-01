@@ -1,6 +1,0 @@
-{
-  "extends": "@appril/tsconfig/app-vue.json",
-  "include": [
-    "."
-  ]
-}

@@ -11,7 +11,10 @@ import api from "@appril/core/router";
 import type { Knex } from "knex";
 import type { Instance, QueryBuilder } from "@appril/dbx";
 
-import { type Config, config } from "@appril/crud/api";
+// @ts-ignore
+import { config } from "@appril/crud/api";
+
+// @ts-ignore
 import { type Pager } from "@appril/crud/client";
 
 import { type ZodTypeAny, type ZodRawShape, ZodError, z } from "zod";
@@ -67,12 +70,11 @@ export function $crudHandlersFactory<
     readonly crud: CrudContext<Extend>;
   };
 
-  const {
-    primaryKey,
-    columns,
-    itemsPerPage,
-    sidePages,
-  } = { ...(config as Config<ItemT>), ...opt };
+  // @ts-ignore
+  const { primaryKey, columns, itemsPerPage, sidePages } = {
+    ...config,
+    ...opt,
+  };
 
   const returningLiteral = function (this: CrudContext) {
     if (this.returning) {

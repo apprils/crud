@@ -1,3 +1,5 @@
+/// <reference path="../env.d.ts" />
+
 import { fetch } from "@appril/more/fetch";
 
 import { apiBase } from "@crud:virtual-module-placeholder/assets";

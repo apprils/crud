@@ -1,54 +1,35 @@
 <script setup lang="ts">
 
-  import { Icon } from "@appril/ui";
+import { Icon } from "@appril/ui";
 
-  import { store, useHandlers } from "@crud:virtual-module-placeholder/base";
+import { store, useHandlers } from "@crud:virtual-module-placeholder/base";
 
-  const { gotoPage } = useHandlers()
+const { gotoPage } = useHandlers()
 </script>
 
 <template>
   <div class="input-group input-group-sm">
-    <button
-      type="button"
-      @click="gotoPage(1)"
-      class="btn btn-outline-secondary"
-      :disabled="store.listPager.currentPage <= 1"
-    >
+    <button type="button" @click="gotoPage(1)" class="btn btn-outline-secondary"
+      :disabled="store.listPager.currentPage <= 1">
       <Icon angles-left />
     </button>
 
-    <button
-      type="button"
-      @click="gotoPage(store.listPager.prevPage)"
-      class="btn btn-outline-secondary"
-      :disabled="!store.listPager.prevPage"
-    >
+    <button type="button" @click="gotoPage(store.listPager.prevPage)" class="btn btn-outline-secondary"
+      :disabled="!store.listPager.prevPage">
       <Icon angle-left /> {{ store.listPager.prevPage }}
     </button>
 
-    <input
-      type="text"
-      :value="store.listPager.currentPage"
-      @keyup.enter.prevent="gotoPage(($event.target as HTMLInputElement).value)"
-      class="form-control text-center"
-    />
+    <input type="text" :value="store.listPager.currentPage"
+      @keyup.enter.prevent="gotoPage(($event.target as HTMLInputElement).value)" class="form-control text-center" />
 
-    <button
-      type="button"
-      @click="gotoPage(store.listPager.nextPage)"
-      class="btn btn-outline-secondary"
-      :disabled="!store.listPager.nextPage"
-    >
-      {{ store.listPager.nextPage }} <Icon angle-right />
+    <button type="button" @click="gotoPage(store.listPager.nextPage)" class="btn btn-outline-secondary"
+      :disabled="!store.listPager.nextPage">
+      {{ store.listPager.nextPage }}
+      <Icon angle-right />
     </button>
 
-    <button
-      type="button"
-      @click="gotoPage(store.listPager.totalPages)"
-      class="btn btn-outline-secondary"
-      :disabled="store.listPager.currentPage >= store.listPager.totalPages"
-    >
+    <button type="button" @click="gotoPage(store.listPager.totalPages)" class="btn btn-outline-secondary"
+      :disabled="store.listPager.currentPage >= store.listPager.totalPages">
       <Icon angles-right />
     </button>
   </div>

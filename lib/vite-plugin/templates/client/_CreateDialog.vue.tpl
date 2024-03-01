@@ -1,34 +1,34 @@
 <script setup lang="ts">
 
-  import { IconOrSpinner } from "@appril/ui";
+import { IconOrSpinner } from "@appril/ui";
 
-  import {
-    type ItemT,
-    type ItemI,
-    store, useHandlers,
-  } from "@crud:virtual-module-placeholder/base";
+import {
+  type ItemT,
+  type ItemI,
+  store, useHandlers,
+} from "@crud:virtual-module-placeholder/base";
 
-  const model = defineModel<ItemI>()
+const model = defineModel<ItemI>()
 
-  const emit = defineEmits<{
-    mounted: [];
-    created: [item: ItemT];
-    close: [];
-  }>()
+const emit = defineEmits<{
+  mounted: [];
+  created: [item: ItemT];
+  close: [];
+}>()
 
-  const { createItem, itemCreated } = useHandlers()
+const { createItem, itemCreated } = useHandlers()
 
-  function create() {
-    return createItem(model.value)
-      .then(itemCreated)
-      .then((item) => emit("created", item))
-      .then(close)
-  }
+function create() {
+  return createItem(model.value)
+    .then(itemCreated)
+    .then((item) => emit("created", item))
+    .then(close)
+}
 
-  function close() {
-    emit("close")
-    store.createDialog = false
-  }
+function close() {
+  emit("close")
+  store.createDialog = false
+}
 </script>
 
 <template>

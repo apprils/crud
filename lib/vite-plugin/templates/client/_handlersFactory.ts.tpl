@@ -1,4 +1,5 @@
-import { ref } from "vue";
+/// <reference path="../env.d.ts" />
+
 import { useRouter, useRoute } from "vue-router";
 import { type ZodTypeAny, z } from "zod";
 import { type FetchMapper } from "@appril/more/fetch";
@@ -125,7 +126,7 @@ export default function handlersFactory<
       }
       store.loading = true;
       return api
-        .post<Partial<ItemT>>(dataset)
+        .post<ItemT>(dataset)
         .catch(errorHandler)
         .finally(() => (store.loading = false));
     },
@@ -149,7 +150,7 @@ export default function handlersFactory<
       }
       store.loading = true;
       return api
-        .patch<Partial<ItemT>>(id, dataset)
+        .patch<ItemT>(id, dataset)
         .catch(errorHandler)
         .finally(() => (store.loading = false));
     },

@@ -1,3 +1,5 @@
+/// <reference path="../env.d.ts" />
+
 import { useStore } from "@crud:virtual-module-placeholder/store";
 
 export * from "@crud:virtual-module-placeholder/assets";

@@ -1,3 +1,5 @@
+/// <reference path="../env.d.ts" />
+
 import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -77,7 +79,7 @@ export const useFilters: UseFilters<ItemT, ListAssetsT> = function useFilters(
 
     $apply(model) {
       return router
-        .push({ query: { ...route.query, ...model.value, _page: undefined } })
+        .push({ query: { ...route.query, ...model.value || {}, _page: undefined } })
         .then(() => loadItems())
         .then(itemsLoaded);
     },
@@ -116,10 +118,12 @@ export const useModel: UseModel<ItemT> = function useModel(opt) {
 
     for (const col of columns) {
       watch(
-        () => model.value[col as string],
+        () => model.value[col],
         // without async there are issues with error handling
-        async (val) =>
-          await updateItem({ [col]: val } as Partial<ItemU>).then(itemUpdated),
+        async (val) => {
+          const updates = await updateItem({ [col]: val })
+          itemUpdated(updates as Partial<ItemT>)
+        },
       );
     }
   }

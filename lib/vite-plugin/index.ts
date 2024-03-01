@@ -121,7 +121,7 @@ export async function vitePluginApprilCrud(
           name: table.apiPath,
           basename: table.basename,
           file: table.apiFile,
-          template: resolve(__dirname, "templates/api/route.tpl"),
+          template: resolve(__dirname, "vite-plugin/templates/api/route.tpl"),
           meta:
             typeof meta === "function"
               ? meta(table)
