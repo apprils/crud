@@ -104,7 +104,7 @@ export async function crudPlugin(
   }
 
   async function configResolved(viteConfig: ResolvedConfig) {
-    const filesGenerator = filesGeneratorFactory(viteConfig);
+    const { generateFile } = filesGeneratorFactory();
 
     const generateApiFiles = async (tables: Table[]) => {
       const routes: Record<
@@ -148,14 +148,11 @@ export async function crudPlugin(
           stringify(routes),
         ].join("\n");
 
-        await filesGenerator.generateFile(
-          join(apiDir, `_000_${base}_routes.yml`),
-          content,
-        );
+        await generateFile(join(apiDir, `_000_${base}_routes.yml`), content);
       }
 
       // generating a bundle file containing api constructors for all tables
-      await filesGenerator.generateFile(join(apiDir, base, "index.ts"), {
+      await generateFile(join(apiDir, base, "index.ts"), {
         template: apiTemplates.constructors,
         context: {
           BANNER,
@@ -245,7 +242,7 @@ export async function crudPlugin(
       }
 
       // regenerating whole bundle, even if single table updated
-      await filesGenerator.generateFile(`${base}.d.ts`, {
+      await generateFile(`${base}.d.ts`, {
         template: extraTemplates.moduleDts,
         context: {
           BANNER,
@@ -331,10 +328,6 @@ export async function crudPlugin(
         await handler();
       }
     }
-
-    await filesGenerator.persistGeneratedFiles(base, (f) => {
-      return join(sourceFolder, f);
-    });
   }
 
   return {
