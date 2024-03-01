@@ -138,7 +138,9 @@ function itemKey(
                       <slot name="listItemIdLink" :item="item satisfies ItemT">
                         <RouterLink :to="itemRoute(item)" class="text-muted">
                           <slot name="listItemIdText" :item="item satisfies ItemT">
-                            #{{ item[store.primaryKey] }}
+                            #{{ // @ts-expect-error
+                              item[store.primaryKey]
+                            }}
                           </slot>
                         </RouterLink>
                       </slot>

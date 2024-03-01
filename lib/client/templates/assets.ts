@@ -1,7 +1,7 @@
 // placeholder file, to be replaced with real values on module build
 
 import type { ZodTypeAny } from "zod";
-import { ApiTypesLiteral } from "../@types";
+import type { ApiTypesLiteral } from "../@types";
 
 export type ItemT = unknown;
 export type ItemI = unknown;

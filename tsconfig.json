@@ -3,10 +3,8 @@
   "include": [
     "lib"
   ],
-  "exclude": [
-    "lib/*/templates/*.ts"
-  ],
   "compilerOptions": {
+    "rootDir": "lib",
     "outDir": "pkg"
   }
 }
