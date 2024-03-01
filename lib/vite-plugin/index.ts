@@ -45,7 +45,9 @@ type DbxConfig = PgtsConfig & {
   base: string;
 };
 
-export async function vitePluginApprilCrud(
+const PLUGIN_NAME = "@appril:crudPlugin";
+
+export async function crudPlugin(
   dbxConfig: DbxConfig,
   crudConfig: Config,
 ): Promise<Plugin> {
@@ -332,7 +334,7 @@ export async function vitePluginApprilCrud(
   }
 
   return {
-    name: "vite-plugin-appril-crud",
+    name: PLUGIN_NAME,
 
     resolveId(id) {
       if (avModules[id]) {
