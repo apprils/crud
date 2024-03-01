@@ -91,9 +91,9 @@ export type Table = TableDeclaration & {
 };
 
 export type Config = {
-  schema?: string;
   base: string;
   apiDir?: string;
+  schemas?: string[];
   templates?: ClientModuleTemplates;
   alias?: Record<string, string | string[]>;
   tableFilter?: (t: TableDeclaration) => boolean;

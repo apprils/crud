@@ -52,8 +52,8 @@ export async function crudPlugin(
   crudConfig: Config,
 ): Promise<Plugin> {
   const {
-    schema,
     base,
+    schemas,
     apiDir = "api",
     alias = {},
     tableFilter,
@@ -62,7 +62,7 @@ export async function crudPlugin(
 
   const { tables } = await pgts(dbxConfig.connection, {
     ...dbxConfig,
-    ...(schema ? { schemas: [schema] } : {}),
+    ...(schemas ? { schemas } : {}),
   });
 
   const watchMap: {
@@ -141,7 +141,7 @@ export async function crudPlugin(
       {
         // not creating route file directly,
         // rather adding a corresponding entry to yml file
-        // and file will be created by api plugin
+        // and file will be created by api generator plugin
 
         const content = [
           BANNER.trim().replace(/^/gm, "#"),
@@ -309,13 +309,17 @@ export async function crudPlugin(
       return tables;
     };
 
-    // regenerating api files when table added/removed
-    watchMap.dbxFiles[resolvePath(dbxConfig.base, "base.ts")] = async () => {
-      await generateApiFiles(tables.flatMap(tableFlatMapper));
+    for (const schema of [...new Set(tables.map((e) => e.schema))]) {
+      const file = resolvePath(dbxConfig.base, join(schema, "index.ts"));
 
-      // do not call generateAmbientVirtualModules here,
-      // it is called by watchMap.apiFiles
-    };
+      // regenerating api files when table added/removed
+      watchMap.dbxFiles[file] = async () => {
+        await generateApiFiles(tables.flatMap(tableFlatMapper));
+
+        // do not call generateAmbientVirtualModules here,
+        // it is called by watchMap.apiFiles
+      };
+    }
 
     for (const handlerMap of [
       // 000 keep the order!
