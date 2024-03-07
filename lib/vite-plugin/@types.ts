@@ -1,86 +1,34 @@
-import type {
-  ConnectionConfig,
-  Config as PgtsConfig,
-  TableDeclaration,
-} from "@appril/pgts";
+import type { TableDeclaration } from "@appril/pgts";
 
-export type { ConnectionConfig, PgtsConfig, TableDeclaration };
+export type DbxConfig = import("@appril/pgts").Config & {
+  connection: string | import("@appril/pgts").ConnectionConfig;
+  base: string;
+};
 
-export type ClientModuleTemplates = {
-  "assets.ts"?: string;
-  "apiTypes.ts"?: string;
+export type { TableDeclaration };
 
+export type ClientTemplates = {
   "api.ts"?: string;
-  "base.ts"?: string;
+  "apiTypes.ts"?: string;
+  "assets.ts"?: string;
 
   "ControlButtons.vue"?: string;
-  "ControlButtons.vue.d.ts"?: string;
-
   "CreateDialog.vue"?: string;
-  "CreateDialog.vue.d.ts"?: string;
-
   "EditorPlaceholder.vue"?: string;
-  "EditorPlaceholder.vue.d.ts"?: string;
 
   "handlers.ts"?: string;
   "index.ts"?: string;
 
   "Layout.vue"?: string;
-  "Layout.vue.d.ts"?: string;
-
   "Overlay.vue"?: string;
-  "Overlay.vue.d.ts"?: string;
-
   "Pager.vue"?: string;
-  "Pager.vue.d.ts"?: string;
 
   "setup.ts"?: string;
   "store.ts"?: string;
 };
 
-export type AVFactoryModuleName =
-  | "@appril/crud:storeFactory"
-  | "@appril/crud:handlersFactory";
-
-export type AVTsModuleName =
-  | "assets"
-  | "apiTypes"
-  | "api"
-  | "base"
-  | "handlers"
-  | "setup"
-  | "store"
-  | ""; // index
-
-export type AVVueModuleName =
-  | "ControlButtons.vue"
-  | "ControlButtons.vue.d.ts"
-  | "CreateDialog.vue"
-  | "CreateDialog.vue.d.ts"
-  | "EditorPlaceholder.vue"
-  | "EditorPlaceholder.vue.d.ts"
-  | "Layout.vue"
-  | "Layout.vue.d.ts"
-  | "Overlay.vue"
-  | "Overlay.vue.d.ts"
-  | "Pager.vue"
-  | "Pager.vue.d.ts";
-
-export type AVModuleName =
-  | AVFactoryModuleName
-  | AVTsModuleName
-  | AVVueModuleName;
-
-export type AVModule = {
-  id: string;
-  name: AVModuleName;
-  ambientCode: string;
-  virtualCode: string;
-};
-
-export type AVModuleMap = Record<string, AVModule>;
-
-export type Table = TableDeclaration & {
+export type TableAssets = {
+  // tabme name for tables or alias name for aliases
   basename: string;
   // relative path inside apiDir, e.g. crud/products/
   apiPath: string;
@@ -88,13 +36,17 @@ export type Table = TableDeclaration & {
   apiBase: string;
   // relative path to file inside sourceFolder, e.g. api/crud/products/index.ts
   apiFile: string;
+  apiFileFullpath: string;
+  meta: Record<string, unknown>;
 };
 
-export type Config = {
+export type Table = TableDeclaration & TableAssets;
+
+export type Options = {
   base: string;
   apiDir?: string;
   /**
-    allowing multiple schemas. by default all schemas would be served.
+    allowing multiple schemas. default: [ public ]
     same name tables would render inconsistently,
     so consider serve schemas separately, each with own base.
     eg. products table contained in both public and store schemas:
@@ -103,10 +55,11 @@ export type Config = {
       crudPlugin({ base: "crudStore", schemas: [ "store" ] }),
     ] */
   schemas?: string[];
-  templates?: ClientModuleTemplates;
+  templates?: ClientTemplates;
   alias?: Record<string, string | string[]>;
   tableFilter?: (t: TableDeclaration) => boolean;
+  usePolling?: boolean;
   meta?:
     | Record<string, Record<string, unknown>>
-    | ((t: Table) => Record<string, unknown>);
+    | ((t: Omit<Table, "meta">) => Record<string, unknown>);
 };

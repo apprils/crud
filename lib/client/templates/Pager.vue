@@ -2,8 +2,10 @@
 
 import { Icon } from "@appril/ui";
 
-import { store, useHandlers } from "./base";
+import { useStore } from "./store";
+import { useHandlers } from "./handlers";
 
+const store = useStore()
 const { gotoPage } = useHandlers()
 </script>
 

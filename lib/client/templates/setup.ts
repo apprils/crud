@@ -1,5 +1,7 @@
-import { store, actionListeners } from "./base";
+import { useStore, actionListeners } from "./store";
 
-for (const listener of actionListeners) {
-  store.$onAction(listener);
+const store = useStore();
+
+for (const handler of actionListeners) {
+  store.$onAction(handler);
 }

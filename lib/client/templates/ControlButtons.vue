@@ -3,8 +3,11 @@
 import { ref } from "vue";
 import { Icon, Confirm } from "@appril/ui";
 
-import { store, useHandlers } from "./base";
+import { useStore } from "./store";
+import { useHandlers } from "./handlers";
+import { primaryKey } from "./assets";
 
+const store = useStore()
 const { deleteItem, itemDeleted, closeItem } = useHandlers()
 const deleteItemId = ref<null | string>(null)
 </script>
@@ -25,7 +28,7 @@ const deleteItemId = ref<null | string>(null)
 
     <slot name="deleteButton">
       <button v-if="store.item" type="button" class="btn btn-sm btn-outline-danger"
-        @click="deleteItemId = String(store.item[store.primaryKey])">
+        @click="deleteItemId = String(store.item[primaryKey])">
         <Icon trash />
       </button>
     </slot>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { store } from "./base";
+import { useStore } from "./store";
+const store = useStore()
 </script>
 
 <template>

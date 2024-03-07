@@ -1,386 +1,150 @@
-import { join, resolve, dirname, basename } from "path";
+import { join, basename } from "path";
 import { readFile } from "fs/promises";
-
-import fsx from "fs-extra";
-import pgts from "@appril/pgts";
-import { transform } from "esbuild";
-import { stringify } from "yaml";
 
 import type { Plugin, ResolvedConfig } from "vite";
 
-import type {
-  ConnectionConfig,
-  PgtsConfig,
-  Config,
-  ClientModuleTemplates,
-  Table,
-  TableDeclaration,
-  AVFactoryModuleName,
-  AVTsModuleName,
-  AVVueModuleName,
-  AVModuleMap,
-  AVModule,
-} from "./@types";
+import type { Options, ClientTemplates, Table, DbxConfig } from "./@types";
 
-import type { ApiTypesLiteral } from "../client/@types";
-
-import {
-  clientTemplatesFactory,
-  factoryTemplatesFactory,
-  apiTemplatesFactory,
-  extraTemplatesFactory,
-} from "./templates";
-
-import { resolvePath, filesGeneratorFactory } from "./base";
-import { BANNER, render } from "./render";
-import { extractTypes } from "./ast";
-
-const clientTemplates = clientTemplatesFactory();
-const factoryTemplates = factoryTemplatesFactory();
-const apiTemplates = apiTemplatesFactory();
-const extraTemplates = extraTemplatesFactory();
-
-type DbxConfig = PgtsConfig & {
-  connection: string | ConnectionConfig;
-  base: string;
-};
+import { resolvePath } from "./base";
+import { workerPool } from "./worker-pool";
+import { bootstrap } from "./workers";
+import { extractTables } from "./tables";
 
 const PLUGIN_NAME = "@appril:crudPlugin";
 
 export async function crudPlugin(
   dbxConfig: DbxConfig,
-  crudConfig: Config,
+  options: Options,
 ): Promise<Plugin> {
-  const {
-    base,
-    schemas,
-    apiDir = "api",
-    alias = {},
-    tableFilter,
-    meta,
-  } = crudConfig;
+  const { base, schemas = ["public"], apiDir = "api", usePolling } = options;
 
-  const { tables } = await pgts(dbxConfig.connection, {
-    ...dbxConfig,
-    ...(schemas ? { schemas } : {}),
-  });
+  const tableMap: Record<string, Table> = {};
 
-  const watchMap: {
-    tplFiles: Record<string, () => Promise<void>>;
-    dbxFiles: Record<string, () => Promise<void>>;
-    apiFiles: Record<string, () => Promise<void>>;
-  } = {
-    tplFiles: {},
-    dbxFiles: {},
-    apiFiles: {},
-  };
+  const tplWatchers: Record<string, () => Promise<void>> = {};
+  const schemaWatchers: Record<string, () => Promise<string>> = {};
 
   const sourceFolder = basename(resolvePath());
 
-  const templates = { ...clientTemplates };
+  const customTemplates: ClientTemplates = {};
 
-  for (const [name, file] of Object.entries({ ...crudConfig.templates }) as [
-    name: keyof ClientModuleTemplates,
-    file: string,
-  ][]) {
-    // watching custom templates for updates
-    watchMap.tplFiles[resolvePath(file)] = async () => {
-      templates[name] = await readFile(resolvePath(file), "utf8");
-    };
-  }
+  const runWatchHandler = async (file: string) => {
+    if (schemaWatchers[file]) {
+      // updating tableMap
+      const schema = await schemaWatchers[file]();
 
-  const avModules = {} as AVModuleMap;
-
-  for (const [name, code] of Object.entries(factoryTemplates) as [
-    name: AVFactoryModuleName,
-    code: string,
-  ][]) {
-    avModules[name] = {
-      id: name,
-      name,
-      ambientCode: code,
-      virtualCode: code,
-    };
-  }
-
-  async function configResolved(viteConfig: ResolvedConfig) {
-    const { generateFile } = filesGeneratorFactory();
-
-    const generateApiFiles = async (tables: Table[]) => {
-      const routes: Record<
-        string,
-        {
-          name: string;
-          basename: string;
-          file: string;
-          template: string;
-          meta: Record<string, unknown>;
-        }
-      > = {};
-
-      for (const table of tables) {
-        routes[table.apiPath] = {
-          name: table.apiPath,
-          basename: table.basename,
-          file: table.apiFile,
-          template: resolve(__dirname, "vite-plugin/templates/api/route.tpl"),
-          meta:
-            typeof meta === "function"
-              ? meta(table)
-              : { ...meta?.["*"], ...meta?.[table.basename] },
-        };
-
-        // watching api file to get apiTypes updates
-        watchMap.apiFiles[resolvePath(table.apiFile)] = async () => {
-          // apiTypes used by multiple table modules
-          // so regenerating all table modules
-          await generateAmbientVirtualModules(table);
-        };
-      }
-
-      {
-        // not creating route file directly,
-        // rather adding a corresponding entry to yml file
-        // and file will be created by api generator plugin
-
-        const content = [
-          BANNER.trim().replace(/^/gm, "#"),
-          stringify(routes),
-        ].join("\n");
-
-        await generateFile(join(apiDir, `_000_${base}_routes.yml`), content);
-      }
-
-      // generating a bundle file containing api constructors for all tables
-      await generateFile(join(apiDir, base, "index.ts"), {
-        template: apiTemplates.constructors,
-        context: {
-          BANNER,
-          sourceFolder,
-          dbxConfig,
-          tables,
-          factoryCode: apiTemplates.factory,
-        },
+      // then feeding it to worker
+      await workerPool.base.handleSchemaFileUpdate({
+        schema,
+        tables: Object.values(tableMap),
+        customTemplates,
       });
-    };
 
-    const generateAmbientVirtualModules = async (table: Table) => {
-      const prefix = [base, table.basename].join(":");
-
-      const apiTypes = extractTypes(
-        await fsx.readFile(resolvePath(table.apiFile), "utf8"),
-        { root: sourceFolder, base: dirname(table.apiFile) },
-      );
-
-      const moduleFactory = (tpl: keyof ClientModuleTemplates): AVModule => {
-        let virtualCode = templates[tpl].replace(
-          /@crud:virtual-module-placeholder/g,
-          prefix,
-        );
-
-        // do not render templates/client/_* files, they contain no mustache code!
-        // rendering them would break vue templates!
-        // only 2 templates contains mustache code - assets.ts and apiTypes.ts,
-        if (tpl === "assets.ts" || tpl === "apiTypes.ts") {
-          const context: Record<string, unknown> = {
-            apiTypes,
-          };
-
-          if (tpl === "assets.ts") {
-            const apiTypesLiteral: ApiTypesLiteral = {
-              EnvT: false,
-              ListAssetsT: false,
-              ItemAssetsT: false,
-            };
-
-            for (const key of Object.keys(
-              apiTypesLiteral,
-            ) as (keyof ApiTypesLiteral)[]) {
-              apiTypesLiteral[key] = key in apiTypes;
-            }
-
-            context.apiTypesLiteral = JSON.stringify(apiTypesLiteral);
-          }
-
-          virtualCode = render(virtualCode, {
-            dbxConfig,
-            ...table,
-            ...context,
-          });
-        }
-
-        const ambientCode = /\.vue$/.test(tpl)
-          ? `export { default } from "${prefix}/${tpl}.d.ts";`
-          : virtualCode;
-
-        return {
-          get id() {
-            return join(prefix, this.name);
-          },
-          get name() {
-            if (tpl === "index.ts") {
-              return "";
-            }
-
-            if (/\.vue/.test(tpl)) {
-              // keeping .vue and .vue.d.ts extensions
-              return tpl as AVVueModuleName;
-            }
-
-            return tpl.replace(/\.ts$/, "") as AVTsModuleName;
-          },
-          ambientCode,
-          virtualCode,
-        };
-      };
-
-      for (const tpl of Object.keys(
-        clientTemplates,
-      ) as (keyof ClientModuleTemplates)[]) {
-        const mdl = moduleFactory(tpl);
-        avModules[mdl.id] = mdl;
-      }
-
-      // regenerating whole bundle, even if single table updated
-      await generateFile(`${base}.d.ts`, {
-        template: extraTemplates.moduleDts,
-        context: {
-          BANNER,
-          avModules: Object.values(avModules),
-        },
-      });
-    };
-
-    const apiAssets = {
-      apiPath: {
-        get(this: Table) {
-          return join(base, this.basename);
-        },
-        enumerable: true,
-      },
-      apiBase: {
-        get(this: Table) {
-          return join(viteConfig.base, apiDir, this.apiPath);
-        },
-        enumerable: true,
-      },
-      apiFile: {
-        get(this: Table) {
-          return join(apiDir, this.apiPath, "index.ts");
-        },
-        enumerable: true,
-      },
-    };
-
-    const tableFlatMapper = (table: TableDeclaration): Table[] => {
-      const tables: Table[] = [];
-
-      if (!tableFilter || tableFilter(table)) {
-        if (!table.primaryKey) {
-          console.log(`[ ${table.name} ] - no primaryKey defined, skipping...`);
-          return [];
-        }
-
-        tables.push(
-          Object.defineProperties(
-            { ...table, basename: table.name },
-            apiAssets,
-          ) as Table,
-        );
-      }
-
-      const aliasNames: string[] = [];
-
-      if (typeof alias[table.name] === "string") {
-        aliasNames.push(alias[table.name] as string);
-      } else if (Array.isArray(alias[table.name])) {
-        aliasNames.push(...(alias[table.name] as string[]));
-      }
-
-      for (const basename of aliasNames) {
-        tables.push(
-          Object.defineProperties({ ...table, basename }, apiAssets) as Table,
-        );
-      }
-
-      return tables;
-    };
-
-    for (const schema of [...new Set(tables.map((e) => e.schema))]) {
-      const file = resolvePath(dbxConfig.base, join(schema, "index.ts"));
-
-      // regenerating api files when table added/removed
-      watchMap.dbxFiles[file] = async () => {
-        await generateApiFiles(tables.flatMap(tableFlatMapper));
-
-        // do not call generateAmbientVirtualModules here,
-        // it is called by watchMap.apiFiles
-      };
+      return;
     }
 
-    for (const handlerMap of [
-      // 000 keep the order!
-      watchMap.tplFiles, // 001
-      watchMap.dbxFiles, // 002
-      watchMap.apiFiles, // 003
-    ]) {
-      for (const handler of Object.values(handlerMap)) {
-        await handler();
+    if (tplWatchers[file]) {
+      // updating customTemplates
+      await tplWatchers[file]();
+
+      // then feeding it to worker
+      await workerPool.base.handleCustomTemplateUpdate({
+        tables: Object.values(tableMap),
+        customTemplates,
+      });
+
+      return;
+    }
+
+    for (const table of Object.values(tableMap)) {
+      if (table.apiFileFullpath === file) {
+        await workerPool.base.handleApiFileUpdate({ table, customTemplates });
+        return;
       }
     }
-  }
+  };
 
   return {
     name: PLUGIN_NAME,
 
-    resolveId(id) {
-      if (avModules[id]) {
-        return id;
-      }
-    },
+    async configResolved(config: ResolvedConfig) {
+      const cacheDir = join(config.cacheDir, base);
 
-    load(id) {
-      if (avModules[id]) {
-        return {
-          code: avModules[id].virtualCode,
-          map: null,
+      // watching custom templates for updates
+      for (const [name, file] of Object.entries({ ...options.templates }) as [
+        name: keyof ClientTemplates,
+        file: string,
+      ][]) {
+        tplWatchers[resolvePath(file)] = async () => {
+          customTemplates[name] = await readFile(resolvePath(file), "utf8");
         };
       }
+
+      // watching schemas for added/removed tables
+      for (const schema of schemas) {
+        const file = resolvePath(dbxConfig.base, join(schema, "index.ts"));
+
+        schemaWatchers[file] = async () => {
+          const tables = await extractTables({
+            options,
+            config,
+            dbxConfig,
+            schema,
+          });
+
+          for (const table of tables) {
+            tableMap[table.basename] = table;
+          }
+
+          return schema;
+        };
+      }
+
+      // populating customTemplates for bootstrap
+      for (const handler of Object.values(tplWatchers)) {
+        await handler();
+      }
+
+      // pupulating tableMap for bootstrap
+      for (const handler of Object.values(schemaWatchers)) {
+        await handler();
+      }
+
+      const payload = {
+        rootPath: resolvePath(".."),
+        cacheDir,
+        apiDir,
+        sourceFolder,
+        base,
+        dbxBase: dbxConfig.base,
+        tables: Object.values(tableMap),
+        customTemplates,
+      };
+
+      config.command === "build"
+        ? await bootstrap(payload)
+        : await workerPool.base.bootstrap(payload);
     },
 
-    transform(src, id) {
-      if (avModules[id]) {
-        return transform(src, {
-          loader: "ts",
-        });
-      }
-    },
+    configureServer({ watcher }) {
+      watcher.options = {
+        ...watcher.options,
+        disableGlobbing: false,
+        usePolling,
+      };
 
-    configResolved,
+      // watching custom templates;
+      // regenerate all tables modules on change
+      watcher.add(Object.keys(tplWatchers));
 
-    configureServer(server) {
-      for (const handlerMap of Object.values(watchMap)) {
-        server.watcher.add(Object.keys(handlerMap));
-      }
+      // watching schema files for added/removed tables;
+      // extract tables and rebuild schema tables modules on change
+      watcher.add(Object.keys(schemaWatchers));
 
-      server.watcher.on("change", async (file) => {
-        if (watchMap.tplFiles[file]) {
-          await watchMap.tplFiles[file]();
-          // regenerating everything when some template updated
-          for (const handler of [
-            ...Object.values(watchMap.dbxFiles),
-            ...Object.values(watchMap.apiFiles),
-          ]) {
-            await handler();
-          }
-        } else {
-          for (const map of [watchMap.dbxFiles, watchMap.apiFiles]) {
-            if (map[file]) {
-              await map[file]();
-            }
-          }
-        }
-      });
+      // watching api files;
+      // regenerate table modules on change
+      watcher.add(`${resolvePath(apiDir)}/**/*.ts`);
+
+      watcher.on("change", runWatchHandler);
     },
   };
 }

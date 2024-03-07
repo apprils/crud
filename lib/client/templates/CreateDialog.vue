@@ -5,9 +5,12 @@ import { IconOrSpinner } from "@appril/ui";
 import {
   type ItemT,
   type ItemI,
-  store, useHandlers,
-} from "./base";
+} from "./assets";
 
+import { useStore } from "./store";
+import { useHandlers } from "./handlers";
+
+const store = useStore()
 const model = defineModel<ItemI>()
 
 const emit = defineEmits<{
@@ -19,7 +22,7 @@ const emit = defineEmits<{
 const { createItem, itemCreated } = useHandlers()
 
 function create() {
-  return createItem(model.value)
+  return createItem(model.value as ItemI)
     .then(itemCreated)
     .then((item) => emit("created", item))
     .then(close)

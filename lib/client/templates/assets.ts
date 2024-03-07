@@ -1,20 +1,21 @@
 // placeholder file, to be replaced with real values on module build
 
-import type { ZodTypeAny } from "zod";
+import type { ZodTypeAny, z } from "zod";
 import type { ApiTypesLiteral } from "../@types";
 
-export type ItemT = unknown;
-export type ItemI = unknown;
-export type ItemU = unknown;
+export * from "./apiTypes";
 
-export type EnvT = unknown;
-export type ListAssetsT = unknown;
-export type ItemAssetsT = unknown;
+export type ItemT = object & { id: number | string };
+export type ItemI = object;
+export type ItemU = object;
 
-export const primaryKey = "";
-export const modelName: string = "";
+export type PKeyT = ItemT["id"];
 
-export const apiBase: string = "";
+export const primaryKey = "id";
+export const modelName = "";
+
+export const apiBase = "";
+
 export const apiTypes: ApiTypesLiteral = {
   EnvT: false,
   ListAssetsT: false,
@@ -23,5 +24,8 @@ export const apiTypes: ApiTypesLiteral = {
 
 export const regularColumns: (keyof ItemT)[] = [];
 
-export const zodSchema: Record<string, ZodTypeAny> = {};
-export const zodErrorHandler: () => void = () => {};
+export const zodSchema: (_z: typeof z) => Record<string, ZodTypeAny> = () => {
+  return {};
+};
+
+export const zodErrorHandler = (_e: unknown) => {};

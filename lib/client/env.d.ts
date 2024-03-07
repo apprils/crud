@@ -8,9 +8,5 @@ declare module "*.vue" {
 
 declare module "@appril/crud/client" {
   import("./@types"); // mandatory for export types to work
-  import("./handlers");
-  import("./store");
   export * from "./@types";
-  export * from "./handlers";
-  export * from "./store";
 }

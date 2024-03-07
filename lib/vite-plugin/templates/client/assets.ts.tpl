@@ -1,5 +1,4 @@
 
-import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
 import type { ApiTypesLiteral } from "@appril/crud/client";
@@ -8,13 +7,15 @@ export type {
   RecordT as ItemT,
   InsertT as ItemI,
   UpdateT as ItemU,
-} from "{{dbxConfig.base}}:{{name}}";
+} from "{{dbxBase}}:{{name}}";
 
 export type {
   EnvT,
   ListAssetsT,
   ItemAssetsT,
-} from "@crud:virtual-module-placeholder/apiTypes";
+} from "./apiTypes";
+
+export type PKeyT = import("{{dbxBase}}:{{name}}").RecordT["{{primaryKey}}"]
 
 export const primaryKey = "{{primaryKey}}";
 
@@ -28,15 +29,19 @@ export const regularColumns = [
   {{#regularColumns}}
   "{{name}}",
   {{/regularColumns}}
-];
+] as const;
 
-export const zodSchema = {
-{{#columns}}
-  {{#zodSchema}}
-  {{name}}: {{zodSchema}},
-  {{/zodSchema}}
-{{/columns}}
-};
+export function zodSchema(
+  z: typeof import("zod").z,
+) {
+  return {
+    {{#columns}}
+    {{#zodSchema}}
+    {{name}}: {{zodSchema}},
+    {{/zodSchema}}
+    {{/columns}}
+  }
+}
 
 export function zodErrorHandler(
   error: any,

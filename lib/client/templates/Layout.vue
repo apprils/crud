@@ -4,11 +4,9 @@ import { ref, onBeforeMount } from "vue";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import { Success, Error } from "@appril/ui";
 
-import {
-  type ItemT,
-  store,
-  useHandlers,
-} from "./base";
+import { type ItemT, type PKeyT, primaryKey } from "./assets";
+import { useStore } from "./store";
+import { useHandlers } from "./handlers";
 
 import ControlButtons from "./ControlButtons.vue";
 import Pager from "./Pager.vue";
@@ -19,6 +17,7 @@ const props = defineProps<{
   fullpageEditor?: boolean | "true" | "false";
 }>()
 
+const store = useStore()
 const route = useRoute()
 
 const error = ref()
@@ -39,7 +38,7 @@ onBeforeMount(() => {
   loadEnv().then(envLoaded).then(() => {
     loadItems().then(itemsLoaded).then(() => {
       if (route.query._id) {
-        loadItem(route.query._id as string).then(itemLoaded)
+        loadItem(route.query._id as unknown as PKeyT).then(itemLoaded)
       }
     })
   })
@@ -52,7 +51,7 @@ onBeforeRouteUpdate((to, from) => {
   }
 
   if (to.query._id && to.query._id != from.query._id) {
-    loadItem(to.query._id as string).then(itemLoaded)
+    loadItem(to.query._id as unknown as PKeyT).then(itemLoaded)
   }
 
 })
@@ -72,6 +71,10 @@ function itemKey(
   <Success v-model="store.itemEvent.event">
     {{ store.$id }} #{{ store.itemEvent.id }} Successfully
     {{ store.itemEvent.event }}
+  </Success>
+
+  <Success v-model="store.successMessage">
+    {{ typeof store.successMessage === "string" ? store.successMessage : "Your changes were successful!" }}
   </Success>
 
   <Error v-model="error" />
@@ -124,9 +127,7 @@ function itemKey(
                     <slot name="listItemNameLink" :item="item satisfies ItemT">
                       <RouterLink :to="itemRoute(item)">
                         <slot name="listItemNameText" :item="item satisfies ItemT">
-                          {{ // @ts-expect-error
-                            item.name || ""
-                          }}
+                          {{ "name" in item ? item.name : "" }}
                         </slot>
                       </RouterLink>
                     </slot>
@@ -138,9 +139,7 @@ function itemKey(
                       <slot name="listItemIdLink" :item="item satisfies ItemT">
                         <RouterLink :to="itemRoute(item)" class="text-muted">
                           <slot name="listItemIdText" :item="item satisfies ItemT">
-                            #{{ // @ts-expect-error
-                              item[store.primaryKey]
-                            }}
+                            #{{ item[primaryKey] }}
                           </slot>
                         </RouterLink>
                       </slot>
