@@ -15,7 +15,6 @@ import {
 } from "./assets";
 
 type StateT = {
-  primaryKey: PKeyT;
   env: EnvT;
   listItems: ItemT[];
   listPager: Pager;
@@ -36,7 +35,6 @@ type StoreItemEvent = {
 export const useStore = defineStore(modelName, {
   state: (): StateT => {
     return {
-      primaryKey,
       env: {} as EnvT,
       listItems: [],
       listPager: {

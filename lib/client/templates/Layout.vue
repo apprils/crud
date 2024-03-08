@@ -62,7 +62,7 @@ function itemKey(
 ): string {
   return [
     prefix || "",
-    item?.[store.primaryKey] || "",
+    item?.[primaryKey] || "",
   ].map(String).join(":")
 }
 </script>
