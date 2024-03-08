@@ -1,11 +1,8 @@
 <script setup lang="ts">
 
-import { IconOrSpinner } from "@appril/ui";
+import { Modal, IconOrSpinner } from "@appril/ui";
 
-import {
-  type ItemT,
-  type ItemI,
-} from "./assets";
+import type { ItemT, ItemI } from "./assets";
 
 import { useStore } from "./store";
 import { useHandlers } from "./handlers";
