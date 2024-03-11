@@ -1,13 +1,13 @@
-import { resolve, join } from "path";
+import { resolve, join } from "node:path";
 
 import * as tsquery from "@phenomnomnominal/tsquery";
 
-import {
-  type CallExpression,
-  type ImportSpecifier,
-  type ImportDeclaration,
-  type Expression,
-  type Node,
+import type {
+  CallExpression,
+  ImportSpecifier,
+  ImportDeclaration,
+  Expression,
+  Node,
 } from "typescript";
 
 import type { ApiTypes } from "../client/@types";

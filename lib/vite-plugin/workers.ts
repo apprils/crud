@@ -1,5 +1,5 @@
-import { dirname, join, resolve } from "path";
-import { readdir } from "fs/promises";
+import { dirname, join, resolve } from "node:path";
+import { readdir } from "node:fs/promises";
 
 import fsx from "fs-extra";
 import { stringify } from "yaml";

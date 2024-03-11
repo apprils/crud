@@ -2,7 +2,7 @@
 
 import { ref, onBeforeMount } from "vue";
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
-import { Success, Error } from "@appril/ui";
+import { Success, Error as ErrorC } from "@appril/ui";
 
 import { type ItemT, type PKeyT, primaryKey } from "./assets";
 import { useStore } from "./store";
@@ -46,19 +46,23 @@ onBeforeMount(() => {
 
 onBeforeRouteUpdate((to, from) => {
 
-  if (to.query._page != from.query._page) {
+  if (Number(to.query._page) !== Number(from.query._page)) {
     loadItems(to.query).then(itemsLoaded)
   }
 
-  if (to.query._id && to.query._id != from.query._id) {
+  if (!to.query._id) {
+    return
+  }
+
+  if (to.query._id !== from.query._id) {
     loadItem(to.query._id as unknown as PKeyT).then(itemLoaded)
   }
 
 })
 
 function itemKey(
-  item: any,
-  prefix: string = "",
+  item: ItemT,
+  prefix = "",
 ): string {
   return [
     prefix || "",
@@ -77,7 +81,7 @@ function itemKey(
     {{ typeof store.successMessage === "string" ? store.successMessage : "Your changes were successful!" }}
   </Success>
 
-  <Error v-model="error" />
+  <ErrorC v-model="error" />
 
   <slot name="controlButtons">
     <ControlButtons>

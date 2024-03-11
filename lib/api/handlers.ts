@@ -11,7 +11,7 @@ import type { Knex } from "knex";
 import type { Instance, QueryBuilder } from "@appril/dbx";
 import type { Pager } from "@appril/crud/client";
 
-import { type ZodTypeAny, type ZodRawShape, ZodError, z } from "zod";
+import { type ZodTypeAny, type ZodRawShape, type ZodError, z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
 type Dataset = Record<string, unknown>;

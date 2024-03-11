@@ -1,5 +1,5 @@
-import { join, basename } from "path";
-import { readFile } from "fs/promises";
+import { join, basename } from "node:path";
+import { readFile } from "node:fs/promises";
 
 import type { Plugin, ResolvedConfig } from "vite";
 

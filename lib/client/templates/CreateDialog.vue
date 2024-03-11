@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { Modal, IconOrSpinner } from "@appril/ui";
+import { Modal, AwaitableIcon } from "@appril/ui";
 
 import type { ItemT, ItemI } from "./assets";
 
@@ -44,7 +44,7 @@ function close() {
     <template #footer>
       <slot name="footer" :create="create">
         <button type="button" @click="create" class="btn btn-primary">
-          <IconOrSpinner plus :spin="store.loading" />
+          <AwaitableIcon plus v-model="store.loading" />
           Create
         </button>
       </slot>

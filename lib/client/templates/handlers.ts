@@ -4,7 +4,7 @@ import { type UnwrapRef, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { type ZodTypeAny, z } from "zod";
 
-import { type Pager } from "@appril/crud/client";
+import type { Pager } from "@appril/crud/client";
 
 import { useStore } from "./store";
 
