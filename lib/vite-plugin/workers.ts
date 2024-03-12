@@ -105,7 +105,7 @@ export async function handleCustomTemplateUpdate({
   // customTemplates only relevant to client modules, api index files not affected
 }
 
-export async function generateApiIndexFiles(data: {
+async function generateApiIndexFiles(data: {
   tables: Table[];
 }) {
   const tables = data.tables.sort((a, b) => a.name.localeCompare(b.name));
@@ -151,7 +151,7 @@ export async function generateApiIndexFiles(data: {
   });
 }
 
-export async function generateClientModules({
+async function generateClientModules({
   table,
   customTemplates,
 }: {
@@ -173,7 +173,7 @@ export async function generateClientModules({
 
     // biome-ignore format:
     let content = [
-      [/@crud:base-placeholder/, base],
+      [/@crud:base-placeholder\b/, base],
     ].reduce(
       (prev, [regex, text]) => prev.replace(regex, text as string),
       tplText,
