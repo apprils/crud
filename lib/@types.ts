@@ -20,3 +20,33 @@ export type ApiTypes = {
 };
 
 export type ApiTypesLiteral = Record<keyof ApiTypes, boolean>;
+
+export type ApiTemplates = {
+  "base.ts"?: string;
+  "route.ts"?: string;
+};
+
+export type ClientTemplates = {
+  "api.ts"?: string;
+  "apiTypes.ts"?: string;
+  "assets.ts"?: string;
+
+  "ControlButtons.vue"?: string;
+  "CreateDialog.vue"?: string;
+  "EditorPlaceholder.vue"?: string;
+
+  "handlers.ts"?: string;
+  "index.ts"?: string;
+
+  "Layout.vue"?: string;
+  "Overlay.vue"?: string;
+  "Pager.vue"?: string;
+
+  "setup.ts"?: string;
+  "store.ts"?: string;
+};
+
+export type DefaultTemplates = {
+  api: Record<keyof ApiTemplates, { file: string; content: string }>;
+  client: Record<keyof ClientTemplates, { file: string; content: string }>;
+};

@@ -15,7 +15,8 @@
     ".": {
       "require": "./pkg/index.js",
       "types": "./pkg/index.d.ts"
-    }
+    },
+    "./templates": "./pkg/templates.js"
   },
   "scripts": {
     "// ✨ linters": "",
@@ -28,8 +29,10 @@
     "prebuild:000": "mkdir -p pkg; find pkg -type f -exec rm -fv {} \\;",
     "prebuild:001": "npm run lint",
     "prebuild:002": "npm run tsc",
-    "prebuild": "set -e; for i in 0 1 2; do npm run prebuild:00${i}; done",
-    "build": "npm run esbuilder index"
+    "prebuild:003": "rsync -av --delete lib/templates pkg",
+    "prebuild": "set -e; for i in 0 1 2 3; do npm run prebuild:00${i}; done",
+    "build": "set -e; for e in index templates; do npm run esbuilder $e; done",
+    "postbuild": "du -sh pkg"
   },
   "prettier": "@appril/prettier-config",
   "release-it": {
@@ -51,15 +54,16 @@
     "esbuild": "^0.20.1",
     "knex": "^3.1.0",
     "koa": "^2.15.0",
+    "pinia": "^2.1.7",
     "release-it": "^17.1.1",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "vue-router": "^4.3.0"
   },
   "peerDependencies": {
     "@appril/core": "^0.2.12",
     "@appril/dbx": "^0.2.10",
     "@appril/more": "^0.2.8",
     "@appril/ui": "^0.2.6",
-    "pinia": "^2.1.7",
     "zod": "^3.22.4",
     "zod-validation-error": "^3.0.3"
   }
