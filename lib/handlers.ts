@@ -5,14 +5,13 @@ import type {
   Middleware,
 } from "koa";
 
-import api from "@appril/core/router";
-
 import type { Knex } from "knex";
 import type { Instance, QueryBuilder } from "@appril/dbx";
-import type { Pager } from "@appril/crud/client";
-
 import { type ZodTypeAny, type ZodRawShape, type ZodError, z } from "zod";
 import { fromZodError } from "zod-validation-error";
+import api from "@appril/core/router";
+
+import type { Pager } from "./@types";
 
 type Dataset = Record<string, unknown>;
 type GenericObject = Record<string, unknown>;
@@ -200,7 +199,7 @@ export function handlersFactory<
       return api.use([
         initHandler,
         async (ctx, next) => {
-          // @ts-ignore
+          // @ts-expect-error
           ctx.crud.returning = await handler(ctx);
           return next();
         },
@@ -220,7 +219,7 @@ export function handlersFactory<
       return api.use([
         initHandler,
         async (ctx, next) => {
-          // @ts-ignore
+          // @ts-expect-error
           ctx.crud.returningExclude = await handler(ctx);
           return next();
         },

@@ -12,13 +12,9 @@
     "pkg/*"
   ],
   "exports": {
-    "./api": {
-      "require": "./pkg/api/index.js",
-      "types": "./pkg/api/index.d.ts"
-    },
-    "./client": {
-      "default": "./pkg/client/index.js",
-      "types": "./pkg/client/index.d.ts"
+    ".": {
+      "require": "./pkg/index.js",
+      "types": "./pkg/index.d.ts"
     }
   },
   "scripts": {
@@ -28,16 +24,12 @@
     "tsc": "tsc --emitDeclarationOnly",
     "// ✨ builders": "",
     "esbuilder": "set -e; func() { e=$1; shift; esbuild lib/$e.ts --outfile=pkg/$e.js --bundle --platform=node --target=node20 --packages=external --loader:.tpl=text --sourcemap=inline $*; }; func",
-    "// ✨ build api": "",
-    "build:api": "npm run esbuilder api/index",
-    "// ✨ build client": "",
-    "build:client": "npm run esbuilder client/index",
     "// ✨ build": "",
     "prebuild:000": "mkdir -p pkg; find pkg -type f -exec rm -fv {} \\;",
     "prebuild:001": "npm run lint",
     "prebuild:002": "npm run tsc",
     "prebuild": "set -e; for i in 0 1 2; do npm run prebuild:00${i}; done",
-    "build": "set -e; for e in api/index client/index; do npm run esbuilder $e; done"
+    "build": "npm run esbuilder index"
   },
   "prettier": "@appril/prettier-config",
   "release-it": {
