@@ -11,24 +11,7 @@ export default async function readTemplates(): Promise<DefaultTemplates> {
     recursive: true,
   });
 
-  const files = entries
-    .filter((e) => e.isFile())
-    .sort((a, b) => {
-      // sorting to place .tpl files at the end
-      // to make sure they would override .ts ones
-      const atpl = a.name.includes(".tpl");
-      const btpl = b.name.includes(".tpl");
-      if (atpl && btpl) {
-        return 0;
-      }
-      if (atpl) {
-        return 1;
-      }
-      if (btpl) {
-        return -1;
-      }
-      return 0;
-    });
+  const files = entries.filter((e) => e.isFile()).sort(sortTemplates);
 
   const templateMap: Record<
     string,
@@ -51,4 +34,21 @@ export default async function readTemplates(): Promise<DefaultTemplates> {
   }
 
   return templateMap as DefaultTemplates;
+}
+
+export function sortTemplates(a: { name: string }, b: { name: string }) {
+  // sorting to place .tpl files at the end
+  // to make sure they would override .ts ones
+  const atpl = a.name.includes(".tpl");
+  const btpl = b.name.includes(".tpl");
+  if (atpl && btpl) {
+    return 0;
+  }
+  if (atpl) {
+    return 1;
+  }
+  if (btpl) {
+    return -1;
+  }
+  return 0;
 }
