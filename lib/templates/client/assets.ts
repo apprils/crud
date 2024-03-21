@@ -3,6 +3,8 @@
 import type { ZodTypeAny, z } from "zod";
 import type { ApiTypesLiteral } from "@appril/crud";
 
+export const fetchOptions = {};
+
 export * from "./apiTypes";
 
 export type ItemT = object & { id: number | string };

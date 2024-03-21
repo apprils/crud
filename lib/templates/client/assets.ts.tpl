@@ -1,7 +1,7 @@
-
+import type { ApiTypesLiteral } from "@appril/crud";
 import { fromZodError } from "zod-validation-error";
 
-import type { ApiTypesLiteral } from "@appril/crud";
+import { serialize, stringify } from "{{sourceFolder}}/../helpers/fetch";
 
 export type {
   RecordT as ItemT,
@@ -24,6 +24,11 @@ export const modelName = "{{modelName}}";
 export const apiBase = "{{apiBase}}";
 
 export const apiTypes: ApiTypesLiteral = {{apiTypesLiteral}};
+
+export const fetchOptions = {
+  ...serialize ? { serialize } : {},
+  ...stringify ? { stringify } : {},
+}
 
 export const regularColumns = [
   {{#regularColumns}}
@@ -51,4 +56,3 @@ export function zodErrorHandler(
     issueSeparator: ";\n",
   })
 };
-
